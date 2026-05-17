@@ -3,6 +3,19 @@ from django.db import transaction
 from apps.properties.models import Favorite, Property, PropertyImage
 
 
+def property_image_add(
+    *, property_obj: Property, image_file, is_primary: bool
+) -> PropertyImage:
+    with transaction.atomic():
+        if is_primary:
+            property_obj.images.filter(is_primary=True).update(is_primary=False)
+        image = PropertyImage(
+            property=property_obj, image=image_file, is_primary=is_primary
+        )
+        image.save()
+    return image
+
+
 def property_create(*, user, form_data: dict, images: list) -> Property:
     prop = Property(
         user=user,
@@ -23,7 +36,9 @@ def property_create(*, user, form_data: dict, images: list) -> Property:
     with transaction.atomic():
         prop.save()
         for idx, image_file in enumerate(images or []):
-            PropertyImage(property=prop, image=image_file, is_primary=(idx == 0)).save()
+            property_image_add(
+                property_obj=prop, image_file=image_file, is_primary=(idx == 0)
+            )
 
     return prop
 
@@ -74,11 +89,11 @@ def property_update(
         if images:
             existing_count = property_obj.images.count()
             for idx, image_file in enumerate(images):
-                PropertyImage(
-                    property=property_obj,
-                    image=image_file,
+                property_image_add(
+                    property_obj=property_obj,
+                    image_file=image_file,
                     is_primary=(idx == 0 and existing_count == 0),
-                ).save()
+                )
 
     return property_obj
 

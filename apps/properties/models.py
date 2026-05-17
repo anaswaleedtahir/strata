@@ -153,15 +153,6 @@ class PropertyImage(BaseModel):
     def __str__(self) -> str:
         return f"Image for {self.property.name}"
 
-    def save(self, *args, **kwargs):
-        """If marked primary, unset other primary flags for the same property before saving."""
-        if self.is_primary:
-            # Use filter by property_id to avoid extra joins when possible
-            PropertyImage.objects.filter(
-                property_id=self.property_id, is_primary=True
-            ).exclude(pk=self.pk).update(is_primary=False)
-        super().save(*args, **kwargs)
-
 
 class Favorite(BaseModel):
     """Model representing a favorite property."""
