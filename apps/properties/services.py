@@ -1,6 +1,23 @@
 from django.db import transaction
 
 from apps.properties.models import Favorite, Property, PropertyImage
+from apps.shared.exceptions import ApplicationError
+
+DOCUMENT_MAX_BYTES = 10 * 1024 * 1024
+IMAGE_MAX_BYTES = 5 * 1024 * 1024
+
+
+def _validate_document_size(document) -> None:
+    if document and getattr(document, "size", 0) > DOCUMENT_MAX_BYTES:
+        raise ApplicationError("Document file size must not exceed 10MB.")
+
+
+def _validate_image_sizes(images) -> None:
+    for image in images or []:
+        if getattr(image, "size", 0) > IMAGE_MAX_BYTES:
+            raise ApplicationError(
+                f"Image '{getattr(image, 'name', 'unknown')}' exceeds the 5MB limit."
+            )
 
 
 def property_image_add(
@@ -17,6 +34,9 @@ def property_image_add(
 
 
 def property_create(*, user, form_data: dict, images: list) -> Property:
+    _validate_document_size(form_data.get("documents"))
+    _validate_image_sizes(images)
+
     prop = Property(
         user=user,
         name=form_data["name"],
@@ -51,6 +71,9 @@ def property_update(
     delete_image_ids: list,
     remove_document: bool,
 ) -> Property:
+    _validate_document_size(form_data.get("documents"))
+    _validate_image_sizes(images)
+
     non_file_fields = [
         "name",
         "description",

@@ -1,8 +1,6 @@
 from django import forms
 from django.core.exceptions import ValidationError
 
-from apps.shared.validators import validate_password_strength
-
 
 class LoginForm(forms.Form):
     email = forms.EmailField(
@@ -151,25 +149,6 @@ class PasswordChangeForm(forms.Form):
         error_messages={"required": "Password confirmation is required."},
         label="Confirm New Password",
     )
-
-    def __init__(self, *args, user=None, **kwargs):
-        self.user = user
-        super().__init__(*args, **kwargs)
-
-    def clean_old_password(self):
-        old_password = self.cleaned_data.get("old_password")
-        if old_password and not self.user.check_password(old_password):
-            raise forms.ValidationError("Current password is incorrect.")
-        return old_password
-
-    def clean_new_password1(self):
-        new_password = self.cleaned_data.get("new_password1")
-        if new_password:
-            try:
-                validate_password_strength(new_password)
-            except ValidationError as e:
-                raise forms.ValidationError(e.message) from e
-        return new_password
 
     def clean(self):
         cleaned_data = super().clean()

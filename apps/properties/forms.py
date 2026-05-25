@@ -1,16 +1,15 @@
 """Forms for property-related operations."""
 
 from django import forms
-from django.core.exceptions import ValidationError
+from django.core.validators import FileExtensionValidator
 
-from apps.properties.models import Property, PropertyImage
+from apps.properties.models import Property
 from apps.shared.validators import cnic_validator, phone_validator
 
 
 class PropertyForm(forms.ModelForm):
     """Form for creating and editing properties."""
 
-    # Override fields to add validators directly
     phone_number = forms.CharField(
         max_length=16,
         validators=[phone_validator],
@@ -23,6 +22,14 @@ class PropertyForm(forms.ModelForm):
         validators=[cnic_validator],
         help_text="Format: 12345-1234567-1",
         label="CNIC",
+    )
+
+    documents = forms.FileField(
+        required=False,
+        validators=[FileExtensionValidator(allowed_extensions=["pdf"])],
+        widget=forms.FileInput(attrs={"accept": ".pdf"}),
+        label="Documents (PDF)",
+        help_text="Upload property documents (PDF only, max 10MB)",
     )
 
     class Meta:
@@ -50,7 +57,6 @@ class PropertyForm(forms.ModelForm):
             "bedrooms": forms.NumberInput(attrs={"min": "0"}),
             "bathrooms": forms.NumberInput(attrs={"min": "0"}),
             "area": forms.NumberInput(attrs={"step": "0.01", "min": "0"}),
-            "documents": forms.FileInput(attrs={"accept": ".pdf"}),
             "is_published": forms.CheckboxInput(),
         }
         labels = {
@@ -62,78 +68,17 @@ class PropertyForm(forms.ModelForm):
             "bedrooms": "Bedrooms",
             "bathrooms": "Bathrooms",
             "area": "Area (sq ft)",
-            "documents": "Documents (PDF)",
             "is_published": "Publish Property",
         }
         help_texts = {
-            "documents": "Upload property documents (PDF only, max 10MB)",
             "is_published": "Make this property visible to other users",
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Make optional fields not required
-        self.fields["documents"].required = False
         self.fields["description"].required = False
         self.fields["bedrooms"].required = True
         self.fields["bathrooms"].required = True
         self.fields["area"].required = True
-        # Make is_published default to False for new properties
         if not self.instance.pk:
             self.fields["is_published"].initial = False
-
-    def clean_price(self):
-        """Validate that price is a positive decimal."""
-        price = self.cleaned_data.get("price")
-        if price is not None and price < 0:
-            raise ValidationError("Price must be a positive value.")
-        return price
-
-    def clean_documents(self):
-        """Validate that uploaded document is a PDF."""
-        document = self.cleaned_data.get("documents")
-        if document:
-            # Check if it's a new upload (has content_type attribute)
-            if hasattr(document, "content_type"):
-                if document.content_type != "application/pdf":
-                    raise ValidationError("Only PDF files are allowed.")
-                # Check file size (max 10MB)
-                if document.size > 10 * 1024 * 1024:
-                    raise ValidationError("File size must not exceed 10MB.")
-        return document
-
-
-class PropertyImageForm(forms.ModelForm):
-    """Form for uploading property images."""
-
-    class Meta:
-        model = PropertyImage
-        fields = ["image", "is_primary"]
-        widgets = {
-            "image": forms.FileInput(attrs={"accept": "image/*"}),
-            "is_primary": forms.CheckboxInput(),
-        }
-
-    def clean_image(self):
-        """Validate image file type and size."""
-        image = self.cleaned_data.get("image")
-        if image:
-            # Check if it's a new upload (has content_type attribute)
-            if hasattr(image, "content_type"):
-                # Validate file type
-                valid_types = [
-                    "image/jpeg",
-                    "image/jpg",
-                    "image/png",
-                    "image/gif",
-                    "image/webp",
-                ]
-                if image.content_type not in valid_types:
-                    raise ValidationError(
-                        "Only image files (JPEG, PNG, GIF, WebP) are allowed."
-                    )
-
-                # Validate file size (max 5MB)
-                if image.size > 5 * 1024 * 1024:
-                    raise ValidationError("Image size must not exceed 5MB.")
-        return image

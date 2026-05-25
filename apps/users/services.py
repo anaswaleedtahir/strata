@@ -28,7 +28,15 @@ def user_create(*, email: str, password: str, first_name: str, last_name: str) -
     return user
 
 
-def user_password_change(*, user: User, new_password: str) -> None:
+def user_password_change(*, user: User, old_password: str, new_password: str) -> None:
+    if not user.check_password(old_password):
+        raise ApplicationError("Current password is incorrect.")
+
+    try:
+        validate_password_strength(new_password)
+    except ValidationError as e:
+        raise ApplicationError(e.message) from e
+
     user.set_password(new_password)
     user.save(update_fields=["password"])
 

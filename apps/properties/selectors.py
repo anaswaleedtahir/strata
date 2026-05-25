@@ -27,6 +27,23 @@ def property_get_with_related(*, pk: int):
     )
 
 
+def property_list_favorites_for_user(*, user):
+    return (
+        Property.objects.filter(favorited_by__user=user)
+        .distinct()
+        .select_related("user")
+        .prefetch_related("images")
+    )
+
+
+def property_list_for_user(*, user):
+    return (
+        Property.objects.filter(user=user)
+        .select_related("user")
+        .prefetch_related("images")
+    )
+
+
 def favorite_ids_for_user(*, user) -> set:
     return set(Favorite.objects.filter(user=user).values_list("property_id", flat=True))
 

@@ -23,6 +23,8 @@ from apps.properties.selectors import (
     favorite_exists,
     favorite_ids_for_user,
     property_get_with_related,
+    property_list_favorites_for_user,
+    property_list_for_user,
     property_list_published,
 )
 from apps.properties.services import (
@@ -31,6 +33,7 @@ from apps.properties.services import (
     property_delete,
     property_update,
 )
+from apps.shared.exceptions import ApplicationError
 from apps.shared.mixins import HTMXMixin, OwnerRequiredMixin
 from apps.shared.validators import cnic_validator, phone_validator
 
@@ -123,6 +126,15 @@ class PropertyCreateView(LoginRequiredMixin, HTMXMixin, View):
                 property_obj = property_create(
                     user=request.user, form_data=form.cleaned_data, images=images
                 )
+            except ApplicationError as e:
+                form.add_error(None, e.message)
+            except Exception as e:
+                logger.error(f"Error creating property: {e}", exc_info=True)
+                form.add_error(
+                    None,
+                    "An error occurred while creating the property. Please try again.",
+                )
+            else:
                 messages.success(
                     request, f'Property "{property_obj.name}" created successfully!'
                 )
@@ -133,12 +145,6 @@ class PropertyCreateView(LoginRequiredMixin, HTMXMixin, View):
                     )
                     return response
                 return redirect("properties:detail", pk=property_obj.pk)
-            except Exception as e:
-                logger.error(f"Error creating property: {e}", exc_info=True)
-                form.add_error(
-                    None,
-                    "An error occurred while creating the property. Please try again.",
-                )
 
         template = (
             "_components/properties/property_form.html"
@@ -184,6 +190,17 @@ class PropertyEditView(LoginRequiredMixin, OwnerRequiredMixin, HTMXMixin, View):
                     delete_image_ids=delete_image_ids,
                     remove_document=remove_document,
                 )
+            except ApplicationError as e:
+                form.add_error(None, e.message)
+            except Exception as e:
+                logger.error(
+                    f"Error updating property {property_obj.pk}: {e}", exc_info=True
+                )
+                form.add_error(
+                    None,
+                    "An error occurred while updating the property. Please try again.",
+                )
+            else:
                 messages.success(
                     request, f'Property "{property_obj.name}" updated successfully!'
                 )
@@ -194,14 +211,6 @@ class PropertyEditView(LoginRequiredMixin, OwnerRequiredMixin, HTMXMixin, View):
                     )
                     return response
                 return redirect("properties:detail", pk=property_obj.pk)
-            except Exception as e:
-                logger.error(
-                    f"Error updating property {property_obj.pk}: {e}", exc_info=True
-                )
-                form.add_error(
-                    None,
-                    "An error occurred while updating the property. Please try again.",
-                )
 
         template = (
             "_components/properties/property_form.html"
@@ -217,21 +226,19 @@ class PropertyEditView(LoginRequiredMixin, OwnerRequiredMixin, HTMXMixin, View):
 
 class MyPropertiesListView(LoginRequiredMixin, View):
     def get(self, request):
-        return render(request, "properties/my-properties.html")
+        properties = property_list_for_user(user=request.user)
+        page_obj = Paginator(properties, 10).get_page(request.GET.get("page", 1))
+
+        context = {"properties": page_obj.object_list, "page_obj": page_obj}
+        return render(request, "properties/my-properties.html", context)
 
 
 class FavoritesListView(LoginRequiredMixin, View):
     def get(self, request):
-        favorite_properties = (
-            Property.objects.filter(favorited_by__user=request.user)
-            .distinct()
-            .select_related("user")
-            .prefetch_related("images")
+        favorite_properties = property_list_favorites_for_user(user=request.user)
+        page_obj = Paginator(favorite_properties, 10).get_page(
+            request.GET.get("page", 1)
         )
-
-        page_number = request.GET.get("page", 1)
-        paginator = Paginator(favorite_properties, 10)
-        page_obj = paginator.get_page(page_number)
 
         for prop in page_obj.object_list:
             prop.is_favorited = True

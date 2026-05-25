@@ -183,15 +183,16 @@ class ProfileEditView(LoginRequiredMixin, HTMXMixin, View):
 
 class PasswordChangeView(LoginRequiredMixin, View):
     def get(self, request):
-        form = PasswordChangeForm(user=request.user)
+        form = PasswordChangeForm()
         return render(request, "users/password_change.html", {"form": form})
 
     def post(self, request):
-        form = PasswordChangeForm(request.POST, user=request.user)
+        form = PasswordChangeForm(request.POST)
         if form.is_valid():
             try:
                 user_password_change(
                     user=request.user,
+                    old_password=form.cleaned_data["old_password"],
                     new_password=form.cleaned_data["new_password1"],
                 )
             except ApplicationError as e:
