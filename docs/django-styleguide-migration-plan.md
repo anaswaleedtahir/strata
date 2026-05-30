@@ -56,7 +56,6 @@ Goal: pure mechanical reshape of `config/`. No behavior change. Independent risk
 - Create `apps/shared/`:
   - `models.py` — `class BaseModel(models.Model)` abstract with `created_at` (db_index=True) + `updated_at`.
   - `exceptions.py` — `class ApplicationError(Exception)` with `message: str`, optional `extra: dict`.
-  - `services.py` — `def model_update(*, instance, fields: list[str], data: dict)` helper.
   - `validators.py` — moved `validate_phone`, `validate_cnic` from `properties/validations.py`; moved `validate_password_strength` from `users/forms.py`.
   - `tests/__init__.py`, `tests/factories.py` — base mixins (empty for now).
 - `INSTALLED_APPS`: `apps.shared` already registered (`apps/shared/apps.py` exists).

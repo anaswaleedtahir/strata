@@ -2,7 +2,6 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 
 from apps.shared.exceptions import ApplicationError
-from apps.shared.services import model_update
 from apps.shared.validators import validate_password_strength
 
 User = get_user_model()
@@ -48,8 +47,9 @@ def user_update(*, user: User, first_name: str, last_name: str, email: str) -> U
     if User.objects.filter(email=email).exclude(pk=user.pk).exists():
         raise ApplicationError("This email address is already registered.")
 
-    return model_update(
-        instance=user,
-        fields=["first_name", "last_name", "email"],
-        data={"first_name": first_name, "last_name": last_name, "email": email},
-    )
+    user.first_name = first_name
+    user.last_name = last_name
+    user.email = email
+    user.full_clean()
+    user.save(update_fields=["first_name", "last_name", "email"])
+    return user

@@ -127,7 +127,6 @@ The project follows the [HackSoftware Django Style Guide](https://github.com/Hac
 **Shared infrastructure in `apps/shared/`:**
 - `BaseModel`: abstract with `created_at` (db_index=True) + `updated_at`; inherit for new models
 - `ApplicationError`: `message: str` + optional `extra: dict`
-- `model_update(instance, fields, data)`: partial update helper
 
 ### 2. Frontend Build Strategy
 

@@ -1,6 +1,6 @@
 # Adopt HackSoft Django Style Guide, adapted for HTMX
 
-The codebase is server-rendered Django with HTMX, Channels, and forms — no DRF. We adopt the HackSoft Django Style Guide ([github.com/HackSoftware/Django-Styleguide](https://github.com/HackSoftware/Django-Styleguide)) for its **services / selectors / models / errors / tests** layer, but skip the DRF-shaped pieces (`apis.py`, `InputSerializer`/`OutputSerializer`, custom DRF exception handler). The guide's intent — keeping business logic out of views, forms, signals, and model `save()` — applies equally to template-rendering views and WebSocket consumers, so we apply it there. `apps/shared/` holds cross-app primitives (`BaseModel`, `ApplicationError`, validators, `model_update`); each app gains `services.py` + `selectors.py` + a `tests/` package.
+The codebase is server-rendered Django with HTMX, Channels, and forms — no DRF. We adopt the HackSoft Django Style Guide ([github.com/HackSoftware/Django-Styleguide](https://github.com/HackSoftware/Django-Styleguide)) for its **services / selectors / models / errors / tests** layer, but skip the DRF-shaped pieces (`apis.py`, `InputSerializer`/`OutputSerializer`, custom DRF exception handler). The guide's intent — keeping business logic out of views, forms, signals, and model `save()` — applies equally to template-rendering views and WebSocket consumers, so we apply it there. `apps/shared/` holds cross-app primitives (`BaseModel`, `ApplicationError`, validators); each app gains `services.py` + `selectors.py` + a `tests/` package.
 
 ## Considered Options
 

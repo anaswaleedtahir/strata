@@ -125,7 +125,6 @@ apps/<app>/
 **Shared infrastructure** (`apps/shared/`):
 - `BaseModel`: abstract model with `created_at` (db_index=True) + `updated_at`
 - `ApplicationError`: domain exception with `message: str` + optional `extra: dict`
-- `model_update()`: helper for partial updates via `update_fields`
 
 ### Component-Based Templates
 - Reusable UI components
