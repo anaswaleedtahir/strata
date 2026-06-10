@@ -110,7 +110,7 @@
     {% block extra_head %}{% endblock %}
 </head>
 
-<body class="min-h-screen bg-base-200">
+<body class="min-h-screen bg-base-200" hx-headers='{"x-csrftoken": "{{ csrf_token }}"}'>
     <!-- Navigation -->
     {% include '_components/navigation/navbar.html' %}
 
@@ -129,11 +129,6 @@
 
     <!-- HTMX Configuration -->
     <script>
-        // Configure HTMX to automatically include CSRF token in all requests
-        document.body.addEventListener('htmx:configRequest', (event) => {
-            event.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';
-        });
-
         // Global loading state management
         document.body.addEventListener('htmx:beforeRequest', (event) => {
             document.body.classList.add('htmx-loading');

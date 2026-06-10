@@ -33,11 +33,16 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django.contrib.sites",
     # Third-party apps
+    "allauth",
+    "allauth.account",
     "axes",
     "channels",
+    "django_htmx",
     "rangefilter",
     "storages",
+    "widget_tweaks",
     # Local apps
     "apps.chat.apps.ChatConfig",
     "apps.properties.apps.PropertiesConfig",
@@ -51,8 +56,10 @@ MIDDLEWARE = [
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
+    "django_htmx.middleware.HtmxMiddleware",
     "axes.middleware.AxesMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "allauth.account.middleware.AccountMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
@@ -113,6 +120,7 @@ AUTH_PASSWORD_VALIDATORS = [
 AUTHENTICATION_BACKENDS = [
     "axes.backends.AxesBackend",
     "django.contrib.auth.backends.ModelBackend",
+    "allauth.account.auth_backends.AuthenticationBackend",
 ]
 
 LOGIN_URL = "users:login"
@@ -197,6 +205,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # THIRD-PARTY INTEGRATION SETTINGS
 # ============================================================================
 
+from config.settings.allauth import *  # noqa: E402, F401, F403
 from config.settings.axes import *  # noqa: E402, F401, F403
 from config.settings.channels import *  # noqa: E402, F401, F403
 from config.settings.storages import *  # noqa: E402, F401, F403

@@ -341,6 +341,19 @@ wheels = [
 ]
 
 [[package]]
+name = "django-allauth"
+version = "65.18.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "asgiref" },
+    { name = "django" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/d7/10/2d33c5bc3c0f9d7db1276a1babcaadd147e73eb416ccb1bd9523c6ac925f/django_allauth-65.18.0.tar.gz", hash = "sha256:afb82e2c545b9a5539370ad120468faaed84715e095a7b6e76972dacdc6376fe", size = 2246988, upload-time = "2026-05-29T13:01:26.071Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/1d/75/5a4c2bf050e38ab16549395a7cd751ddcf3a18305bff4852cfd6c0d94998/django_allauth-65.18.0-py3-none-any.whl", hash = "sha256:e508640c83b94eaf1a9b4e9ac5332dc310dcdc83fca40d58a3f670e15bad1e84", size = 2061080, upload-time = "2026-05-29T13:01:16.532Z" },
+]
+
+[[package]]
 name = "django-appconf"
 version = "1.2.0"
 source = { registry = "https://pypi.org/simple" }
@@ -415,6 +428,19 @@ wheels = [
 ]
 
 [[package]]
+name = "django-htmx"
+version = "1.27.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "asgiref" },
+    { name = "django" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/34/f2/8c3e28a5eed8e5226835c762892bfef74eda7e8629c65b49c186098eb303/django_htmx-1.27.0.tar.gz", hash = "sha256:036e5da801bfdf5f1ca815f21592cfb9f004a898f330c842f15e55c70e301a75", size = 65362, upload-time = "2025-11-28T23:18:55.049Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/23/ac/25d28489dc43224e260f4ebee7565f7ef1efe12af0f284a89500c19f75e2/django_htmx-1.27.0-py3-none-any.whl", hash = "sha256:13e1e13b87d39b57f95aae6e4987cb3df056d0b1373a41f4a94504a00298ffd8", size = 62126, upload-time = "2025-11-28T23:18:53.57Z" },
+]
+
+[[package]]
 name = "django-storages"
 version = "1.14.6"
 source = { registry = "https://pypi.org/simple" }
@@ -436,6 +462,18 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/95/55/0649c4e7b540528f80078c300db7ae299502f3c2fccd4d6882193fa104d1/django_unfold-0.93.0.tar.gz", hash = "sha256:bce719989d199484c989e4042f338c287394c4562af05785f4fa511a8e3be859", size = 1124076, upload-time = "2026-05-11T10:13:07.855Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/8f/6c/c6c63af9eaabf85877005ba307a7af80088e9d28efd77c6431ec8c61c3c3/django_unfold-0.93.0-py3-none-any.whl", hash = "sha256:d0a09ebe906278fa994d6eb808880ba3f24c20d8c3a5ca37f82ee89969fd459c", size = 1249541, upload-time = "2026-05-11T10:13:09.185Z" },
+]
+
+[[package]]
+name = "django-widget-tweaks"
+version = "1.5.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "django" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/01/6d/d1b5a3ae3bccfee96e10315373298cea51e5e0d6853d022181b7b0861a4d/django_widget_tweaks-1.5.1.tar.gz", hash = "sha256:084acc9eeb5a3208f2670522de6284287973e54d54488ce6d402f4b99bc5f452", size = 16233, upload-time = "2026-01-02T12:46:28.907Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/64/6a/ad176284371005426b9a1c424e6cd77a9018ab1b17dc23948bfbeb2f6a21/django_widget_tweaks-1.5.1-py3-none-any.whl", hash = "sha256:3f5080f8365740fc1c14607498c975cbfed896dd0c40e1b563095716ee31e3b5", size = 9634, upload-time = "2026-01-02T12:46:02.18Z" },
 ]
 
 [[package]]
@@ -861,9 +899,12 @@ dependencies = [
     { name = "channels-redis" },
     { name = "django" },
     { name = "django-admin-rangefilter" },
+    { name = "django-allauth" },
     { name = "django-axes" },
+    { name = "django-htmx" },
     { name = "django-storages" },
     { name = "django-unfold" },
+    { name = "django-widget-tweaks" },
     { name = "environs", extra = ["django"] },
     { name = "nh3" },
     { name = "pillow" },
@@ -896,9 +937,12 @@ requires-dist = [
     { name = "channels-redis", specifier = "==4.3.0" },
     { name = "django", specifier = "==6.0.5" },
     { name = "django-admin-rangefilter", specifier = "==0.13.5" },
+    { name = "django-allauth", specifier = "==65.18.0" },
     { name = "django-axes", specifier = "==8.3.1" },
+    { name = "django-htmx", specifier = "==1.27.0" },
     { name = "django-storages", specifier = "==1.14.6" },
     { name = "django-unfold", specifier = ">=0.81.0" },
+    { name = "django-widget-tweaks", specifier = "==1.5.1" },
     { name = "environs", extras = ["django"], specifier = "==14.6.0" },
     { name = "nh3", specifier = ">=0.3.3" },
     { name = "pillow", specifier = "==12.2.0" },

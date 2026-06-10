@@ -4,7 +4,7 @@ from django.core.exceptions import PermissionDenied
 class HTMXMixin:
     @property
     def is_htmx(self):
-        return self.request.headers.get("HX-Request") == "true"
+        return bool(self.request.htmx)
 
 
 class OwnerRequiredMixin:

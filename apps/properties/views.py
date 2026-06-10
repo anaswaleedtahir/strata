@@ -1,4 +1,3 @@
-import json
 import logging
 import os
 
@@ -16,6 +15,7 @@ from django.http import (
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views import View
+from django_htmx.http import trigger_client_event
 
 from apps.properties.forms import PropertyForm
 from apps.properties.models import Property
@@ -275,22 +275,18 @@ class PropertyFavoriteToggleView(LoginRequiredMixin, View):
 
         is_favorited = favorite_toggle(user=request.user, property_obj=property_obj)
 
-        if request.headers.get("HX-Request"):
+        if request.htmx:
             property_obj.is_favorited = is_favorited
             response = render(
                 request,
                 "_components/properties/favorite_button.html",
                 {"property": property_obj},
             )
-            response["HX-Trigger"] = json.dumps(
-                {
-                    "favorite-toggled": {
-                        "propertyId": property_obj.pk,
-                        "isFavorited": is_favorited,
-                    }
-                }
+            return trigger_client_event(
+                response,
+                "favorite-toggled",
+                {"propertyId": property_obj.pk, "isFavorited": is_favorited},
             )
-            return response
 
         return JsonResponse({"is_favorited": is_favorited})
 
