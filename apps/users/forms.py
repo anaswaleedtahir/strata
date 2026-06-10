@@ -1,6 +1,8 @@
 from django import forms
 from django.core.exceptions import ValidationError
 
+from allauth.account.forms import SignupForm as AllauthBaseSignupForm
+
 
 class LoginForm(forms.Form):
     email = forms.EmailField(
@@ -87,6 +89,26 @@ class SignupForm(forms.Form):
             raise ValidationError({"password2": "Passwords do not match."})
 
         return cleaned_data
+
+
+class AllauthSignupForm(AllauthBaseSignupForm):
+    first_name = forms.CharField(
+        max_length=150,
+        required=True,
+        widget=forms.TextInput(attrs={"autocomplete": "given-name"}),
+        error_messages={
+            "required": "First name is required.",
+        },
+    )
+
+    last_name = forms.CharField(
+        max_length=150,
+        required=True,
+        widget=forms.TextInput(attrs={"autocomplete": "family-name"}),
+        error_messages={
+            "required": "Last name is required.",
+        },
+    )
 
 
 class ProfileForm(forms.Form):

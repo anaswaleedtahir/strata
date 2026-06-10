@@ -12,19 +12,26 @@
         </label>
     {% endif %}
 
+    {% with placeholder_value=placeholder|default:'' rows_value=rows|default:4 %}
     <div class="relative">
-        {% if icon %}
-            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
-                {{ icon|safe }}
-            </div>
-        {% endif %}
-
-        {% if 'textarea' in field.field.widget.template_name %}
-            {% render_field field class="textarea textarea-bordered w-full {% if field.errors %}textarea-error{% endif %}" rows=rows|default:4 placeholder=placeholder|default:'' %}
-        {% elif 'select' in field.field.widget.template_name %}
-            {% render_field field class="select select-bordered w-full {% if field.errors %}select-error{% endif %}" %}
+        {% if field|widget_type == 'textarea' %}
+            {% if field.errors %}
+                {% render_field field class="textarea textarea-bordered w-full textarea-error" rows=rows_value placeholder=placeholder_value %}
+            {% else %}
+                {% render_field field class="textarea textarea-bordered w-full" rows=rows_value placeholder=placeholder_value %}
+            {% endif %}
+        {% elif field|widget_type == 'select' %}
+            {% if field.errors %}
+                {% render_field field class="select select-bordered w-full select-error" %}
+            {% else %}
+                {% render_field field class="select select-bordered w-full" %}
+            {% endif %}
         {% elif field.field.widget.input_type == 'password' %}
-            {% render_field field class="input input-bordered w-full pr-12 {% if field.errors %}input-error{% endif %}" placeholder=placeholder|default:'' %}
+            {% if field.errors %}
+                {% render_field field class="input input-bordered w-full pr-12 input-error" placeholder=placeholder_value %}
+            {% else %}
+                {% render_field field class="input input-bordered w-full pr-12" placeholder=placeholder_value %}
+            {% endif %}
             <button type="button"
                     class="absolute inset-y-0 right-0 pr-3 flex items-center"
                     onclick="togglePassword('{{ field.id_for_label }}', this)"
@@ -35,9 +42,24 @@
                 </svg>
             </button>
         {% else %}
-            {% render_field field class="input input-bordered w-full {% if icon %}pl-10 {% endif %}{% if field.errors %}input-error{% endif %}" placeholder=placeholder|default:'' %}
+            {% if icon and field.errors %}
+                <label class="input input-bordered input-error flex items-center gap-2">
+                    {{ icon|safe }}
+                    {% render_field field class="grow" placeholder=placeholder_value %}
+                </label>
+            {% elif icon %}
+                <label class="input input-bordered flex items-center gap-2">
+                    {{ icon|safe }}
+                    {% render_field field class="grow" placeholder=placeholder_value %}
+                </label>
+            {% elif field.errors %}
+                {% render_field field class="input input-bordered w-full input-error" placeholder=placeholder_value %}
+            {% else %}
+                {% render_field field class="input input-bordered w-full" placeholder=placeholder_value %}
+            {% endif %}
         {% endif %}
     </div>
+    {% endwith %}
 
     {% if field.errors %}
         <label class="label">

@@ -25,7 +25,13 @@ class DjangoIntegrationSettingsTests(SimpleTestCase):
         self.assertEqual(settings.ACCOUNT_LOGIN_METHODS, {"email"})
         self.assertEqual(
             settings.ACCOUNT_SIGNUP_FIELDS,
-            ["email*", "password1*", "password2*"],
+            ["email*", "first_name*", "last_name*", "password1*", "password2*"],
+        )
+        self.assertEqual(
+            settings.ACCOUNT_FORMS["signup"], "apps.users.forms.AllauthSignupForm"
+        )
+        self.assertEqual(
+            settings.ACCOUNT_ADAPTER, "apps.users.adapters.PropertyHubAccountAdapter"
         )
 
     def test_allauth_urls_are_mounted(self):

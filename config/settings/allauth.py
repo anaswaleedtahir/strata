@@ -5,11 +5,19 @@ env = Env()
 SITE_ID = env.int("SITE_ID", 1)
 
 ACCOUNT_LOGIN_METHODS = {"email"}
-ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*", "password2*"]
+ACCOUNT_SIGNUP_FIELDS = [
+    "email*",
+    "first_name*",
+    "last_name*",
+    "password1*",
+    "password2*",
+]
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 ACCOUNT_USER_MODEL_EMAIL_FIELD = "email"
 ACCOUNT_EMAIL_VERIFICATION = env.str("ACCOUNT_EMAIL_VERIFICATION", "optional")
 ACCOUNT_SESSION_REMEMBER = None
+ACCOUNT_FORMS = {"signup": "apps.users.forms.AllauthSignupForm"}
+ACCOUNT_ADAPTER = "apps.users.adapters.PropertyHubAccountAdapter"
 
 LOGIN_REDIRECT_URL = "properties:list"
 LOGOUT_REDIRECT_URL = "properties:list"
