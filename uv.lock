@@ -419,6 +419,12 @@ wheels = [
 ]
 
 [[package]]
+name = "django-heroicons"
+version = "0.0.8"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/b0/d3/c72275cec3c34ad7f1a24bce5957733ffc740f4605de0ccab5313c598e23/django_heroicons-0.0.8.tar.gz", hash = "sha256:bea76cc9bf9b0bc44fbcab65adde7c6571478b4a87103e78db7429808677707e", size = 48099, upload-time = "2020-09-11T23:00:28.917Z" }
+
+[[package]]
 name = "django-htmx"
 version = "1.27.0"
 source = { registry = "https://pypi.org/simple" }
@@ -891,6 +897,7 @@ dependencies = [
     { name = "django" },
     { name = "django-allauth" },
     { name = "django-axes" },
+    { name = "django-heroicons" },
     { name = "django-htmx" },
     { name = "django-storages" },
     { name = "django-unfold" },
@@ -928,6 +935,7 @@ requires-dist = [
     { name = "django", specifier = "==6.0.5" },
     { name = "django-allauth", specifier = "==65.18.0" },
     { name = "django-axes", specifier = "==8.3.1" },
+    { name = "django-heroicons", specifier = ">=0.0.8" },
     { name = "django-htmx", specifier = "==1.27.0" },
     { name = "django-storages", specifier = "==1.14.6" },
     { name = "django-unfold", specifier = ">=0.81.0" },

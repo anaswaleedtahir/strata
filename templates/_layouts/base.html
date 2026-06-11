@@ -24,89 +24,6 @@
     <!-- Alpine.js -->
     <script defer src="{% static 'vendor/alpinejs.min.js' %}"></script>
 
-    <!-- Custom Styles -->
-    <style>
-        /* Alpine.js x-cloak: Prevent flash of unstyled content */
-        [x-cloak] {
-            display: none !important;
-        }
-
-        /* HTMX loading indicators */
-        .htmx-indicator {
-            display: none;
-        }
-
-        .htmx-request .htmx-indicator {
-            display: inline-block;
-        }
-
-        .htmx-request.htmx-indicator {
-            display: inline-block;
-        }
-
-        .htmx-request .htmx-indicator-hide {
-            display: none;
-        }
-
-        /* Custom gradient backgrounds */
-        .bg-gradient-airbnb {
-            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #d946ef 100%);
-        }
-
-        .bg-gradient-card {
-            background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
-        }
-
-        /* Custom animations */
-        @keyframes slideInRight {
-            from {
-                opacity: 0;
-                transform: translateX(100%);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-
-        .animate-slide-in-right {
-            animation: slideInRight 0.3s ease-out;
-        }
-
-        /* Navigation active state */
-        .nav-link-active {
-            @apply bg-white/20 text-white;
-        }
-
-        /* Property card hover effects */
-        .property-card {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .property-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-        }
-
-        /* Custom scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: #f1f5f9;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
-    </style>
-
     {% block extra_head %}{% endblock %}
 </head>
 
@@ -129,20 +46,6 @@
 
     <!-- Footer -->
     {% include '_components/navigation/footer.html' %}
-
-    <script>
-        function togglePassword(inputId, btn) {
-            const input = document.getElementById(inputId);
-            const icon = btn.querySelector('svg');
-            if (input.type === 'password') {
-                input.type = 'text';
-                icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"></path>';
-            } else {
-                input.type = 'password';
-                icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>';
-            }
-        }
-    </script>
 
     {% block extra_scripts %}{% endblock %}
 </body>

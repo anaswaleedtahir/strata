@@ -2,9 +2,6 @@
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
 
-/* Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap');
-
 /* Custom Components */
 @layer components {
   /* Property Card Hover Effects */
@@ -12,42 +9,9 @@
     @apply transition-all duration-300 hover:shadow-large hover:-translate-y-1;
   }
 
-  .property-card-image {
-    @apply transition-transform duration-300 group-hover:scale-105;
-  }
-
-  /* Button Variants */
-  .btn-airbnb {
-    @apply bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white font-medium px-6 py-3 rounded-xl transition-all duration-200 shadow-soft hover:shadow-medium;
-  }
-
-  .btn-airbnb-outline {
-    @apply border-2 border-primary-500 text-primary-600 hover:bg-primary-500 hover:text-white font-medium px-6 py-3 rounded-xl transition-all duration-200;
-  }
-
   /* Navigation */
   .nav-link-active {
-    @apply text-primary-100 bg-primary-600 rounded-lg;
-  }
-
-  /* Form Inputs */
-  .form-input-airbnb {
-    @apply w-full px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200;
-  }
-
-  /* Cards */
-  .card-airbnb {
-    @apply bg-white rounded-2xl shadow-soft hover:shadow-medium transition-shadow duration-300 overflow-hidden;
-  }
-
-  /* Badges */
-  .badge-airbnb {
-    @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium;
-  }
-
-  /* Loading States */
-  .loading-overlay {
-    @apply absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-50;
+    @apply bg-white/20 text-white rounded-lg;
   }
 }
 
@@ -60,46 +24,12 @@
   .bg-gradient-airbnb {
     @apply bg-gradient-to-br from-primary-500 via-primary-600 to-secondary-600;
   }
-
-  /* Scrollbar Styling */
-  .scrollbar-thin {
-    scrollbar-width: thin;
-    scrollbar-color: theme('colors.primary.300') theme('colors.neutral.100');
-  }
-
-  .scrollbar-thin::-webkit-scrollbar {
-    width: 6px;
-  }
-
-  .scrollbar-thin::-webkit-scrollbar-track {
-    @apply bg-neutral-100;
-  }
-
-  .scrollbar-thin::-webkit-scrollbar-thumb {
-    @apply bg-primary-300 rounded-full;
-  }
-
-  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-    @apply bg-primary-400;
-  }
-}
-
-/* Animation Keyframes */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 @keyframes slideInRight {
   from {
     opacity: 0;
-    transform: translateX(30px);
+    transform: translateX(100%);
   }
   to {
     opacity: 1;
@@ -107,25 +37,25 @@
   }
 }
 
-.animate-fade-in-up {
-  animation: fadeInUp 0.6s ease-out;
-}
-
 .animate-slide-in-right {
-  animation: slideInRight 0.4s ease-out;
+  animation: slideInRight 0.3s ease-out;
 }
 
 /* HTMX Loading States */
 .htmx-indicator {
-  @apply opacity-0 transition-opacity duration-200;
+  display: none;
 }
 
 .htmx-request .htmx-indicator {
-  @apply opacity-100;
+  display: inline-block;
 }
 
 .htmx-request.htmx-indicator {
-  @apply opacity-100;
+  display: inline-block;
+}
+
+.htmx-request .htmx-indicator-hide {
+  display: none;
 }
 
 /* Alpine.js Transitions */

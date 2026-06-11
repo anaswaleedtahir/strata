@@ -1,4 +1,4 @@
-{% load widget_tweaks %}
+{% load heroicons widget_tweaks %}
 
 <div class="form-control w-full">
     {% if label %}
@@ -13,7 +13,7 @@
     {% endif %}
 
     {% with placeholder_value=placeholder|default:'' rows_value=rows|default:4 %}
-    <div class="relative">
+    <div class="relative" {% if field.field.widget.input_type == 'password' %}x-data="{ showPassword: false }"{% endif %}>
         {% if field|widget_type == 'textarea' %}
             {% if field.errors %}
                 {% render_field field class="textarea textarea-bordered w-full textarea-error" rows=rows_value placeholder=placeholder_value %}
@@ -28,29 +28,44 @@
             {% endif %}
         {% elif field.field.widget.input_type == 'password' %}
             {% if field.errors %}
-                {% render_field field class="input input-bordered w-full pr-12 input-error" placeholder=placeholder_value %}
+                <label class="input input-bordered input-error flex items-center gap-2">
+                    {% render_field field class="grow" placeholder=placeholder_value %}
+                    <button type="button"
+                            class="btn btn-ghost btn-xs btn-circle -mr-2 min-h-0 h-8 w-8 text-base-content/60"
+                            @click.prevent="showPassword = !showPassword; $el.closest('label').querySelector('input').type = showPassword ? 'text' : 'password'"
+                            :aria-label="showPassword ? 'Hide password' : 'Show password'"
+                            :aria-pressed="showPassword.toString()">
+                        <span x-show="!showPassword" class="[&_svg]:h-5 [&_svg]:w-5">{% heroicon 'eye' %}</span>
+                        <span x-show="showPassword" x-cloak class="[&_svg]:h-5 [&_svg]:w-5">{% heroicon 'eye-off' %}</span>
+                    </button>
+                </label>
             {% else %}
-                {% render_field field class="input input-bordered w-full pr-12" placeholder=placeholder_value %}
+                <label class="input input-bordered flex items-center gap-2">
+                    {% render_field field class="grow" placeholder=placeholder_value %}
+                    <button type="button"
+                            class="btn btn-ghost btn-xs btn-circle -mr-2 min-h-0 h-8 w-8 text-base-content/60"
+                            @click.prevent="showPassword = !showPassword; $el.closest('label').querySelector('input').type = showPassword ? 'text' : 'password'"
+                            :aria-label="showPassword ? 'Hide password' : 'Show password'"
+                            :aria-pressed="showPassword.toString()">
+                        <span x-show="!showPassword" class="[&_svg]:h-5 [&_svg]:w-5">{% heroicon 'eye' %}</span>
+                        <span x-show="showPassword" x-cloak class="[&_svg]:h-5 [&_svg]:w-5">{% heroicon 'eye-off' %}</span>
+                    </button>
+                </label>
             {% endif %}
-            <button type="button"
-                    class="absolute inset-y-0 right-0 pr-3 flex items-center"
-                    onclick="togglePassword('{{ field.id_for_label }}', this)"
-                    aria-label="Toggle password visibility">
-                <svg class="w-5 h-5 text-base-content/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                </svg>
-            </button>
         {% else %}
             {% if icon and field.errors %}
                 <label class="input input-bordered input-error flex items-center gap-2">
-                    {{ icon|safe }}
                     {% render_field field class="grow" placeholder=placeholder_value %}
+                    <span class="pointer-events-none flex h-5 w-5 shrink-0 items-center justify-center text-base-content/40 [&_svg]:h-5 [&_svg]:w-5">
+                        {% heroicon icon %}
+                    </span>
                 </label>
             {% elif icon %}
                 <label class="input input-bordered flex items-center gap-2">
-                    {{ icon|safe }}
                     {% render_field field class="grow" placeholder=placeholder_value %}
+                    <span class="pointer-events-none flex h-5 w-5 shrink-0 items-center justify-center text-base-content/40 [&_svg]:h-5 [&_svg]:w-5">
+                        {% heroicon icon %}
+                    </span>
                 </label>
             {% elif field.errors %}
                 {% render_field field class="input input-bordered w-full input-error" placeholder=placeholder_value %}
