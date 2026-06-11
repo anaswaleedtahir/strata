@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-{% load static %}
+{% load static tailwind_cli %}
 <html lang="en" data-theme="propertyhub">
 
 <head>
@@ -16,13 +16,23 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <!-- Tailwind CSS with DaisyUI -->
-    <link href="{% static 'dist/output.css' %}" rel="stylesheet">
+    {% tailwind_css %}
 
     <!-- HTMX -->
-    <script src="{% static 'vendor/htmx.min.js' %}" defer></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/htmx.org@1.9.10/dist/htmx.min.js"
+      integrity="sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8nO7UC"
+      crossorigin="anonymous"
+      defer
+    ></script>
 
     <!-- Alpine.js -->
-    <script defer src="{% static 'vendor/alpinejs.min.js' %}"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"
+      integrity="sha384-Rpe/8orFUm5Q1GplYBHxbuA8Az8O8C5sAoOsdbRWkqPjKFaxPgGZipj4zeHL7lxX"
+      crossorigin="anonymous"
+      defer
+    ></script>
 
     {% block extra_head %}{% endblock %}
 </head>
