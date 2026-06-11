@@ -39,7 +39,9 @@ INSTALLED_APPS = [
     "allauth.account",
     "axes",
     "channels",
+    "django_cotton",
     "django_htmx",
+    "django_tailwind_cli",
     "heroicons",
     "storages",
     "widget_tweaks",
@@ -141,6 +143,16 @@ USE_TZ = True
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 MEDIA_ROOT = BASE_DIR / "media"
+
+# ============================================================================
+# TAILWIND CSS
+# ============================================================================
+
+TAILWIND_CLI_SRC_CSS = "assets/css/input.css"
+TAILWIND_CLI_DIST_CSS = "dist/output.css"
+TAILWIND_CLI_USE_DAISY_UI = True
+TAILWIND_CLI_VERSION = "2.8.3"
+TAILWIND_CLI_AUTOMATIC_MINIFY = True
 
 # ============================================================================
 # MESSAGES FRAMEWORK
