@@ -22,8 +22,10 @@ This document provides AI agents with essential context for making informed deci
 - **Environs 14.6.0** - [Documentation](https://environs.readthedocs.io/) - Environment variable parsing
 
 ### Frontend
-- **Tailwind CSS 3.4** - [Documentation](https://tailwindcss.com/docs) - Utility-first CSS
-- **DaisyUI 4.6** - [Documentation](https://daisyui.com/docs/) - Component library
+- **Tailwind CSS 4** - [Documentation](https://tailwindcss.com/docs) - Utility-first CSS
+- **DaisyUI** - [Documentation](https://daisyui.com/docs/) - Component library
+- **Django Cotton 2.7.2** - [Documentation](https://django-cotton.com/) - Template components
+- **django-tailwind-cli 4.6.2** - Node-free Tailwind CLI integration
 - **HTMX** - [Documentation](https://htmx.org/docs/) - Dynamic HTML interactions
 - **Alpine.js** - [Documentation](https://alpinejs.dev/guide) - Lightweight JavaScript framework
 
@@ -43,7 +45,7 @@ All implementation details are documented in the `docs/` directory:
 
 ### Architecture
 - **[Architecture Overview](./docs/architecture/overview.md)** - System design, tech stack, data flow, security, and scalability
-- **[Frontend Architecture](./docs/architecture/frontend.md)** - Source/production separation, build process, configuration
+- **[Frontend Architecture](./docs/architecture/frontend.md)** - Django Tailwind CLI, Cotton, static assets
 
 ### Development Guides
 - **[Frontend Setup](./docs/development/frontend-setup.md)** - Tailwind CSS workflow, asset management, development commands
@@ -73,18 +75,16 @@ Property-Hub/
 │   └── wsgi.py            # WSGI application
 ├── templates/              # HTML templates
 │   ├── _layouts/          # Base layouts (base.html, auth.html, dashboard.html)
-│   ├── _components/       # Reusable UI components
+│   ├── cotton/            # Shared Cotton components
 │   │   ├── forms/         # Form components
 │   │   ├── navigation/    # Navbar, footer
-│   │   ├── properties/    # Property cards, forms, details
 │   │   └── ui/            # Generic UI elements
 │   ├── properties/        # Property pages
 │   ├── users/             # User auth pages
 │   └── chat/              # Chat pages
-├── frontend/               # Frontend source files (NOT collected by Django)
-│   └── src/
-│       ├── input.css      # Tailwind source with @import directives
-│       └── chat-client.js # WebSocket client class
+├── assets/                 # Source assets
+│   └── css/
+│       └── input.css      # Tailwind CSS 4 source
 ├── static/                 # Production static assets
 │   ├── dist/              # Compiled CSS (output.css)
 │   ├── images/            # Static images
@@ -95,8 +95,6 @@ Property-Hub/
 ├── docker-compose.yml      # Development services
 ├── Dockerfile              # Production container
 ├── pyproject.toml          # Python dependencies (UV)
-├── package.json            # Node.js dependencies (Tailwind)
-├── tailwind.config.js      # Tailwind configuration
 └── justfile                # Development command shortcuts
 ```
 
@@ -130,22 +128,23 @@ The project follows the [HackSoftware Django Style Guide](https://github.com/Hac
 
 ### 2. Frontend Build Strategy
 
-**Critical:** Source files (`frontend/`) are **separated** from production assets (`static/`). This prevents `collectstatic` errors with Tailwind's `@import` directives.
+The project has no Node.js or npm build pipeline. Tailwind CSS 4 is built by `django-tailwind-cli`, using Django settings and `assets/css/input.css`.
 
-- **Source files**: `frontend/src/input.css` (contains `@import "tailwindcss/base"` etc.)
-- **Compiled output**: `static/dist/output.css` (processed by Tailwind)
-- **Django collects**: Only files from `static/`, never from `frontend/`
+- **Source CSS**: `assets/css/input.css`
+- **Compiled output**: `static/dist/output.css`
+- **Django collects**: files from `static/`, never `assets/`
+- **Browser libraries**: HTMX and Alpine.js load from pinned CDN URLs with SRI in `templates/_layouts/base.html`
 
 **Build Commands:**
 ```bash
-# Development (watch mode)
-npm run build-css
+# Development (Django plus Tailwind watch mode)
+just runserver
 
 # Production (minified)
-npm run build-css-prod
+uv run python manage.py tailwind build --force
 
 # Then collectstatic
-python manage.py collectstatic --noinput
+uv run python manage.py collectstatic --noinput
 ```
 
 **See:** [Frontend Architecture](./docs/architecture/frontend.md) | [Frontend Setup](./docs/development/frontend-setup.md)
@@ -185,27 +184,27 @@ STORAGES = {
 
 ### 4. Component-Based Templates
 
-Templates use a component architecture for DRY code:
+Templates use Cotton for reusable components and regular Django templates for layouts/pages:
 
 ```django
 {% extends "_layouts/base.html" %}
 
 {% block content %}
-  {% include "_components/properties/property-card.html" with property=property %}
+  <c-properties.property-card :property="property" />
 {% endblock %}
 ```
 
 **Component locations:**
-- Forms: `templates/_components/forms/`
-- Navigation: `templates/_components/navigation/`
-- Properties: `templates/_components/properties/`
-- UI elements: `templates/_components/ui/`
+- Shared forms: `templates/cotton/forms/`
+- Shared navigation: `templates/cotton/navigation/`
+- Shared UI: `templates/cotton/ui/`
+- Property-specific components: `apps/properties/templates/cotton/properties/`
 
 ### 5. WebSocket Chat Implementation
 
 The chat system uses Django Channels with Redis as the channel layer.
 
-**Client:** `frontend/src/chat-client.js` - `ChatClient` class
+**Client:** `static/js/chat-client.js` - `ChatClient` class
 - Exponential backoff reconnection (1s, 2s, 4s, 8s, 16s)
 - Message validation (1-5000 characters)
 - Callback system for messages and connection status
@@ -231,7 +230,7 @@ python manage.py migrate
 
 ### 7. Static Files & Media
 
-- **Static files**: CSS, JS, images in `static/` (compiled) and `frontend/src/` (source)
+- **Static files**: generated CSS, JS, and images in `static/`; source CSS in `assets/css/`
 - **Media uploads**: User-uploaded files in `media/`
 - **Production storage**: Optional AWS S3 for media/static via `django-storages`
 
@@ -266,7 +265,7 @@ just up  # Starts PostgreSQL, Redis, Mailhog, Localstack
 
 ### 2. Install Dependencies
 ```bash
-just build  # Installs Python (UV) and Node.js dependencies
+just build  # Installs Python dependencies
 ```
 
 ### 3. Database Setup
@@ -274,17 +273,12 @@ just build  # Installs Python (UV) and Node.js dependencies
 just migrate  # Apply migrations
 ```
 
-### 4. Start Frontend Build (Watch Mode)
+### 4. Start Django Server And Tailwind Watch Mode
 ```bash
-npm run build-css  # Terminal 1 - watches for CSS changes
+just runserver
 ```
 
-### 5. Start Django Server
-```bash
-just runserver  # Terminal 2 - Django dev server
-```
-
-### 6. Access Application
+### 5. Access Application
 ```
 http://127.0.0.1:8000
 ```
@@ -329,12 +323,12 @@ uv run ruff format --check .
 
 ### Frontend Build Test
 ```bash
-npm run build-css-prod
-python manage.py collectstatic --noinput --dry-run
+uv run python manage.py tailwind build --force
+uv run python manage.py collectstatic --noinput --dry-run
 ```
 
 ### Chat Client Tests
-Open `static/src/chat-client.test.html` in browser or run programmatically with `runTests()`.
+Open `docs/development/chat-client-test.html` in browser or run programmatically with `runTests()`.
 
 **See:** [Contributing Guide - Testing Guidelines](./docs/guides/contributing.md)
 
@@ -355,6 +349,8 @@ Open `static/src/chat-client.test.html` in browser or run programmatically with 
 - django-axes==8.3.1 (security)
 - django-storages==1.14.6 (S3)
 - whitenoise==6.11.0 (static files)
+- django-cotton==2.7.2 (template components)
+- django-tailwind-cli==4.6.2 (Tailwind CLI integration)
 - pillow==12.1.1 (image processing)
 - environs[django]==14.6.0 (env vars)
 - nh3>=0.3.3 (HTML sanitization)
@@ -371,13 +367,6 @@ Open `static/src/chat-client.test.html` in browser or run programmatically with 
 - uvicorn[standard]==0.41.0 (ASGI server)
 - django-compressor==4.6.0
 
-### Node.js (package.json)
-- tailwindcss ^3.4.0
-- daisyui ^4.6.0
-- @tailwindcss/forms ^0.5.7
-- @tailwindcss/typography ^0.5.10
-- nodemon ^3.0.0 (dev)
-
 ---
 
 ## Important Notes for Agents
@@ -388,7 +377,7 @@ Open `static/src/chat-client.test.html` in browser or run programmatically with 
 3. **Call `.save()` directly in views** — always go through a service
 4. **Raise `ValidationError` from services** — raise `ApplicationError(message)` instead
 5. **Skip `full_clean()`** before saving a model in a service
-6. **Modify** `frontend/` files during Django `collectstatic` - they are source files, not production assets
+6. **Add** Node.js, npm, or local frontend package files without an explicit architecture change
 7. **Add** source files to `STATICFILES_DIRS` - only `static/` should be collected
 8. **Hardcode** secrets or environment-specific values - always use environment variables
 9. **Commit** compiled `static/dist/output.css` if CI/CD builds it - but it's okay to commit for releases
@@ -401,9 +390,9 @@ Open `static/src/chat-client.test.html` in browser or run programmatically with 
 2. **Inherit `BaseModel`** for new models (provides `created_at` + `updated_at`)
 3. **Raise `ApplicationError`** for domain violations in services
 4. **Use keyword-only args** in all service and selector functions
-5. **Follow** the component-based template structure in `templates/_components/`
+5. **Follow** the Cotton component structure in `templates/cotton/` and app-level `templates/cotton/<app>/`
 6. **Use** Tailwind utility classes first, custom CSS only when necessary
-7. **Add** custom CSS in `frontend/src/input.css` within `@layer` directives
+7. **Add** custom CSS in `assets/css/input.css` within `@layer` directives
 8. **Write** reusable components for repeated UI patterns
 9. **Run** quality gates (`check`, `makemigrations --check`, `ruff check`, `ruff format --check`) before committing
 10. **Use** `factory_boy` factories for test data — never inline `User.objects.create_*` in production tests
@@ -422,18 +411,18 @@ Open `static/src/chat-client.test.html` in browser or run programmatically with 
 4. Create a **thin view** in `apps/<app>/views.py`: validate form → call service/selector → render
 5. Add URL pattern in `apps/<app>/urls.py`
 6. Create template in `templates/<app>/` using `_layouts/base.html`
-7. Reuse components from `templates/_components/` as needed
+7. Reuse Cotton components from `templates/cotton/` or app-level Cotton directories as needed
 
 ### Adding new styles?
 1. Use Tailwind utility classes directly in HTML
-2. For reusable styles, add to `frontend/src/input.css` in `@layer components`
-3. Run `npm run build-css` (dev) or `npm run build-css-prod` (prod)
+2. For reusable styles, add to `assets/css/input.css` in `@layer components`
+3. Run `just runserver` for watch mode or `uv run python manage.py tailwind build --force` for production CSS
 
 ### Adding JavaScript interactivity?
-1. For simple UI: Use Alpine.js (already included via DaisyUI)
+1. For simple UI: Use Alpine.js from the pinned CDN script
 2. For dynamic content: Use HTMX (add to template)
-3. For complex logic: Add to `frontend/src/` and build to `static/dist/`
-4. For WebSocket: Use `ChatClient` class (see `frontend/src/chat-client.js`)
+3. For project-owned browser logic: Add direct scripts to `static/js/`
+4. For WebSocket: Use `ChatClient` class (see `static/js/chat-client.js`)
 
 ### Need real-time features?
 1. Use Django Channels (see `apps/chat/` as reference)
@@ -443,8 +432,8 @@ Open `static/src/chat-client.test.html` in browser or run programmatically with 
 
 ### Storing files?
 1. **User uploads**: Use `MEDIA_ROOT` (or S3 if `USE_S3_MEDIA=True`)
-2. **Static assets**: Place in `static/` (images, fonts) or `frontend/src/` (CSS/JS to compile)
-3. **Never** store files in `frontend/` that should be collected by Django
+2. **Static assets**: Place generated CSS, direct JS, images, and fonts in `static/`
+3. **Source CSS**: Place in `assets/css/input.css`
 
 ### Changing database schema?
 1. Update model in `apps/<app>/models.py`

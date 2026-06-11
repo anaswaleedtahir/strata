@@ -305,7 +305,7 @@ function runTests() {
   }
 }
 
-// Export for use in browser or Node.js
+// Export for use in the browser test harness
 if (typeof module !== "undefined" && module.exports) {
   module.exports = { tests, runTests };
 }

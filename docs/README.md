@@ -8,14 +8,14 @@ Welcome to the Property Hub documentation. This directory contains all technical
 Technical architecture and design decisions.
 
 - [Architecture Overview](./architecture/overview.md) - High-level system architecture
-- [Frontend Architecture](./architecture/frontend.md) - Frontend structure, build process, and Tailwind CSS integration
+- [Frontend Architecture](./architecture/frontend.md) - Django Tailwind CLI, Cotton components, and static assets
 - [Backend Architecture](./architecture/backend.md) - Django app structure and design patterns *(Coming Soon)*
 - [Database Schema](./architecture/database.md) - Database models and relationships *(Coming Soon)*
 
 ### Development
 Guides for local development and contributing.
 
-- [Frontend Setup](./development/frontend-setup.md) - Frontend development workflow *(To be created)*
+- [Frontend Setup](./development/frontend-setup.md) - Tailwind, Cotton, and browser JavaScript workflow
 - [Chat Client](./development/chat-client.md) - WebSocket chat client documentation
 - [Local Development](./development/local-setup.md) - Setting up local development environment *(Coming Soon)*
 - [Testing Guide](./development/testing.md) - Writing and running tests *(Coming Soon)*
@@ -39,7 +39,7 @@ Step-by-step guides for common tasks.
 
 ### For Developers
 - Start here: [Local Development](./development/local-setup.md) *(Coming Soon)*
-- Frontend work: [Frontend Architecture](./architecture/frontend.md)
+- UI work: [Frontend Architecture](./architecture/frontend.md)
 - Adding features: [Adding a New Feature](./guides/new-feature.md) *(Coming Soon)*
 
 ### For DevOps
@@ -50,7 +50,7 @@ Step-by-step guides for common tasks.
 ### For Architects
 - System design: [Backend Architecture](./architecture/backend.md) *(Coming Soon)*
 - Data model: [Database Schema](./architecture/database.md) *(Coming Soon)*
-- Frontend: [Frontend Architecture](./architecture/frontend.md)
+- UI pipeline: [Frontend Architecture](./architecture/frontend.md)
 
 ## 📝 Contributing to Documentation
 
@@ -77,14 +77,14 @@ See the [Contributing Guide](./guides/contributing.md) for complete guidelines.
 ## 🔍 Finding Documentation
 
 ### By Topic
-- **Frontend**: `architecture/frontend.md`, `development/frontend-setup.md`
+- **UI pipeline**: `architecture/frontend.md`, `development/frontend-setup.md`
 - **Deployment**: `deployment/` directory
 - **Development**: `development/` directory
 - **Architecture**: `architecture/` directory
 
 ### By Role
 - **New Developer**: Start with `development/local-setup.md` and `guides/contributing.md`
-- **Frontend Developer**: See `architecture/frontend.md` and `development/frontend-setup.md`
+- **UI Developer**: See `architecture/frontend.md` and `development/frontend-setup.md`
 - **Backend Developer**: See `architecture/backend.md` and `development/`
 - **DevOps Engineer**: See `deployment/` directory
 - **Contributor**: See `guides/contributing.md`

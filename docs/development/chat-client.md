@@ -174,10 +174,10 @@ The client implements exponential backoff for reconnection attempts:
 
 ### Unit Tests
 
-Run the unit tests by opening `chat-client.test.html` in a browser:
+Run the unit tests by opening `docs/development/chat-client-test.html` in a browser:
 
 ```bash
-open static/src/chat-client.test.html
+open docs/development/chat-client-test.html
 ```
 
 Or run the test suite programmatically:
@@ -192,7 +192,7 @@ runTests();
 Use the interactive test page for manual testing:
 
 ```bash
-open static/src/chat-client.test.html
+open docs/development/chat-client-test.html
 ```
 
 ## Integration
@@ -202,7 +202,7 @@ The ChatClient is integrated into the conversation detail template:
 ```html
 {% load static %}
 
-<script src="{% static 'dist/chat-client.js' %}"></script>
+<script src="{% static 'js/chat-client.js' %}"></script>
 
 <script>
     const chatClient = new ChatClient({{ conversation.id }});

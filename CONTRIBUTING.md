@@ -53,7 +53,7 @@ uv run ruff check .
 uv run ruff format --check .
 
 # Test frontend build
-npm run build-css-prod
+uv run python manage.py tailwind build --force
 python manage.py collectstatic --noinput --dry-run
 ```
 
@@ -154,7 +154,7 @@ def property_create_view(request):
 ### HTML/Templates
 
 - Use semantic HTML5 elements
-- Keep templates DRY (use includes and components)
+- Keep templates DRY with Cotton components for reusable UI
 - Use Tailwind utility classes
 - Add ARIA labels for accessibility
 - Indent with 2 spaces
@@ -169,7 +169,7 @@ def property_create_view(request):
     {{ property.title }}
   </h1>
 
-  {% include "_components/properties/property-card.html" %}
+  <c-properties.property-card :property="property" />
 </article>
 {% endblock %}
 ```
@@ -179,6 +179,7 @@ def property_create_view(request):
 - Prefer Tailwind utilities over custom CSS
 - Use `@layer components` for reusable components
 - Use `@layer utilities` for custom utilities
+- Keep custom CSS in `assets/css/input.css`
 - Document complex custom styles
 
 **Example:**

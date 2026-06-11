@@ -30,8 +30,9 @@ Comprehensive documentation is available in the [`docs/`](./docs/) directory:
 - **UV** - Package manager
 
 ### Frontend
-- **Tailwind CSS** - Utility-first CSS framework
+- **Tailwind CSS 4** - Utility-first CSS framework, built by Django
 - **DaisyUI** - Component library
+- **Django Cotton** - Reusable template components
 - **HTMX** - Dynamic interactions
 - **Alpine.js** - Lightweight JavaScript framework
 
@@ -70,17 +71,16 @@ Property-Hub/
 │
 ├── templates/               # HTML templates
 │   ├── _layouts/            # Base layouts
-│   ├── _components/         # Reusable components
+│   ├── cotton/              # Shared Cotton components
 │   ├── properties/          # Property templates
 │   └── users/               # User templates
 │
-├── frontend/                # Frontend source files
-│   └── src/                 # Source files (CSS, JS)
-│       ├── input.css        # Tailwind source
-│       └── *.js             # JavaScript source
+├── assets/                  # Source assets
+│   └── css/
+│       └── input.css        # Tailwind CSS 4 source
 │
 ├── static/                  # Production static assets
-│   ├── dist/                # Compiled CSS/JS
+│   ├── dist/                # Compiled CSS
 │   ├── images/              # Images
 │   └── js/                  # Static JavaScript
 │
@@ -88,7 +88,6 @@ Property-Hub/
 ├── media/                   # User uploads
 ├── Dockerfile               # Docker image
 ├── docker-compose.*.yml     # Docker compose configs
-├── tailwind.config.js       # Tailwind configuration
 ├── pyproject.toml           # Python dependencies
 └── justfile                 # Development commands
 ```
@@ -96,7 +95,7 @@ Property-Hub/
 ### Design Patterns
 
 **Component-Based Templates**
-- Reusable UI components in `templates/_components/`
+- Reusable UI components in `templates/cotton/`
 - Separation of layouts, components, and pages
 - DRY principle for forms, navigation, and UI elements
 
@@ -118,7 +117,6 @@ Property-Hub/
 ### Prerequisites
 
 - Python 3.13+
-- Node.js 18+ (for Tailwind CSS)
 - Docker (optional)
 
 ### Local Development
@@ -137,7 +135,7 @@ Property-Hub/
 
 3. **Install dependencies**
    ```bash
-   # Install Python and Node dependencies
+   # Install Python dependencies
    just build
    ```
 
@@ -170,20 +168,14 @@ Property-Hub/
 
 | Command | Description |
 |---------|-------------|
-| `just build` | Install Python and Node dependencies |
+| `just build` | Install Python dependencies |
 | `just migrate` | Apply Django migrations |
 | `just makemigrations` | Create new Django migrations |
-| `just runserver [port]` | Start Django development server (default port: 8000) |
+| `just runserver [port]` | Start Django development server with Tailwind watch mode (default port: 8000) |
+| `just build-css` | Build production Tailwind CSS |
 | `just up` | Start development services i.e (PostgresDB, Redis, Localstack and Mailhog) with Docker |
 | `just down` | Stop development services |
 | `just help` | Show all available commands |
-
-### NPM Commands
-
-| Command | Description |
-|---------|-------------|
-| `npm run build-css` | Build Tailwind CSS (watch mode) |
-| `npm run build-css-prod` | Build Tailwind CSS (production) |
 
 ---
 
@@ -210,12 +202,12 @@ AWS_MEDIA_BUCKET_NAME=your-bucket-name
 
 ## 🎨 Frontend Development
 
-The frontend uses Tailwind CSS with DaisyUI for styling. Source files are kept separate from production assets.
+The frontend uses Tailwind CSS 4 with DaisyUI for styling, Django Cotton for reusable template components, and pinned CDN HTMX/Alpine scripts for browser behavior.
 
 **Quick Start:**
 ```bash
-npm run build-css        # Watch mode for development
-npm run build-css-prod   # Production build
+just runserver           # Django server plus Tailwind watch mode
+just build-css           # Production Tailwind build
 ```
 
 **Learn More:**

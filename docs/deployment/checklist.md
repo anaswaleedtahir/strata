@@ -3,15 +3,14 @@
 ## Pre-Deployment
 
 ### Frontend Build
-- [ ] Run `npm run build-css-prod` to compile Tailwind CSS
+- [ ] Run `uv run python manage.py tailwind build --force` to compile Tailwind CSS
 - [ ] Verify `static/dist/output.css` exists and is up-to-date
-- [ ] Commit compiled CSS if not using CI/CD build
 
 ### Static Files
 - [ ] Run `python manage.py collectstatic --noinput`
 - [ ] Verify no errors about missing files
 - [ ] Check `staticfiles/dist/` contains hashed CSS files
-- [ ] Confirm `staticfiles/src/` does NOT exist (source files excluded)
+- [ ] Confirm `assets/css/input.css` is not collected as a static file
 
 ### Environment Variables
 - [ ] Set `DEBUG=False`
@@ -44,7 +43,7 @@ docker build \
 - [ ] Build completes without errors
 - [ ] No "missing file" errors during collectstatic
 - [ ] Image size is reasonable (check with `docker images`)
-- [ ] Runtime image doesn't contain `frontend/` directory
+- [ ] Runtime image doesn't contain a Node.js toolchain
 - [ ] Runtime image contains `staticfiles/` directory
 
 ### Test Container
@@ -118,8 +117,8 @@ kubectl rollout undo deployment/property-hub
 4. Clear browser cache
 
 ### Build Fails at collectstatic
-1. Ensure `npm run build-css-prod` ran first
-2. Check `frontend/` directory exists in build context
+1. Ensure `uv run python manage.py tailwind build --force` ran first
+2. Check `assets/css/input.css` exists in build context
 3. Verify `static/dist/output.css` was created
 4. Check no source files in `static/` directory
 
@@ -157,7 +156,7 @@ kubectl rollout undo deployment/property-hub
 ```yaml
 # Example GitHub Actions workflow
 - name: Build Frontend
-  run: npm run build-css-prod
+  run: uv run python manage.py tailwind build --force
 
 - name: Collect Static Files
   run: python manage.py collectstatic --noinput

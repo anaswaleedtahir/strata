@@ -15,8 +15,9 @@ Property Hub is a modern Django-based real estate management platform with a com
 - **UV** - Fast Python package manager
 
 ### Frontend
-- **Tailwind CSS 3.4** - Utility-first CSS framework
-- **DaisyUI 4.6** - Component library built on Tailwind
+- **Tailwind CSS 4** - Utility-first CSS framework built by `django-tailwind-cli`
+- **DaisyUI** - Component library built on Tailwind
+- **Django Cotton** - Reusable template components
 - **HTMX** - Dynamic HTML interactions without JavaScript
 - **Alpine.js** - Lightweight JavaScript framework
 - **WhiteNoise** - Static file serving with compression
@@ -64,14 +65,15 @@ config/
 ```
 templates/
 ├── _layouts/       # Base layouts (base.html, etc.)
-├── _components/    # Reusable UI components
+├── cotton/         # Shared Cotton components
 ├── properties/     # Property-specific templates
 ├── users/          # User-specific templates
 └── chat/           # Chat-specific templates
 ```
 
 **Component-Based Approach:**
-- Reusable components in `_components/`
+- Reusable shared components in `templates/cotton/`
+- Property-specific components in `apps/properties/templates/cotton/properties/`
 - DRY principle for forms, navigation, UI elements
 - Separation of layouts, components, and pages
 
@@ -80,8 +82,8 @@ templates/
 See [Frontend Architecture](./frontend.md) for detailed information.
 
 ```
-frontend/           # Source files (CSS, JS)
-static/             # Production assets
+assets/css/         # Tailwind source CSS
+static/             # Static assets and generated CSS output
 staticfiles/        # Collected files (auto-generated)
 ```
 
@@ -216,8 +218,8 @@ Browser ← WebSocket → Channels → Redis → Channels → WebSocket → Brow
 
 ### Local Development
 1. Docker Compose for services (PostgreSQL, Redis, Localstack)
-2. Django development server
-3. Tailwind CSS watch mode
+2. Django development server via `python manage.py tailwind runserver`
+3. Tailwind CSS watch mode through `django-tailwind-cli`
 4. Hot reload for templates
 
 ### Testing

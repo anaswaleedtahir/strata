@@ -10,11 +10,11 @@ Complete index of all Property Hub documentation.
 ## 🏗 Architecture
 
 - [Architecture Overview](./architecture/overview.md) - System architecture and design
-- [Frontend Architecture](./architecture/frontend.md) - Frontend structure and build process
+- [Frontend Architecture](./architecture/frontend.md) - Django Tailwind CLI, Cotton components, and static assets
 
 ## 🚀 Development
 
-- [Frontend Setup](./development/frontend-setup.md) - Frontend development workflow
+- [Frontend Setup](./development/frontend-setup.md) - Tailwind, Cotton, and browser JavaScript workflow
 - [Chat Client](./development/chat-client.md) - WebSocket chat client documentation
 
 ## 📦 Deployment
@@ -35,7 +35,7 @@ Complete index of all Property Hub documentation.
 3. Review [Frontend Setup](./development/frontend-setup.md)
 4. Check [Contributing Guide](./guides/contributing.md)
 
-### For Frontend Developers
+### For UI Developers
 1. [Frontend Architecture](./architecture/frontend.md)
 2. [Frontend Setup Guide](./development/frontend-setup.md)
 3. [Chat Client Docs](./development/chat-client.md)
@@ -53,7 +53,7 @@ Complete index of all Property Hub documentation.
 ## Documentation by Topic
 
 ### Static Files & Assets
-- [Frontend Architecture](./architecture/frontend.md) - Complete guide
+- [Frontend Architecture](./architecture/frontend.md) - Complete UI pipeline guide
 - [Frontend Setup](./development/frontend-setup.md) - Development workflow
 
 ### Real-time Features
