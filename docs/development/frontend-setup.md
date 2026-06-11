@@ -16,7 +16,7 @@ Start supporting services:
 just up
 ```
 
-Run Django with Tailwind watch mode:
+Run uvicorn with Tailwind watch mode:
 
 ```bash
 just runserver

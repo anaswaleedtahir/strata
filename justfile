@@ -8,9 +8,21 @@ up:
 down:
     docker compose -f docker-compose.yml down -v
 
-# Start Django development server with Tailwind watch mode
+# Start uvicorn with Tailwind watch mode
 runserver port="8000":
-    uv run python manage.py tailwind runserver {{port}}
+    #!/usr/bin/env bash
+    set -euo pipefail
+    trap 'kill 0' EXIT INT TERM
+    uv run python manage.py tailwind watch &
+    DJANGO_SETTINGS_MODULE=config.django.local uv run uvicorn config.asgi:application --reload --host 127.0.0.1 --port {{port}}
+
+# Start uvicorn only (ASGI + WebSocket support)
+uvicorn port="8000":
+    DJANGO_SETTINGS_MODULE=config.django.local uv run uvicorn config.asgi:application --reload --host 127.0.0.1 --port {{port}}
+
+# Start Tailwind watch mode only
+tailwind-watch:
+    uv run python manage.py tailwind watch
 
 # Build production Tailwind CSS
 build-css:

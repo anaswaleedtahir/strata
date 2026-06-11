@@ -49,7 +49,7 @@ Goal: pure mechanical reshape of `config/`. No behavior change. Independent risk
   - `justfile`, `scripts/` if applicable
   - `.github/workflows/`
   - `pyproject.toml` (`[tool.ruff]` excludes if any reference settings paths)
-- Smoke-test: `python manage.py check` + `python manage.py runserver` + `docker compose up` + run existing tests.
+- Smoke-test: `python manage.py check` + `just runserver` + `docker compose up` + run existing tests.
 
 ### PR #1 — shared infrastructure + docs + ADRs
 

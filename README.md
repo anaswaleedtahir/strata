@@ -171,7 +171,9 @@ Property-Hub/
 | `just build` | Install Python dependencies |
 | `just migrate` | Apply Django migrations |
 | `just makemigrations` | Create new Django migrations |
-| `just runserver [port]` | Start Django development server with Tailwind watch mode (default port: 8000) |
+| `just runserver [port]` | Start uvicorn with Tailwind watch mode (default port: 8000) |
+| `just uvicorn [port]` | Start uvicorn only (ASGI + WebSocket support) |
+| `just tailwind-watch` | Start Tailwind watch mode only |
 | `just build-css` | Build production Tailwind CSS |
 | `just up` | Start development services i.e (PostgresDB, Redis, Localstack and Mailhog) with Docker |
 | `just down` | Stop development services |
@@ -206,7 +208,7 @@ The frontend uses Tailwind CSS 4 with DaisyUI for styling, Django Cotton for reu
 
 **Quick Start:**
 ```bash
-just runserver           # Django server plus Tailwind watch mode
+just runserver           # uvicorn plus Tailwind watch mode
 just build-css           # Production Tailwind build
 ```
 

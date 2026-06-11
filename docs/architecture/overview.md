@@ -218,8 +218,8 @@ Browser ← WebSocket → Channels → Redis → Channels → WebSocket → Brow
 
 ### Local Development
 1. Docker Compose for services (PostgreSQL, Redis, Localstack)
-2. Django development server via `python manage.py tailwind runserver`
-3. Tailwind CSS watch mode through `django-tailwind-cli`
+2. Local ASGI server via uvicorn (`just runserver` or `just uvicorn`)
+3. Tailwind CSS watch mode through `django-tailwind-cli` (`just tailwind-watch`)
 4. Hot reload for templates
 
 ### Testing

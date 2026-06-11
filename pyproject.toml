@@ -17,12 +17,12 @@ dependencies = [
     "django-tailwind-cli==4.6.2",
     "django-unfold>=0.81.0",
     "django-widget-tweaks==1.5.1",
-    "daphne==4.2.1",
     "environs[django]==14.6.0",
     "nh3>=0.3.3",
     "pillow==12.2.0",
     "psycopg[binary]==3.3.3",
     "redis[hiredis]>=7.2.0",
+    "uvicorn[standard]==0.49.0",
     "whitenoise==6.11.0",
 ]
 
@@ -38,13 +38,11 @@ dev = [
     "factory-boy>=3.3.0",
     "remote-pdb>=2.1.0",
     "ruff==0.15.2",
-    "twisted[http2,tls]==25.5.0",
     "werkzeug==3.1.6",
 ]
 prod = [
     "django-compressor==4.6.0",
     "gunicorn==25.1.0",
-    "uvicorn[standard]==0.41.0",
 ]
 
 [build-system]

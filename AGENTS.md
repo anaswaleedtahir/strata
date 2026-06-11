@@ -18,7 +18,8 @@ This document provides AI agents with essential context for making informed deci
 - **Django Axes 8.3.1** - [Documentation](https://django-axes.readthedocs.io/) - Brute-force protection
 - **Django Storages 1.14.6** - [Documentation](https://django-storages.readthedocs.io/) - Cloud storage backends
 - **WhiteNoise 6.11.0** - [Documentation](http://whitenoise.evans.io/) - Static file serving
-- **Daphne 4.2.1** - [Documentation](https://github.com/django/daphne) - ASGI server
+- **Uvicorn 0.41.0** - [Documentation](https://www.uvicorn.org/) - ASGI server (local dev)
+- **Gunicorn 25.1.0** - [Documentation](https://docs.gunicorn.org/) - Production process manager with Uvicorn workers
 - **Environs 14.6.0** - [Documentation](https://environs.readthedocs.io/) - Environment variable parsing
 
 ### Frontend
@@ -352,19 +353,18 @@ Open `docs/development/chat-client-test.html` in browser or run programmatically
 - django-cotton==2.7.2 (template components)
 - django-tailwind-cli==4.6.2 (Tailwind CLI integration)
 - pillow==12.1.1 (image processing)
+- uvicorn[standard]==0.41.0 (ASGI server)
 - environs[django]==14.6.0 (env vars)
 - nh3>=0.3.3 (HTML sanitization)
 
 **Dev:**
-- daphne==4.2.1 (ASGI server)
 - django-debug-toolbar==6.2.0
 - django-extensions==4.1
 - ruff==0.15.2 (lint/format)
 - factory-boy>=3.3.0 (test factories)
 
 **Prod:**
-- gunicorn==25.1.0 (WSGI server)
-- uvicorn[standard]==0.41.0 (ASGI server)
+- gunicorn==25.1.0 (process manager with Uvicorn workers)
 - django-compressor==4.6.0
 
 ---

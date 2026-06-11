@@ -53,7 +53,7 @@ Development:
 just runserver
 ```
 
-`just runserver` delegates to `python manage.py tailwind runserver`, which starts Django and Tailwind watch mode together.
+`just runserver` runs uvicorn with `--reload` and `python manage.py tailwind watch` in parallel. Use `just uvicorn` or `just tailwind-watch` to run either process alone.
 
 Production:
 

@@ -22,8 +22,6 @@ ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", [])
 # ============================================================================
 
 INSTALLED_APPS = [
-    # Channels must be before Django apps for proper ASGI support
-    "daphne",
     # Third-party admin theme
     "unfold",
     # Django core apps
@@ -145,16 +143,6 @@ STATICFILES_DIRS = [BASE_DIR / "static"]
 MEDIA_ROOT = BASE_DIR / "media"
 
 # ============================================================================
-# TAILWIND CSS
-# ============================================================================
-
-TAILWIND_CLI_SRC_CSS = "assets/css/input.css"
-TAILWIND_CLI_DIST_CSS = "dist/output.css"
-TAILWIND_CLI_USE_DAISY_UI = True
-TAILWIND_CLI_VERSION = "2.8.3"
-TAILWIND_CLI_AUTOMATIC_MINIFY = True
-
-# ============================================================================
 # MESSAGES FRAMEWORK
 # ============================================================================
 
@@ -222,3 +210,4 @@ from config.settings.axes import *  # noqa: E402, F401, F403
 from config.settings.channels import *  # noqa: E402, F401, F403
 from config.settings.storages import *  # noqa: E402, F401, F403
 from config.settings.unfold import *  # noqa: E402, F401, F403
+from config.settings.tailwind_cli import *  # noqa: E402, F401, F403
