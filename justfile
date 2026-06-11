@@ -8,27 +8,13 @@ up:
 down:
     docker compose -f docker-compose.yml down -v
 
-# Start Django development server with CSS & JS build
+# Start Django development server with Tailwind watch mode
 runserver port="8000":
-    #!/usr/bin/env bash
-    set -euo pipefail
+    uv run python manage.py tailwind runserver {{port}}
 
-    css_pid=""
-
-    cleanup() {
-        if [[ -n "$css_pid" ]]; then
-            kill "$css_pid" 2>/dev/null || true
-            wait "$css_pid" 2>/dev/null || true
-        fi
-    }
-
-    trap cleanup EXIT INT TERM
-
-    npm run build-js
-    npm run build-css &
-    css_pid=$!
-
-    uv run python manage.py runserver {{port}}
+# Build production Tailwind CSS
+build-css:
+    uv run python manage.py tailwind build --force
 
 # Create new Django migrations
 makemigrations:
@@ -41,7 +27,6 @@ migrate:
 # Install Python dependencies
 build:
     uv sync
-    npm install
 
 # Type check with ty (manual run)
 type-check:

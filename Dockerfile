@@ -5,19 +5,18 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential curl \
-    && curl -fsSL https://deb.nodesource.com/setup_lts.x | bash - \
-    && apt-get install -y --no-install-recommends nodejs \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
 # Install dependencies
-COPY pyproject.toml uv.lock package.json package-lock.json ./
-RUN uv sync --frozen --no-dev --group prod && npm ci
+COPY pyproject.toml uv.lock ./
+RUN uv sync --frozen --no-dev --group prod
 
 # Copy app and build
 COPY . .
-RUN npm run build
+RUN DJANGO_SETTINGS_MODULE=config.django.base \
+    uv run python manage.py tailwind build --force
 
 # Collectstatic using base settings (no database/AWS required for build)
 RUN DJANGO_SETTINGS_MODULE=config.django.base \
