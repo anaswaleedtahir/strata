@@ -295,6 +295,7 @@ class ConversationAdmin(admin.ModelAdmin):
         return f"/admin/{app_label}/{model_name}/{quote(obj_id)}/change/"
 
 
+@admin.register(Message)
 class MessageAdmin(admin.ModelAdmin):
     """
     Admin interface for Message model.
