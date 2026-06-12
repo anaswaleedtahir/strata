@@ -17,8 +17,8 @@ AWS_DEFAULT_ACL = "public-read"
 AWS_S3_VERIFY = env.bool("AWS_S3_VERIFY", True)
 AWS_QUERYSTRING_AUTH = False
 
-AWS_MEDIA_BUCKET_NAME = env.str("AWS_MEDIA_BUCKET_NAME", "propertyhub-media")
-AWS_STATIC_BUCKET_NAME = env.str("AWS_STATIC_BUCKET_NAME", "propertyhub-static")
+AWS_MEDIA_BUCKET_NAME = env.str("AWS_MEDIA_BUCKET_NAME", "realmkey-media")
+AWS_STATIC_BUCKET_NAME = env.str("AWS_STATIC_BUCKET_NAME", "realmkey-static")
 
 STORAGES = {
     "default": {

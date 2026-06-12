@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 from apps.shared.validators import validate_password_strength
 
 
-class PropertyHubAccountAdapter(DefaultAccountAdapter):
+class RealmKeyAccountAdapter(DefaultAccountAdapter):
     def clean_password(self, password, user=None):
         default_error = None
         try:

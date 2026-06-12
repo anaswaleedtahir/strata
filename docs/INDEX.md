@@ -1,6 +1,6 @@
 # Documentation Index
 
-Complete index of all Property Hub documentation.
+Complete index of all RealmKey documentation.
 
 ## 📖 Main Documentation
 
@@ -104,4 +104,4 @@ See the [Contributing Guide](./guides/contributing.md) for:
 ---
 
 **Last Updated:** February 2026
-**Maintainers:** Property Hub Team
+**Maintainers:** RealmKey Team

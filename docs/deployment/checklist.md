@@ -36,7 +36,7 @@ docker build \
   --build-arg DATABASE_URL=sqlite:///tmp/build.db \
   --build-arg DEBUG=False \
   --build-arg ALLOWED_HOSTS=localhost \
-  -t property-hub:latest .
+  -t realm-key:latest .
 ```
 
 ### Build Verification
@@ -53,7 +53,7 @@ docker run -p 8000:8000 \
   -e DATABASE_URL=sqlite:///db.sqlite3 \
   -e DEBUG=False \
   -e ALLOWED_HOSTS=localhost \
-  property-hub:latest
+  realm-key:latest
 ```
 
 - [ ] Container starts successfully
@@ -90,11 +90,11 @@ docker run -p 8000:8000 \
 ### Quick Rollback
 ```bash
 # Revert to previous image
-docker pull property-hub:previous-tag
+docker pull realm-key:previous-tag
 docker-compose up -d
 
 # Or use orchestration rollback
-kubectl rollout undo deployment/property-hub
+kubectl rollout undo deployment/realm-key
 ```
 
 ### Database Rollback
@@ -162,13 +162,13 @@ kubectl rollout undo deployment/property-hub
   run: python manage.py collectstatic --noinput
 
 - name: Build Docker Image
-  run: docker build -t property-hub:${{ github.sha }} .
+  run: docker build -t realm-key:${{ github.sha }} .
 
 - name: Run Tests
-  run: docker run property-hub:${{ github.sha }} pytest
+  run: docker run realm-key:${{ github.sha }} pytest
 
 - name: Push to Registry
-  run: docker push property-hub:${{ github.sha }}
+  run: docker push realm-key:${{ github.sha }}
 ```
 
 ### Recommended Tools

@@ -5,11 +5,11 @@
 @source "../../static/js";
 
 @plugin "daisyui" {
-  themes: propertyhub --default;
+  themes: realmkey --default;
 }
 
 @plugin "daisyui/theme" {
-  name: "propertyhub";
+  name: "realmkey";
   default: true;
   prefersdark: false;
   color-scheme: light;

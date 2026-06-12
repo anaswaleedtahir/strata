@@ -2,7 +2,7 @@
 
 ## System Architecture
 
-Property Hub is a modern Django-based real estate management platform with a component-based architecture.
+RealmKey is a modern Django-based real estate management platform with a component-based architecture.
 
 ## Technology Stack
 

@@ -1,6 +1,6 @@
 # Frontend Architecture
 
-Property Hub uses a Django-owned frontend pipeline. Django templates remain the page and layout layer, reusable markup lives in Cotton components, Tailwind CSS is built by `django-tailwind-cli`, and browser libraries that do not need local customization are loaded from pinned CDN URLs with SRI.
+RealmKey uses a Django-owned frontend pipeline. Django templates remain the page and layout layer, reusable markup lives in Cotton components, Tailwind CSS is built by `django-tailwind-cli`, and browser libraries that do not need local customization are loaded from pinned CDN URLs with SRI.
 
 ## Stack
 

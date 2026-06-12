@@ -2,7 +2,7 @@
 
 ## Overview
 
-The `ChatClient` class provides a WebSocket-based client for real-time chat functionality in the PropertyHub application. It handles connection management, message sending/receiving, and automatic reconnection with exponential backoff.
+The `ChatClient` class provides a WebSocket-based client for real-time chat functionality in the RealmKey application. It handles connection management, message sending/receiving, and automatic reconnection with exponential backoff.
 
 ## Features
 

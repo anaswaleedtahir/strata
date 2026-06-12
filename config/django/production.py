@@ -11,8 +11,8 @@ ALLOWED_HOSTS = env.list("ALLOWED_HOSTS")  # noqa: F405
 CSRF_TRUSTED_ORIGINS = env.list(  # noqa: F405
     "CSRF_TRUSTED_ORIGINS",
     [
-        "https://propertyhub.duckdns.org",
-        "http://propertyhub.duckdns.org",
+        "https://realmkey.duckdns.org",
+        "http://realmkey.duckdns.org",
     ],
 )
 
@@ -76,7 +76,7 @@ EMAIL_PORT = env.int("EMAIL_PORT", 587)  # noqa: F405
 EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", True)  # noqa: F405
 EMAIL_HOST_USER = env.str("EMAIL_HOST_USER", "")  # noqa: F405
 EMAIL_HOST_PASSWORD = env.str("EMAIL_HOST_PASSWORD", "")  # noqa: F405
-DEFAULT_FROM_EMAIL = env.str("DEFAULT_FROM_EMAIL", "noreply@propertyhub.com")  # noqa: F405
+DEFAULT_FROM_EMAIL = env.str("DEFAULT_FROM_EMAIL", "noreply@realmkey.com")  # noqa: F405
 
 # ============================================================================
 # ADMIN

@@ -1,5 +1,5 @@
 [project]
-name = "property-hub"
+name = "realm-key"
 version = "0.1.0"
 description = "Django Property Management System"
 requires-python = ">=3.13"

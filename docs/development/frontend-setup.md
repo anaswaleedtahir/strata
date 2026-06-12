@@ -1,6 +1,6 @@
 # Frontend Development Setup
 
-This guide covers day-to-day UI development in Property Hub.
+This guide covers day-to-day UI development in RealmKey.
 
 ## Setup
 

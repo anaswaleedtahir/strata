@@ -1,14 +1,14 @@
-# Contributing to Property Hub
+# Contributing to RealmKey
 
-Thank you for your interest in contributing to Property Hub! This document provides guidelines and instructions for contributing.
+Thank you for your interest in contributing to RealmKey! This document provides guidelines and instructions for contributing.
 
 ## Getting Started
 
 1. **Fork the repository**
 2. **Clone your fork**
    ```bash
-   git clone https://github.com/your-username/Property-Hub.git
-   cd Property-Hub
+   git clone https://github.com/your-username/realm-key.git
+   cd realm-key
    ```
 3. **Set up development environment**
    - Follow the [README.md](../README.md) setup instructions
@@ -446,4 +446,4 @@ If you have questions about contributing:
 3. Open a GitHub Discussion
 4. Ask in project communication channels
 
-Thank you for contributing to Property Hub! 🎉
+Thank you for contributing to RealmKey! 🎉

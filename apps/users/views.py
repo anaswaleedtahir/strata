@@ -43,7 +43,7 @@ class SignupView(HTMXMixin, View):
                 )
                 messages.success(
                     request,
-                    f"Welcome to PropertyHub, {user.first_name}! Your account has been created successfully.",
+                    f"Welcome to RealmKey, {user.first_name}! Your account has been created successfully.",
                 )
                 if self.is_htmx:
                     response = HttpResponse()

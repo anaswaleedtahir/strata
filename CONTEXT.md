@@ -1,4 +1,4 @@
-# Property Hub
+# RealmKey
 
 Server-rendered Django + HTMX real-estate platform. Property listings, owner profiles, real-time chat between buyers and owners. No public REST API; all interaction is through HTML responses and WebSocket events.
 

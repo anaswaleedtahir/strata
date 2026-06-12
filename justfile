@@ -1,4 +1,4 @@
-# Property Hub Development Commands
+# RealmKey Development Commands
 
 # Start development services with Docker
 up:

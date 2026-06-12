@@ -1,6 +1,6 @@
-# Property Hub Documentation
+# RealmKey Documentation
 
-Welcome to the Property Hub documentation. This directory contains all technical documentation for the project.
+Welcome to the RealmKey documentation. This directory contains all technical documentation for the project.
 
 ## 📚 Documentation Structure
 

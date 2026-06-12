@@ -68,7 +68,7 @@ class DjangoIntegrationSettingsTests(SimpleTestCase):
             settings.ACCOUNT_FORMS["signup"], "apps.users.forms.AllauthSignupForm"
         )
         self.assertEqual(
-            settings.ACCOUNT_ADAPTER, "apps.users.adapters.PropertyHubAccountAdapter"
+            settings.ACCOUNT_ADAPTER, "apps.users.adapters.RealmKeyAccountAdapter"
         )
 
     def test_allauth_urls_are_mounted(self):

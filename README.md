@@ -1,4 +1,4 @@
-# Property Hub
+# RealmKey
 
 A modern real-estate property management platform built with Django, featuring a component-based architecture for listing, searching, and managing properties.
 
@@ -48,7 +48,7 @@ Comprehensive documentation is available in the [`docs/`](./docs/) directory:
 ### Project Structure
 
 ```
-Property-Hub/
+realm-key/
 ├── apps/
 │   ├── properties/          # Property management
 │   │   ├── models.py        # Property, PropertyImage models
@@ -124,7 +124,7 @@ Property-Hub/
 1. **Clone the repository**
    ```bash
    git clone <repository-url>
-   cd Property-Hub
+   cd realm-key
    ```
 
 2. **Set up environment variables**
@@ -233,7 +233,7 @@ In Progress
 
 **Quick Deploy:**
 ```bash
-docker build -t property-hub .
+docker build -t realm-key .
 docker-compose -f docker-compose.prod.yml up
 ```
 
