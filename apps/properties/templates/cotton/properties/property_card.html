@@ -1,7 +1,7 @@
 {% load static %}
 <c-vars property />
 
-<div class="card property-card bg-base-100 shadow-soft hover:shadow-large transition-all duration-300 overflow-hidden" data-property-card>
+<div class="card property-card bg-base-100 shadow-soft overflow-hidden" data-property-card>
     <!-- Property Image -->
     <figure class="relative h-48 overflow-hidden">
         {% if property.images.first %}
@@ -9,8 +9,8 @@
                  alt="{{ property.name }}"
                  class="w-full h-full object-cover transition-transform duration-300 hover:scale-105">
         {% else %}
-            <div class="w-full h-full bg-gradient-to-br from-primary-100 to-secondary-100 flex items-center justify-center">
-                <c-ui.icon name="home" classes="h-16 w-16 text-primary-300" />
+            <div class="w-full h-full surface-placeholder flex items-center justify-center">
+                <c-ui.icon name="home" classes="h-16 w-16 text-secondary-400" />
             </div>
         {% endif %}
 
@@ -31,7 +31,7 @@
 
         <!-- Price Badge -->
         <div class="absolute bottom-3 left-3">
-            <span class="badge badge-accent badge-lg font-bold text-white">
+            <span class="badge badge-secondary badge-lg price-tag text-secondary-content">
                 ${{ property.price|floatformat:0 }}
                 {% if property.property_type == 'rent' %}/month{% endif %}
             </span>
@@ -74,7 +74,7 @@
         <div class="flex items-center justify-between">
             <div class="flex items-center space-x-2">
                 <div class="avatar placeholder">
-                    <div class="bg-primary-100 text-primary-600 rounded-full w-8 h-8">
+                    <div class="bg-secondary-100 text-secondary-700 rounded-full w-8 h-8">
                         <span class="text-xs font-semibold">
                             {{ property.user.first_name|first|default:property.user.username|first|upper }}
                         </span>

@@ -14,119 +14,148 @@
   prefersdark: false;
   color-scheme: light;
 
-  --color-primary: #6366f1;
-  --color-primary-content: #ffffff;
-  --color-secondary: #d946ef;
-  --color-secondary-content: #ffffff;
-  --color-accent: #f97316;
-  --color-accent-content: #ffffff;
-  --color-neutral: #64748b;
-  --color-neutral-content: #ffffff;
-  --color-base-100: #ffffff;
-  --color-base-200: #f8fafc;
-  --color-base-300: #f1f5f9;
-  --color-base-content: #1e293b;
-  --color-info: #3b82f6;
-  --color-info-content: #ffffff;
-  --color-success: #10b981;
-  --color-success-content: #ffffff;
-  --color-warning: #f59e0b;
-  --color-warning-content: #1e293b;
-  --color-error: #ef4444;
-  --color-error-content: #ffffff;
+  /* Ink — architectural navy, trust for management */
+  --color-primary: #1b3347;
+  --color-primary-content: #f4f2ee;
 
-  --radius-selector: 0.5rem;
-  --radius-field: 0.5rem;
-  --radius-box: 1rem;
+  /* Brass — aged door hardware, warmth against cool neutrals */
+  --color-secondary: #a67c52;
+  --color-secondary-content: #f4f2ee;
+
+  /* Verdigris — patina accent for discovery actions */
+  --color-accent: #4a8b8c;
+  --color-accent-content: #f4f2ee;
+
+  --color-neutral: #6b7280;
+  --color-neutral-content: #f4f2ee;
+
+  /* Plaster & concrete surfaces */
+  --color-base-100: #f4f2ee;
+  --color-base-200: #ebe8e2;
+  --color-base-300: #e0ddd6;
+  --color-base-content: #2a3139;
+
+  --color-info: #4a8b8c;
+  --color-info-content: #f4f2ee;
+  --color-success: #5c7249;
+  --color-success-content: #f4f2ee;
+  --color-warning: #b8860b;
+  --color-warning-content: #2a3139;
+  --color-error: #c2553b;
+  --color-error-content: #f4f2ee;
+
+  --radius-selector: 0.375rem;
+  --radius-field: 0.375rem;
+  --radius-box: 0.625rem;
   --size-selector: 0.25rem;
   --size-field: 0.25rem;
   --border: 1px;
-  --depth: 1;
+  --depth: 0;
   --noise: 0;
 }
 
 @theme {
-  --color-primary-50: #f0f4ff;
-  --color-primary-100: #e0e7ff;
-  --color-primary-200: #c7d2fe;
-  --color-primary-300: #a5b4fc;
-  --color-primary-400: #818cf8;
-  --color-primary-500: #6366f1;
-  --color-primary-600: #4f46e5;
-  --color-primary-700: #4338ca;
-  --color-primary-800: #3730a3;
-  --color-primary-900: #312e81;
-  --color-primary-950: #1e1b4b;
-  --color-primary-focus: #4f46e5;
+  --color-primary-50: #edf1f4;
+  --color-primary-100: #d5dee6;
+  --color-primary-200: #abbdd0;
+  --color-primary-300: #7896af;
+  --color-primary-400: #4e7390;
+  --color-primary-500: #345871;
+  --color-primary-600: #1b3347;
+  --color-primary-700: #162839;
+  --color-primary-800: #111e2c;
+  --color-primary-900: #0c151f;
+  --color-primary-950: #070d13;
+  --color-primary-focus: #162839;
 
-  --color-secondary-50: #fdf4ff;
-  --color-secondary-100: #fae8ff;
-  --color-secondary-200: #f5d0fe;
-  --color-secondary-300: #f0abfc;
-  --color-secondary-400: #e879f9;
-  --color-secondary-500: #d946ef;
-  --color-secondary-600: #c026d3;
-  --color-secondary-700: #a21caf;
-  --color-secondary-800: #86198f;
-  --color-secondary-900: #701a75;
-  --color-secondary-950: #4a044e;
-  --color-secondary-focus: #c026d3;
+  --color-secondary-50: #f7f2ec;
+  --color-secondary-100: #ede0d0;
+  --color-secondary-200: #dcc2a5;
+  --color-secondary-300: #cba47a;
+  --color-secondary-400: #b89066;
+  --color-secondary-500: #a67c52;
+  --color-secondary-600: #8a6644;
+  --color-secondary-700: #6e5136;
+  --color-secondary-800: #523d28;
+  --color-secondary-900: #36281a;
+  --color-secondary-950: #1a130c;
+  --color-secondary-focus: #8a6644;
 
-  --color-accent-50: #fff7ed;
-  --color-accent-100: #ffedd5;
-  --color-accent-200: #fed7aa;
-  --color-accent-300: #fdba74;
-  --color-accent-400: #fb923c;
-  --color-accent-500: #f97316;
-  --color-accent-600: #ea580c;
-  --color-accent-700: #c2410c;
-  --color-accent-800: #9a3412;
-  --color-accent-900: #7c2d12;
-  --color-accent-950: #431407;
-  --color-accent-focus: #ea580c;
+  --color-accent-50: #eef5f5;
+  --color-accent-100: #d5e8e8;
+  --color-accent-200: #abd1d2;
+  --color-accent-300: #81bab9;
+  --color-accent-400: #66a3a4;
+  --color-accent-500: #4a8b8c;
+  --color-accent-600: #3d7475;
+  --color-accent-700: #305d5e;
+  --color-accent-800: #234647;
+  --color-accent-900: #162f30;
+  --color-accent-950: #0a1819;
+  --color-accent-focus: #3d7475;
 
-  --color-neutral-50: #f8fafc;
-  --color-neutral-100: #f1f5f9;
-  --color-neutral-200: #e2e8f0;
-  --color-neutral-300: #cbd5e1;
-  --color-neutral-400: #94a3b8;
-  --color-neutral-500: #64748b;
-  --color-neutral-600: #475569;
-  --color-neutral-700: #334155;
-  --color-neutral-800: #1e293b;
-  --color-neutral-900: #0f172a;
-  --color-neutral-950: #020617;
-  --color-neutral-focus: #475569;
+  --color-neutral-50: #f4f2ee;
+  --color-neutral-100: #ebe8e2;
+  --color-neutral-200: #e0ddd6;
+  --color-neutral-300: #cdc9c0;
+  --color-neutral-400: #a8a399;
+  --color-neutral-500: #6b7280;
+  --color-neutral-600: #565b63;
+  --color-neutral-700: #42464d;
+  --color-neutral-800: #2a3139;
+  --color-neutral-900: #1c2127;
+  --color-neutral-950: #0e1114;
+  --color-neutral-focus: #42464d;
 
-  --font-sans: Inter, system-ui, sans-serif;
-  --font-display: Poppins, system-ui, sans-serif;
+  --font-sans: "Figtree", system-ui, sans-serif;
+  --font-display: "Newsreader", Georgia, serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
 
-  --radius-xl: 1rem;
-  --radius-2xl: 1.5rem;
-  --radius-3xl: 2rem;
+  --radius-xl: 0.75rem;
+  --radius-2xl: 1rem;
+  --radius-3xl: 1.25rem;
 
-  --shadow-soft: 0 2px 15px -3px rgb(0 0 0 / 0.07), 0 10px 20px -2px rgb(0 0 0 / 0.04);
-  --shadow-medium: 0 4px 25px -5px rgb(0 0 0 / 0.1), 0 10px 10px -5px rgb(0 0 0 / 0.04);
-  --shadow-large: 0 10px 50px -12px rgb(0 0 0 / 0.25);
+  --shadow-soft: 0 1px 3px rgb(42 49 57 / 0.06), 0 4px 12px rgb(42 49 57 / 0.04);
+  --shadow-medium: 0 2px 8px rgb(42 49 57 / 0.08), 0 8px 24px rgb(42 49 57 / 0.06);
+  --shadow-large: 0 4px 16px rgb(42 49 57 / 0.1), 0 16px 48px rgb(42 49 57 / 0.08);
 }
 
 @layer components {
   .property-card {
-    @apply transition-all duration-300 hover:shadow-large hover:-translate-y-1;
+    @apply border-l-[3px] border-secondary-500 transition-all duration-300 hover:shadow-medium;
   }
 
   .nav-link-active {
-    @apply bg-white/20 text-white rounded-lg;
+    @apply text-primary bg-primary/5 border-b-2 border-secondary-500 rounded-none;
+  }
+
+  .hero-survey {
+    background-color: var(--color-base-100);
+    background-image:
+      linear-gradient(rgb(27 51 71 / 0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(27 51 71 / 0.04) 1px, transparent 1px);
+    background-size: 48px 48px;
+  }
+
+  .surface-placeholder {
+    @apply bg-base-200;
+    background-image:
+      linear-gradient(135deg, rgb(166 124 82 / 0.06) 25%, transparent 25%),
+      linear-gradient(225deg, rgb(166 124 82 / 0.06) 25%, transparent 25%),
+      linear-gradient(45deg, rgb(166 124 82 / 0.06) 25%, transparent 25%),
+      linear-gradient(315deg, rgb(166 124 82 / 0.06) 25%, rgb(235 232 226) 25%);
+    background-size: 16px 16px;
+    background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+  }
+
+  .price-tag {
+    @apply font-mono text-sm font-semibold tracking-tight;
   }
 }
 
 @layer utilities {
   .text-gradient {
     @apply bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent;
-  }
-
-  .bg-gradient-airbnb {
-    @apply bg-gradient-to-br from-primary-500 via-primary-600 to-secondary-600;
   }
 }
 
@@ -161,4 +190,14 @@
 
 [x-cloak] {
   display: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .property-card {
+    transition: none;
+  }
+
+  .animate-slide-in-right {
+    animation: none;
+  }
 }

@@ -14,36 +14,37 @@
 {% block main_class %}p-0 m-0{% endblock %}
 
 {% block content %}
-<!-- Hero Section - Full Width -->
-<div class="bg-gradient-airbnb text-white mb-8 ">
-    <div class="container mx-auto py-20 px-4 text-center ">
-        <h1 class="text-4xl md:text-5xl font-display font-bold mb-4">
+<!-- Hero Section -->
+<div class="hero-survey border-b border-base-300 mb-8">
+    <div class="container mx-auto py-16 md:py-20 px-4 text-center">
+        <p class="text-secondary-600 font-medium tracking-wide uppercase text-sm mb-3">Property marketplace</p>
+        <h1 class="text-4xl md:text-5xl font-display font-bold text-primary mb-4">
             {% if show_my_properties %}
                 My Properties
             {% elif show_favorites %}
                 Your Favorites
             {% else %}
-                Find Your Perfect Property
+                Find your next place
             {% endif %}
         </h1>
-        <p class="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
+        <p class="text-lg text-base-content/70 mb-8 max-w-xl mx-auto">
             {% if show_my_properties %}
                 Manage and track your property listings
             {% elif show_favorites %}
                 Properties you've saved for later
             {% else %}
-                Discover amazing properties in your desired location
+                Browse listings from owners and managers in your area
             {% endif %}
         </p>
 
         {% if not show_my_properties and not show_favorites %}
             <!-- Search Bar -->
             <div class="max-w-2xl mx-auto">
-                <div class="join w-full">
+                <div class="join w-full shadow-soft">
                     <input type="text"
-                           placeholder="Search by location, property type..."
-                           class="input input-bordered join-item flex-1 text-base-content">
-                    <button class="btn btn-accent join-item">
+                           placeholder="City, neighborhood, or property type…"
+                           class="input input-bordered join-item flex-1 bg-base-100">
+                    <button class="btn btn-primary join-item">
                         <c-ui.icon name="search" />
                         Search
                     </button>

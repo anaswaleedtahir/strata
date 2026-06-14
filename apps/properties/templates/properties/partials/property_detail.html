@@ -17,8 +17,8 @@
                 {% endfor %}
             </div>
         {% else %}
-            <div class="lg:col-span-2 h-96 bg-gradient-to-br from-primary-100 to-secondary-100 rounded-2xl flex items-center justify-center">
-                <c-ui.icon name="home" classes="h-24 w-24 text-primary-300" />
+            <div class="lg:col-span-2 h-96 surface-placeholder rounded-xl flex items-center justify-center">
+                <c-ui.icon name="home" classes="h-24 w-24 text-secondary-400" />
             </div>
         {% endif %}
     </div>
@@ -65,7 +65,7 @@
                     <h3 class="card-title text-lg mb-4">Contact Owner</h3>
                     <div class="flex items-center space-x-3 mb-4">
                         <div class="avatar placeholder">
-                            <div class="bg-primary-100 text-primary-600 rounded-full w-12 h-12">
+                            <div class="bg-secondary-100 text-secondary-700 rounded-full w-12 h-12">
                                 <span class="text-lg font-semibold">
                                     {{ property.user.first_name|first|default:property.user.username|first|upper }}
                                 </span>

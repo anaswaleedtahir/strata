@@ -1,17 +1,17 @@
 {% extends '_layouts/base.html' %}
 
-{% block main_class %}min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 to-secondary-50 px-4{% endblock %}
+{% block main_class %}min-h-screen flex items-center justify-center bg-base-200 px-4{% endblock %}
 
 {% block content %}
 <div class="w-full max-w-md">
-    <div class="card bg-base-100 shadow-large">
+    <div class="card bg-base-100 shadow-medium border border-base-300">
         <div class="card-body p-8">
             <!-- Logo -->
             <div class="text-center mb-8">
-                <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-airbnb rounded-2xl mb-4">
-                    <c-ui.icon name="home" variant="solid" classes="h-8 w-8 text-white" />
+                <div class="inline-flex items-center justify-center w-16 h-16 bg-primary rounded-xl mb-4">
+                    <c-ui.icon name="home" variant="solid" classes="h-8 w-8 text-base-100" />
                 </div>
-                <h1 class="text-2xl font-display font-bold text-base-content">
+                <h1 class="text-2xl font-display font-bold text-primary">
                     {% block auth_title %}RealmKey{% endblock %}
                 </h1>
                 <p class="text-base-content/60 mt-2">

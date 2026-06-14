@@ -1,6 +1,6 @@
 {% load static %}
 
-<nav class="navbar bg-gradient-airbnb text-primary-content shadow-large sticky top-0 z-50">
+<nav class="navbar bg-base-100 border-b border-base-300 text-base-content shadow-soft sticky top-0 z-50">
     <div class="container mx-auto flex justify-between items-center relative">
         <!-- Left: Logo and Mobile Menu -->
         <div class="flex items-center">
@@ -45,8 +45,8 @@
             </div>
 
             <!-- Logo -->
-            <a href="{% url 'properties:list' %}" class="btn btn-ghost text-xl font-display font-bold">
-                <c-ui.icon name="home" variant="solid" classes="h-8 w-8 mr-2" />
+            <a href="{% url 'properties:list' %}" class="btn btn-ghost text-xl font-display font-bold text-primary">
+                <c-ui.icon name="home" variant="solid" classes="h-7 w-7 mr-2 text-secondary-600" />
                 RealmKey
             </a>
         </div>
@@ -83,8 +83,8 @@
             {% if user.is_authenticated %}
                 <div class="dropdown dropdown-end">
                     <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
-                        <div class="w-10 rounded-full bg-white/20 flex items-center justify-center">
-                            <span class="text-white font-semibold">
+                        <div class="w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                            <span class="text-primary font-semibold">
                                 {{ user.email|slice:":1"|upper }}
                             </span>
                         </div>
