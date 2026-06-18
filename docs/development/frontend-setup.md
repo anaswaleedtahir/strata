@@ -1,6 +1,6 @@
 # Frontend Development Setup
 
-This guide covers day-to-day UI development in RealmKey.
+This guide covers day-to-day UI development in Strata.
 
 ## Setup
 

@@ -3,11 +3,11 @@
 
 {% block title %}
     {% if show_my_properties %}
-        My Properties - RealmKey
+        My Properties - Strata
     {% elif show_favorites %}
-        Favorites - RealmKey
+        Favorites - Strata
     {% else %}
-        Properties - RealmKey
+        Properties - Strata
     {% endif %}
 {% endblock %}
 
@@ -118,7 +118,7 @@
         </div>
     {% endif %}
 
-    <!-- Properties Grid -->
+    <!-- Properties -->
     {% include 'properties/partials/property_grid.html' with properties=properties page_obj=page_obj %}
 </div>
 

@@ -3,15 +3,15 @@ services:
     image: postgres:17-alpine
     container_name: db
     environment:
-      POSTGRES_USER: realmkey
-      POSTGRES_PASSWORD: realmkey
-      POSTGRES_DB: realmkey
+      POSTGRES_USER: strata
+      POSTGRES_PASSWORD: strata
+      POSTGRES_DB: strata
     volumes:
       - pgdata:/var/lib/postgresql/data
     ports:
       - "5433:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U realmkey"]
+      test: ["CMD-SHELL", "pg_isready -U strata"]
       interval: 10s
       timeout: 5s
       retries: 5

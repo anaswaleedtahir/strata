@@ -1,6 +1,6 @@
-# RealmKey Documentation
+# Strata Documentation
 
-Welcome to the RealmKey documentation. This directory contains all technical documentation for the project.
+Welcome to the Strata documentation. This directory contains all technical documentation for the project.
 
 ## 📚 Documentation Structure
 

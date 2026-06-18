@@ -11,7 +11,7 @@ ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", ["localhost", "127.0.0.1"])  # noqa: F
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:8000",
     "http://127.0.0.1:8000",
-    "https://realmkey.loca.lt",
+    "https://strata.loca.lt",
 ]
 
 # ============================================================================
@@ -20,7 +20,6 @@ CSRF_TRUSTED_ORIGINS = [
 
 INSTALLED_APPS += [  # noqa: F405
     "debug_toolbar",
-    "django_extensions",
 ]
 
 MIDDLEWARE.insert(  # noqa: F405

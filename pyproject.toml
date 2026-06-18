@@ -1,5 +1,5 @@
 [project]
-name = "realm-key"
+name = "strata"
 version = "0.1.0"
 description = "Django Property Management System"
 requires-python = ">=3.13"

@@ -2,7 +2,7 @@
 
 ## System Architecture
 
-RealmKey is a modern Django-based real estate management platform with a component-based architecture.
+Strata is a modern Django-based real estate management platform with a component-based architecture.
 
 ## Technology Stack
 

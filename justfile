@@ -1,4 +1,4 @@
-# RealmKey Development Commands
+# Strata Development Commands
 
 # Start development services with Docker
 up:
@@ -35,6 +35,10 @@ makemigrations:
 # Apply Django migrations
 migrate:
     uv run python manage.py migrate
+
+# Seed local development data
+seed *args:
+    uv run python manage.py seed_local {{args}}
 
 # Install Python dependencies
 build:

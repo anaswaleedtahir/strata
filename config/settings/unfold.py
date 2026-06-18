@@ -1,8 +1,8 @@
 from django.templatetags.static import static
 
 UNFOLD = {
-    "SITE_TITLE": "RealmKey Admin",
-    "SITE_HEADER": "RealmKey",
+    "SITE_TITLE": "Strata Admin",
+    "SITE_HEADER": "Strata",
     "SHOW_HISTORY": True,
     "SHOW_VIEW_ON_SITE": True,
     "SITE_FAVICONS": [
