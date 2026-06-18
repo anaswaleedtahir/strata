@@ -1,17 +1,17 @@
 import random
-from io import BytesIO
 from decimal import Decimal
+from io import BytesIO
 
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
-from PIL import Image, ImageDraw
 
 try:
+    from PIL import Image, ImageDraw
     from faker import Faker
-except ImportError as exc:  # pragma: no cover - exercised only without dev deps
-    raise CommandError(
+except ImportError as exc:  # pragma: no cover - dependency guard
+    raise ImportError(
         "The seed_local command requires dev dependencies. "
         "Install them with `uv sync --group dev`."
     ) from exc
@@ -30,22 +30,27 @@ from apps.users.services import user_create
 User = get_user_model()
 
 SEED_EMAIL_DOMAIN = "strata.local"
-DEFAULT_PASSWORD = "RealmPass1!"
+SEED_EMAIL_SUFFIX = f"@{SEED_EMAIL_DOMAIN}"
+DEFAULT_PASSWORD = "StrataPass1!"
 PROPERTY_TYPES = ("House", "Plot")
 IMAGE_PALETTES = (
-    ((235, 238, 230), (90, 118, 88), (189, 171, 138)),
-    ((229, 235, 240), (61, 86, 107), (180, 156, 121)),
-    ((237, 232, 224), (124, 86, 66), (75, 104, 111)),
-    ((228, 237, 233), (70, 101, 82), (194, 151, 95)),
+    ((228, 217, 201), (125, 99, 84), (181, 154, 132)),
+    ((209, 224, 232), (88, 111, 125), (146, 167, 178)),
+    ((223, 218, 200), (92, 96, 80), (155, 160, 134)),
+    ((232, 212, 196), (132, 94, 76), (195, 150, 125)),
 )
 CHAT_SNIPPETS = (
     "Hi, is this property still available?",
     "Yes, it is available. Would you like to schedule a visit?",
-    "Could you share more details about the neighborhood?",
-    "The area is quiet and close to schools, shops, and public transport.",
-    "Is the price negotiable?",
-    "There is some room for negotiation after a viewing.",
+    "That sounds good. Is there any flexibility on the price?",
+    "There may be some room depending on timing and payment terms.",
+    "Great, thanks. Can you share more details about the neighborhood?",
+    "Absolutely. It is a quiet area with easy access to schools and shops.",
 )
+
+
+def seeded_user_queryset():
+    return User.objects.filter(email__endswith=SEED_EMAIL_SUFFIX)
 
 
 class Command(BaseCommand):
@@ -102,18 +107,17 @@ class Command(BaseCommand):
         parser.add_argument(
             "--reset",
             action="store_true",
-            help=f"Delete existing @{SEED_EMAIL_DOMAIN} seed users before seeding.",
+            help=f"Delete existing {SEED_EMAIL_SUFFIX} seed users before seeding.",
         )
         parser.add_argument(
             "--delete",
             action="store_true",
-            help=f"Delete existing @{SEED_EMAIL_DOMAIN} seed users and exit.",
+            help=f"Delete existing {SEED_EMAIL_SUFFIX} seed users and exit.",
         )
 
     @transaction.atomic
     def handle(self, *args, **options):
         self._validate_counts(options)
-
         random.seed(options["random_seed"])
         fake = Faker()
         Faker.seed(options["random_seed"])
@@ -131,7 +135,7 @@ class Command(BaseCommand):
             return
 
         admin = self._ensure_user(
-            email=f"admin@{SEED_EMAIL_DOMAIN}",
+            email=f"admin{SEED_EMAIL_SUFFIX}",
             first_name="Strata",
             last_name="Admin",
             password=options["password"],
@@ -167,37 +171,29 @@ class Command(BaseCommand):
                 "Seeded local data: "
                 f"users={len(users) + 1}, "
                 f"properties={len(properties)}, "
-                f"favorites={Favorite.objects.filter(user__email__endswith=SEED_EMAIL_DOMAIN).count()} "
-                f"({favorites_created} new), "
+                f"favorites={Favorite.objects.filter(user__email__endswith=SEED_EMAIL_SUFFIX).count()} "
+                f"(created {favorites_created}), "
                 f"conversations={len(conversations)}, "
-                f"messages={messages_created} new, "
-                f"images={sum(prop.images.count() for prop in properties)}."
+                f"messages={Message.objects.filter(conversation__in=conversations).count()} "
+                f"(created {messages_created})"
             )
-        )
-        self.stdout.write(
-            f"Demo login: admin@{SEED_EMAIL_DOMAIN} / {options['password']}"
         )
 
     def _validate_counts(self, options):
-        for name in (
+        count_options = (
             "users",
             "properties",
             "favorites",
             "conversations",
             "messages",
             "images",
-        ):
-            if options[name] < 0:
-                raise CommandError(f"--{name} must be greater than or equal to 0.")
-        if options["reset"] and options["delete"]:
-            raise CommandError("Use either --reset or --delete, not both.")
-        if options["properties"] > 0 and options["users"] == 0:
-            raise CommandError("--properties requires at least one seeded user.")
-        if options["conversations"] > 0 and options["users"] < 2:
-            raise CommandError("--conversations requires at least two seeded users.")
+        )
+        for option_name in count_options:
+            if options[option_name] < 0:
+                raise CommandError(f"--{option_name.replace('_', '-')} must be >= 0.")
 
     def _reset_seed_data(self):
-        queryset = User.objects.filter(email__endswith=SEED_EMAIL_DOMAIN)
+        queryset = seeded_user_queryset()
         count = queryset.count()
         queryset.delete()
         return count
@@ -205,7 +201,7 @@ class Command(BaseCommand):
     def _ensure_users(self, *, count, password, fake):
         return [
             self._ensure_user(
-                email=f"user{index}@{SEED_EMAIL_DOMAIN}",
+                email=f"user{index}{SEED_EMAIL_SUFFIX}",
                 first_name=fake.first_name(),
                 last_name=fake.last_name(),
                 password=password,
@@ -214,7 +210,13 @@ class Command(BaseCommand):
         ]
 
     def _ensure_user(
-        self, *, email, first_name, last_name, password, is_superuser=False
+        self,
+        *,
+        email,
+        first_name,
+        last_name,
+        password,
+        is_superuser=False,
     ):
         user = User.objects.filter(email=email).first()
         if user is None:
@@ -240,10 +242,11 @@ class Command(BaseCommand):
     def _ensure_properties(self, *, count, owners, fake):
         properties = list(
             Property.objects.filter(
-                user__email__endswith=SEED_EMAIL_DOMAIN,
+                user__email__endswith=SEED_EMAIL_SUFFIX,
                 name__startswith="Seed Property ",
             ).order_by("id")[:count]
         )
+
         for index in range(len(properties) + 1, count + 1):
             owner = owners[(index - 1) % len(owners)]
             property_type = random.choice(PROPERTY_TYPES)
@@ -268,8 +271,10 @@ class Command(BaseCommand):
                 "is_published": random.random() > 0.15,
             }
             images = [
-                self._generate_property_image(property_index=index, image_index=image)
-                for image in range(1, self._images_per_property + 1)
+                self._generate_property_image(
+                    property_index=index, image_index=image_index
+                )
+                for image_index in range(1, self._images_per_property + 1)
             ]
             try:
                 properties.append(
@@ -277,41 +282,34 @@ class Command(BaseCommand):
                 )
             except ApplicationError as exc:
                 raise CommandError(exc.message) from exc
+
         for property_obj in properties:
             self._ensure_property_images(property_obj=property_obj)
+
         return properties
 
     def _ensure_property_images(self, *, property_obj):
-        existing_count = property_obj.images.count()
-        for image_index in range(existing_count + 1, self._images_per_property + 1):
+        missing_images = max(0, self._images_per_property - property_obj.images.count())
+        for offset in range(1, missing_images + 1):
+            image = self._generate_property_image(
+                property_index=property_obj.id,
+                image_index=property_obj.images.count() + offset,
+            )
             property_image_add(
                 property_obj=property_obj,
-                image_file=self._generate_property_image(
-                    property_index=property_obj.id,
-                    image_index=image_index,
-                ),
-                is_primary=(existing_count == 0 and image_index == 1),
+                image_file=image,
+                is_primary=(property_obj.images.count() == 0),
             )
 
     def _generate_property_image(self, *, property_index, image_index):
         width, height = 1200, 800
-        background, accent, secondary = IMAGE_PALETTES[
-            (property_index + image_index) % len(IMAGE_PALETTES)
-        ]
-        image = Image.new("RGB", (width, height), background)
+        background, secondary, accent = random.choice(IMAGE_PALETTES)
+        image = Image.new("RGB", (width, height), color=background)
         draw = ImageDraw.Draw(image)
+        horizon = 430
 
-        horizon = height // 2 + random.randint(-45, 45)
-        draw.rectangle((0, horizon, width, height), fill=(214, 218, 204))
         draw.rectangle((0, 0, width, horizon), fill=background)
-        draw.polygon(
-            (
-                (220, horizon),
-                (600, 180),
-                (980, horizon),
-            ),
-            fill=accent,
-        )
+        draw.polygon(((220, horizon), (600, 180), (980, horizon)), fill=accent)
         draw.rectangle((315, horizon - 20, 885, 625), fill=(246, 242, 232))
         draw.rectangle((395, 420, 520, 625), fill=secondary)
         draw.rectangle((610, 410, 795, 525), fill=(178, 204, 216))
@@ -335,7 +333,7 @@ class Command(BaseCommand):
         attempts = 0
         max_attempts = max(count * 10, 25)
         while (
-            Favorite.objects.filter(user__email__endswith=SEED_EMAIL_DOMAIN).count()
+            Favorite.objects.filter(user__email__endswith=SEED_EMAIL_SUFFIX).count()
             < count
             and attempts < max_attempts
         ):
@@ -356,8 +354,8 @@ class Command(BaseCommand):
 
         conversations = list(
             Conversation.objects.filter(
-                participant_one__email__endswith=SEED_EMAIL_DOMAIN,
-                participant_two__email__endswith=SEED_EMAIL_DOMAIN,
+                participant_one__email__endswith=SEED_EMAIL_SUFFIX,
+                participant_two__email__endswith=SEED_EMAIL_SUFFIX,
             ).order_by("id")[:count]
         )
         attempts = 0
@@ -382,7 +380,10 @@ class Command(BaseCommand):
         for conversation in conversations:
             existing_count = conversation.messages.count()
             missing_count = max(0, messages_per_conversation - existing_count)
-            participants = (conversation.participant_one, conversation.participant_two)
+            participants = (
+                conversation.participant_one,
+                conversation.participant_two,
+            )
             for index in range(missing_count):
                 sender = participants[(existing_count + index) % 2]
                 content = CHAT_SNIPPETS[(existing_count + index) % len(CHAT_SNIPPETS)]
@@ -392,7 +393,9 @@ class Command(BaseCommand):
                     content=content,
                 )
                 created += 1
+
             Message.objects.filter(conversation=conversation).exclude(
                 sender=conversation.participant_two
             ).update(is_read=True)
+
         return created

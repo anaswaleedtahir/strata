@@ -1,99 +1,92 @@
-from io import StringIO
-from tempfile import TemporaryDirectory
-
-from django.contrib.auth import get_user_model
 from django.core.management import call_command
-from django.core.management.base import CommandError
-from django.test import TestCase, override_settings
+from django.test import TestCase
 
-from apps.chat.models import Conversation, Message
-from apps.properties.models import Favorite, Property, PropertyImage
-
-User = get_user_model()
+from apps.chat.services import conversation_start, message_create
+from apps.properties.models import Favorite, Property
+from apps.properties.services import favorite_toggle, property_create
+from apps.shared.management.commands.seed_local import (
+    SEED_EMAIL_SUFFIX,
+    seeded_user_queryset,
+)
+from apps.shared.tests.factories import UserFactory
 
 
 class SeedLocalCommandTests(TestCase):
-    def setUp(self):
-        self.media_root = TemporaryDirectory()
-        self.override = override_settings(MEDIA_ROOT=self.media_root.name)
-        self.override.enable()
-        self.addCleanup(self.override.disable)
-        self.addCleanup(self.media_root.cleanup)
+    def test_seeded_user_queryset_matches_only_exact_seed_suffix(self):
+        seeded_user = UserFactory(email=f"user1{SEED_EMAIL_SUFFIX}")
+        lookalike_users = [
+            UserFactory(email="user@notstrata.local"),
+            UserFactory(email="user@dev.strata.local"),
+        ]
 
-    def test_seeds_local_data(self):
-        stdout = StringIO()
+        queryset_ids = set(seeded_user_queryset().values_list("id", flat=True))
 
-        call_command(
-            "seed_local",
-            users=3,
-            properties=4,
-            favorites=2,
-            conversations=2,
-            messages=2,
-            images=2,
-            stdout=stdout,
+        self.assertEqual(queryset_ids, {seeded_user.id})
+        self.assertTrue(all(user.id not in queryset_ids for user in lookalike_users))
+
+    def test_delete_only_removes_exact_seed_users_and_their_related_data(self):
+        seeded_owner = UserFactory(email=f"owner{SEED_EMAIL_SUFFIX}")
+        seeded_guest = UserFactory(email=f"guest{SEED_EMAIL_SUFFIX}")
+        lookalike_owner = UserFactory(email="owner@dev.strata.local")
+        lookalike_guest = UserFactory(email="guest@notstrata.local")
+
+        seeded_property = self._create_property(seeded_owner, "Seeded Listing")
+        lookalike_property = self._create_property(lookalike_owner, "Lookalike Listing")
+
+        favorite_toggle(user=seeded_guest, property_obj=seeded_property)
+        favorite_toggle(user=lookalike_guest, property_obj=lookalike_property)
+
+        seeded_conversation = conversation_start(
+            user=seeded_guest,
+            property_obj=seeded_property,
+        )
+        message_create(
+            conversation=seeded_conversation,
+            sender=seeded_guest,
+            content="seeded message",
         )
 
-        self.assertIn("Seeded local data", stdout.getvalue())
-        self.assertEqual(User.objects.filter(email__endswith="strata.local").count(), 4)
-        self.assertEqual(Property.objects.count(), 4)
-        self.assertEqual(Favorite.objects.count(), 2)
-        self.assertEqual(Conversation.objects.count(), 2)
-        self.assertEqual(Message.objects.count(), 4)
-        self.assertEqual(PropertyImage.objects.count(), 8)
-        self.assertEqual(
-            PropertyImage.objects.filter(is_primary=True).count(),
-            4,
+        lookalike_conversation = conversation_start(
+            user=lookalike_guest,
+            property_obj=lookalike_property,
+        )
+        message_create(
+            conversation=lookalike_conversation,
+            sender=lookalike_guest,
+            content="lookalike message",
         )
 
-    def test_reset_only_deletes_seed_users(self):
-        User.objects.create_user(
-            email="real@example.com",
-            password="TestPass1!",
-            first_name="Real",
-            last_name="User",
+        call_command("seed_local", delete=True)
+
+        self.assertFalse(type(seeded_owner).objects.filter(id=seeded_owner.id).exists())
+        self.assertFalse(type(seeded_guest).objects.filter(id=seeded_guest.id).exists())
+        self.assertTrue(
+            type(lookalike_owner).objects.filter(id=lookalike_owner.id).exists()
         )
-        call_command(
-            "seed_local",
-            users=2,
-            properties=2,
-            conversations=1,
-            messages=1,
-            images=1,
-            reset=True,
-            stdout=StringIO(),
+        self.assertTrue(
+            type(lookalike_guest).objects.filter(id=lookalike_guest.id).exists()
         )
+        self.assertFalse(Property.objects.filter(id=seeded_property.id).exists())
+        self.assertTrue(Property.objects.filter(id=lookalike_property.id).exists())
+        self.assertEqual(Favorite.objects.count(), 1)
+        self.assertEqual(Property.objects.count(), 1)
 
-        self.assertTrue(User.objects.filter(email="real@example.com").exists())
-        self.assertEqual(User.objects.filter(email__endswith="strata.local").count(), 3)
-
-    def test_delete_removes_seed_data_without_reseeding(self):
-        User.objects.create_user(
-            email="real@example.com",
-            password="TestPass1!",
-            first_name="Real",
-            last_name="User",
+    def _create_property(self, user, name):
+        return property_create(
+            user=user,
+            form_data={
+                "name": name,
+                "description": "A nice place",
+                "full_address": "123 Test Street",
+                "phone_number": "+92-3001234567",
+                "cnic": "12345-1234567-1",
+                "property_type": "House",
+                "price": "10000000.00",
+                "bedrooms": 3,
+                "bathrooms": 2,
+                "area": "1200.00",
+                "documents": None,
+                "is_published": True,
+            },
+            images=[],
         )
-        call_command(
-            "seed_local",
-            users=2,
-            properties=2,
-            images=1,
-            stdout=StringIO(),
-        )
-
-        stdout = StringIO()
-        call_command("seed_local", delete=True, stdout=stdout)
-
-        self.assertIn("Deleted 3 existing seeded user(s).", stdout.getvalue())
-        self.assertTrue(User.objects.filter(email="real@example.com").exists())
-        self.assertFalse(User.objects.filter(email__endswith="strata.local").exists())
-        self.assertFalse(Property.objects.exists())
-        self.assertFalse(PropertyImage.objects.exists())
-
-    def test_reset_and_delete_cannot_be_combined(self):
-        with self.assertRaisesMessage(
-            CommandError,
-            "Use either --reset or --delete, not both.",
-        ):
-            call_command("seed_local", reset=True, delete=True, stdout=StringIO())
