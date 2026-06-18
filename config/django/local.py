@@ -20,7 +20,6 @@ CSRF_TRUSTED_ORIGINS = [
 
 INSTALLED_APPS += [  # noqa: F405
     "debug_toolbar",
-    "django_extensions",
 ]
 
 MIDDLEWARE.insert(  # noqa: F405

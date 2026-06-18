@@ -36,6 +36,10 @@ makemigrations:
 migrate:
     uv run python manage.py migrate
 
+# Seed local development data
+seed *args:
+    uv run python manage.py seed_local {{args}}
+
 # Install Python dependencies
 build:
     uv sync
