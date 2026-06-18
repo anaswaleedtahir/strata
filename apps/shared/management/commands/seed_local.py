@@ -29,7 +29,7 @@ from apps.users.services import user_create
 
 User = get_user_model()
 
-SEED_EMAIL_DOMAIN = "realmkey.local"
+SEED_EMAIL_DOMAIN = "strata.local"
 DEFAULT_PASSWORD = "RealmPass1!"
 PROPERTY_TYPES = ("House", "Plot")
 IMAGE_PALETTES = (
@@ -49,7 +49,7 @@ CHAT_SNIPPETS = (
 
 
 class Command(BaseCommand):
-    help = "Seed local development data for RealmKey."
+    help = "Seed local development data for Strata."
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -132,7 +132,7 @@ class Command(BaseCommand):
 
         admin = self._ensure_user(
             email=f"admin@{SEED_EMAIL_DOMAIN}",
-            first_name="RealmKey",
+            first_name="Strata",
             last_name="Admin",
             password=options["password"],
             is_superuser=True,

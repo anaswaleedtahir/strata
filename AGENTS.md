@@ -1,6 +1,6 @@
-# RealmKey - Agent Guide
+# Strata - Agent Guide
 
-This document provides AI agents with essential context for making informed decisions when working on the RealmKey codebase. It includes technology stack documentation, implementation patterns, and references to detailed project documentation.
+This document provides AI agents with essential context for making informed decisions when working on the Strata codebase. It includes technology stack documentation, implementation patterns, and references to detailed project documentation.
 
 ---
 
@@ -63,7 +63,7 @@ All implementation details are documented in the `docs/` directory:
 ## Project Structure
 
 ```
-realm-key/
+grid/
 ├── apps/                    # Django applications
 │   ├── properties/         # Property listings & management
 │   ├── users/              # Authentication & profiles

@@ -35,9 +35,7 @@ class SeedLocalCommandTests(TestCase):
         )
 
         self.assertIn("Seeded local data", stdout.getvalue())
-        self.assertEqual(
-            User.objects.filter(email__endswith="realmkey.local").count(), 4
-        )
+        self.assertEqual(User.objects.filter(email__endswith="strata.local").count(), 4)
         self.assertEqual(Property.objects.count(), 4)
         self.assertEqual(Favorite.objects.count(), 2)
         self.assertEqual(Conversation.objects.count(), 2)
@@ -67,9 +65,7 @@ class SeedLocalCommandTests(TestCase):
         )
 
         self.assertTrue(User.objects.filter(email="real@example.com").exists())
-        self.assertEqual(
-            User.objects.filter(email__endswith="realmkey.local").count(), 3
-        )
+        self.assertEqual(User.objects.filter(email__endswith="strata.local").count(), 3)
 
     def test_delete_removes_seed_data_without_reseeding(self):
         User.objects.create_user(
@@ -91,7 +87,7 @@ class SeedLocalCommandTests(TestCase):
 
         self.assertIn("Deleted 3 existing seeded user(s).", stdout.getvalue())
         self.assertTrue(User.objects.filter(email="real@example.com").exists())
-        self.assertFalse(User.objects.filter(email__endswith="realmkey.local").exists())
+        self.assertFalse(User.objects.filter(email__endswith="strata.local").exists())
         self.assertFalse(Property.objects.exists())
         self.assertFalse(PropertyImage.objects.exists())
 

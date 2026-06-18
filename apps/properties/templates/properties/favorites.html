@@ -1,7 +1,7 @@
 {% extends '_layouts/base.html' %}
 {% load static %}
 
-{% block title %}My Favorites - RealmKey{% endblock %}
+{% block title %}My Favorites - Strata{% endblock %}
 
 {% block content %}
 <div x-data="{
@@ -47,7 +47,7 @@
         </div>
     </div>
 
-    <!-- Properties Grid -->
+    <!-- Properties -->
     <div x-show="favoriteCount > 0">
         {% if properties %}
             {% include 'properties/partials/property_grid.html' with properties=properties page_obj=page_obj %}

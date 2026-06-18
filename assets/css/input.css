@@ -5,11 +5,11 @@
 @source "../../static/js";
 
 @plugin "daisyui" {
-  themes: realmkey --default;
+  themes: strata --default;
 }
 
 @plugin "daisyui/theme" {
-  name: "realmkey";
+  name: "strata";
   default: true;
   prefersdark: false;
   color-scheme: light;

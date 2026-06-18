@@ -17,7 +17,7 @@ ACCOUNT_USER_MODEL_EMAIL_FIELD = "email"
 ACCOUNT_EMAIL_VERIFICATION = env.str("ACCOUNT_EMAIL_VERIFICATION", "optional")
 ACCOUNT_SESSION_REMEMBER = None
 ACCOUNT_FORMS = {"signup": "apps.users.forms.AllauthSignupForm"}
-ACCOUNT_ADAPTER = "apps.users.adapters.RealmKeyAccountAdapter"
+ACCOUNT_ADAPTER = "apps.users.adapters.StrataAccountAdapter"
 
 LOGIN_REDIRECT_URL = "properties:list"
 LOGOUT_REDIRECT_URL = "properties:list"

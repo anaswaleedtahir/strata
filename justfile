@@ -1,4 +1,4 @@
-# RealmKey Development Commands
+# Strata Development Commands
 
 # Start development services with Docker
 up:

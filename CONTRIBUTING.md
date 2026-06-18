@@ -1,14 +1,14 @@
-# Contributing to RealmKey
+# Contributing to Strata
 
-Thank you for your interest in contributing to RealmKey! This document provides guidelines and instructions for contributing.
+Thank you for your interest in contributing to Strata! This document provides guidelines and instructions for contributing.
 
 ## Getting Started
 
 1. **Fork the repository**
 2. **Clone your fork**
    ```bash
-   git clone https://github.com/your-username/realm-key.git
-   cd realm-key
+   git clone https://github.com/your-username/strata.git
+   cd strata
    ```
 3. **Set up development environment**
    - Follow the [README.md](../README.md) setup instructions
@@ -446,4 +446,4 @@ If you have questions about contributing:
 3. Open a GitHub Discussion
 4. Ask in project communication channels
 
-Thank you for contributing to RealmKey! 🎉
+Thank you for contributing to Strata! 🎉
