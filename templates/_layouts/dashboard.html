@@ -1,29 +1,14 @@
 {% extends "_layouts/base.html" %}
 
 {% block content %}
-<div class="space-y-8">
-  <header class="flex flex-col gap-4 border-b pb-6 sm:flex-row sm:items-end sm:justify-between">
+<div class="space-y-7">
+  <header class="flex flex-col gap-4 py-2 sm:flex-row sm:items-end sm:justify-between">
     <div class="space-y-1">
       <p class="text-sm font-medium text-muted-foreground">Workspace</p>
-      <h1 class="text-3xl font-bold tracking-tight">{% block page_title %}Dashboard{% endblock %}</h1>
+      <h1 class="text-pretty text-3xl font-bold tracking-tight">{% block page_title %}Dashboard{% endblock %}</h1>
     </div>
     <div class="flex flex-wrap items-center gap-2">{% block page_actions %}{% endblock %}</div>
   </header>
-
-  <nav class="flex gap-1 overflow-x-auto rounded-lg bg-muted p-1" aria-label="Workspace">
-    <a href="{% url 'properties:my-properties' %}" class="inline-flex h-8 shrink-0 items-center gap-2 rounded-md px-3 text-sm font-medium {% if request.resolver_match.url_name == 'my-properties' %}bg-background shadow-xs{% else %}text-muted-foreground hover:text-foreground{% endif %}">
-      <c-ui.icon name="home" classes="size-4" /> My Properties
-    </a>
-    <a href="{% url 'properties:favorites' %}" class="inline-flex h-8 shrink-0 items-center gap-2 rounded-md px-3 text-sm font-medium {% if request.resolver_match.url_name == 'favorites' %}bg-background shadow-xs{% else %}text-muted-foreground hover:text-foreground{% endif %}">
-      <c-ui.icon name="heart" classes="size-4" /> Favorites
-    </a>
-    <a href="{% url 'chat:conversation_list' %}" class="inline-flex h-8 shrink-0 items-center gap-2 rounded-md px-3 text-sm font-medium {% if request.resolver_match.app_name == 'chat' %}bg-background shadow-xs{% else %}text-muted-foreground hover:text-foreground{% endif %}">
-      <c-ui.icon name="chat" classes="size-4" /> Messages
-    </a>
-    <a href="{% url 'users:profile' %}" class="inline-flex h-8 shrink-0 items-center gap-2 rounded-md px-3 text-sm font-medium {% if request.resolver_match.app_name == 'users' %}bg-background shadow-xs{% else %}text-muted-foreground hover:text-foreground{% endif %}">
-      <c-ui.icon name="user" classes="size-4" /> Profile
-    </a>
-  </nav>
 
   {% block dashboard_content %}{% endblock %}
 </div>

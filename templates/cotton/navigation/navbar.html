@@ -1,56 +1,71 @@
-<nav class="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80" x-data="{ mobileOpen: false, accountOpen: false }">
-  <div class="mx-auto flex h-14 max-w-7xl items-center px-4 sm:px-6 lg:px-8">
-    <a href="{% url 'properties:list' %}" class="mr-6 flex items-center gap-2 font-semibold tracking-tight">
-      <span class="flex size-7 items-center justify-center rounded-md bg-primary text-primary-foreground">
-        <c-ui.icon name="home" variant="solid" classes="size-4" />
+<nav
+  class="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80"
+  aria-label="Primary navigation"
+  x-data="{ accountOpen: false }"
+  @keydown.escape.window="accountOpen = false"
+>
+  <div class="mx-auto flex min-h-20 max-w-7xl flex-wrap items-center gap-y-3 px-4 py-3 sm:px-6 lg:h-20 lg:flex-nowrap lg:py-0 lg:px-8">
+    <a href="{% url 'properties:list' %}" class="mr-6 flex shrink-0 items-center gap-2.5 font-semibold tracking-tight focus-visible:rounded-md focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring">
+      <span class="flex size-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-xs">
+        <c-ui.icon name="home" variant="solid" classes="size-[1.125rem]" />
       </span>
       Strata
     </a>
 
-    <div class="hidden items-center gap-1 md:flex">
-      <a href="{% url 'properties:list' %}" class="rounded-md px-3 py-2 text-sm font-medium {% if request.resolver_match.url_name == 'list' %}bg-accent text-accent-foreground{% else %}text-muted-foreground hover:bg-accent hover:text-accent-foreground{% endif %}">Browse</a>
+    <div class="order-3 flex w-full items-center gap-1 overflow-x-auto border-t pt-3 lg:order-none lg:w-auto lg:border-0 lg:pt-0">
+      <a href="{% url 'properties:list' %}" {% if request.resolver_match.url_name == 'list' or request.resolver_match.url_name == 'detail' %}aria-current="page"{% endif %} class="inline-flex h-10 shrink-0 items-center gap-2 rounded-full px-4 text-sm font-medium transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring {% if request.resolver_match.url_name == 'list' or request.resolver_match.url_name == 'detail' %}bg-primary text-primary-foreground shadow-xs{% else %}text-muted-foreground hover:bg-accent hover:text-accent-foreground{% endif %}">
+        <c-ui.icon name="search" classes="size-4" /> Browse
+      </a>
       {% if user.is_authenticated %}
-        <a href="{% url 'properties:my-properties' %}" class="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground">My Properties</a>
-        <a href="{% url 'properties:favorites' %}" class="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground">Favorites</a>
-        <a href="{% url 'chat:conversation_list' %}" class="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground">Messages</a>
+        <a href="{% url 'properties:my-properties' %}" {% if request.resolver_match.url_name == 'my-properties' or request.resolver_match.url_name == 'create' or request.resolver_match.url_name == 'edit' %}aria-current="page"{% endif %} class="inline-flex h-10 shrink-0 items-center gap-2 rounded-full px-4 text-sm font-medium transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring {% if request.resolver_match.url_name == 'my-properties' or request.resolver_match.url_name == 'create' or request.resolver_match.url_name == 'edit' %}bg-primary text-primary-foreground shadow-xs{% else %}text-muted-foreground hover:bg-accent hover:text-accent-foreground{% endif %}">
+          <c-ui.icon name="home" classes="size-4" /> My Properties
+        </a>
+        <a href="{% url 'properties:favorites' %}" {% if request.resolver_match.url_name == 'favorites' %}aria-current="page"{% endif %} class="inline-flex h-10 shrink-0 items-center gap-2 rounded-full px-4 text-sm font-medium transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring {% if request.resolver_match.url_name == 'favorites' %}bg-primary text-primary-foreground shadow-xs{% else %}text-muted-foreground hover:bg-accent hover:text-accent-foreground{% endif %}">
+          <c-ui.icon name="heart" classes="size-4" /> Favorites
+        </a>
+        <a href="{% url 'chat:conversation_list' %}" {% if request.resolver_match.app_name == 'chat' %}aria-current="page"{% endif %} class="inline-flex h-10 shrink-0 items-center gap-2 rounded-full px-4 text-sm font-medium transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring {% if request.resolver_match.app_name == 'chat' %}bg-primary text-primary-foreground shadow-xs{% else %}text-muted-foreground hover:bg-accent hover:text-accent-foreground{% endif %}">
+          <c-ui.icon name="chat" classes="size-4" /> Messages
+        </a>
       {% endif %}
     </div>
 
     <div class="ml-auto flex items-center gap-2">
       {% if user.is_authenticated %}
         <span class="hidden sm:inline-flex">
-          <c-button href="{% url 'properties:create' %}" size="sm">
+          <c-button href="{% url 'properties:create' %}">
             <c-ui.icon name="plus" classes="size-4" /> Add Property
           </c-button>
         </span>
         <div class="relative">
           <button
             type="button"
-            class="flex size-9 items-center justify-center rounded-full border bg-background text-sm font-medium shadow-xs hover:bg-accent focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring"
+            class="flex size-10 items-center justify-center rounded-full border bg-background text-sm font-semibold shadow-xs hover:bg-accent focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring {% if request.resolver_match.app_name == 'users' %}ring-2 ring-foreground ring-offset-2 ring-offset-background{% endif %}"
             @click="accountOpen = !accountOpen"
             @click.outside="accountOpen = false"
             :aria-expanded="accountOpen.toString()"
+            aria-controls="account-menu"
             aria-label="Open account menu"
           >
             {{ user.email|slice:":1"|upper }}
           </button>
           <div
+            id="account-menu"
             x-show="accountOpen"
             x-transition
             x-cloak
-            class="absolute right-0 mt-2 w-56 rounded-md border bg-popover p-1 text-popover-foreground shadow-md"
+            class="absolute right-0 mt-2 w-60 origin-top-right rounded-xl border bg-popover p-1.5 text-popover-foreground shadow-lg"
           >
-            <div class="px-2 py-1.5">
+            <div class="px-2.5 py-2">
               <p class="truncate text-sm font-medium">{{ user.first_name|default:"Your account" }}</p>
               <p class="truncate text-xs text-muted-foreground">{{ user.email }}</p>
             </div>
             <div class="my-1 h-px bg-border"></div>
-            <a href="{% url 'users:profile' %}" class="flex items-center gap-2 rounded-sm px-2 py-1.5 text-sm hover:bg-accent"><c-ui.icon name="user" classes="size-4" /> Profile</a>
-            <a href="{% url 'properties:my-properties' %}" class="flex items-center gap-2 rounded-sm px-2 py-1.5 text-sm hover:bg-accent"><c-ui.icon name="home" classes="size-4" /> My Properties</a>
+            <a href="{% url 'users:profile' %}" class="flex items-center gap-2 rounded-md px-2.5 py-2 text-sm hover:bg-accent focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"><c-ui.icon name="user" classes="size-4" /> Profile</a>
+            <a href="{% url 'users:password_change' %}" class="flex items-center gap-2 rounded-md px-2.5 py-2 text-sm hover:bg-accent focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"><c-ui.icon name="key" classes="size-4" /> Security</a>
             <div class="my-1 h-px bg-border"></div>
             <form method="post" action="{% url 'users:logout' %}">
               {% csrf_token %}
-              <button type="submit" class="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left text-sm text-destructive hover:bg-accent">
+              <button type="submit" class="flex w-full items-center gap-2 rounded-md px-2.5 py-2 text-left text-sm text-destructive hover:bg-accent focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring">
                 <c-ui.icon name="logout" classes="size-4" /> Sign out
               </button>
             </form>
@@ -61,23 +76,6 @@
         <c-button href="{% url 'users:signup' %}" size="sm">Get started</c-button>
       {% endif %}
 
-      <button type="button" class="inline-flex size-9 items-center justify-center rounded-md hover:bg-accent md:hidden" @click="mobileOpen = !mobileOpen" :aria-expanded="mobileOpen.toString()" aria-label="Toggle navigation">
-        <c-ui.icon name="menu" classes="size-5" />
-      </button>
-    </div>
-  </div>
-
-  <div x-show="mobileOpen" x-transition x-cloak class="border-t px-4 py-3 md:hidden">
-    <div class="grid gap-1">
-      <a href="{% url 'properties:list' %}" class="rounded-md px-3 py-2 text-sm font-medium hover:bg-accent">Browse properties</a>
-      {% if user.is_authenticated %}
-        <a href="{% url 'properties:create' %}" class="rounded-md px-3 py-2 text-sm font-medium hover:bg-accent">Add Property</a>
-        <a href="{% url 'properties:my-properties' %}" class="rounded-md px-3 py-2 text-sm font-medium hover:bg-accent">My Properties</a>
-        <a href="{% url 'properties:favorites' %}" class="rounded-md px-3 py-2 text-sm font-medium hover:bg-accent">Favorites</a>
-        <a href="{% url 'chat:conversation_list' %}" class="rounded-md px-3 py-2 text-sm font-medium hover:bg-accent">Messages</a>
-      {% else %}
-        <a href="{% url 'users:login' %}" class="rounded-md px-3 py-2 text-sm font-medium hover:bg-accent">Sign in</a>
-      {% endif %}
     </div>
   </div>
 </nav>
