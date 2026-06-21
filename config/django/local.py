@@ -8,6 +8,12 @@ DEBUG = True
 
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", ["localhost", "127.0.0.1"])  # noqa: F405
 
+# Development and tests serve source assets directly. The manifest-backed
+# storage remains the production default, where collectstatic creates it.
+STORAGES["staticfiles"] = {  # noqa: F405
+    "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+}
+
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:8000",
     "http://127.0.0.1:8000",

@@ -1,5 +1,7 @@
 # Django Style Guide migration plan
 
+> Historical plan. Property phone/CNIC fields and their validation endpoints were later removed by [ADR-0006](./adr/0006-owner-contact-through-conversations.md), and the multi-step Property editor was replaced by the single-page flow recorded alongside [ADR-0005](./adr/0005-adopt-project-owned-shadcn-ui.md).
+
 Adopt HackSoft Django Style Guide ([github.com/HackSoftware/Django-Styleguide](https://github.com/HackSoftware/Django-Styleguide)), adapted for the HTMX + Channels stack (no DRF). See [ADR-0001](./adr/0001-adopt-hacksoft-styleguide-htmx-adapted.md) for the framing decision.
 
 ## Locked decisions (from grilling session)

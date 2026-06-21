@@ -1,171 +1,54 @@
-{% extends '_layouts/dashboard.html' %}
-{% load static %}
+{% extends "_layouts/dashboard.html" %}
 
-{% block title %}My Properties - Strata{% endblock %}
-
+{% block title %}My Properties — Strata{% endblock %}
 {% block page_title %}My Properties{% endblock %}
 
 {% block page_actions %}
-<a href="{% url 'properties:create' %}" class="btn btn-primary">
-    <c-ui.icon name="plus" classes="h-4 w-4 mr-2" />
-    Add Property
-</a>
+  <c-button href="{% url 'properties:create' %}">
+    <c-ui.icon name="plus" classes="size-4" /> Add Property
+  </c-button>
 {% endblock %}
 
 {% block dashboard_content %}
-<!-- Stats Overview -->
-<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-    <div class="stat bg-base-100 shadow-soft rounded-2xl">
-        <div class="stat-figure text-primary">
-            <c-ui.icon name="home" classes="h-8 w-8" />
-        </div>
-        <div class="stat-title">Total Properties</div>
-        <div class="stat-value text-primary">{{ properties|length }}</div>
-        <div class="stat-desc">Properties listed</div>
-    </div>
+<div class="space-y-8">
+  <section class="grid gap-4 sm:grid-cols-3" aria-label="Property summary">
+    <c-card>
+      <c-card.content class="p-5">
+        <p class="text-sm text-muted-foreground">Total</p>
+        <p class="mt-1 text-3xl font-bold tracking-tight">{{ property_counts.total }}</p>
+      </c-card.content>
+    </c-card>
+    <c-card>
+      <c-card.content class="p-5">
+        <p class="text-sm text-muted-foreground">Published</p>
+        <p class="mt-1 text-3xl font-bold tracking-tight">{{ property_counts.published }}</p>
+      </c-card.content>
+    </c-card>
+    <c-card>
+      <c-card.content class="p-5">
+        <p class="text-sm text-muted-foreground">Drafts</p>
+        <p class="mt-1 text-3xl font-bold tracking-tight">{{ property_counts.drafts }}</p>
+      </c-card.content>
+    </c-card>
+  </section>
 
-    <div class="stat bg-base-100 shadow-soft rounded-2xl">
-        <div class="stat-figure text-success">
-            <c-ui.icon name="eye" classes="h-8 w-8" />
-        </div>
-        <div class="stat-title">Total Views</div>
-        <div class="stat-value text-success">{{ total_views|default:0 }}</div>
-        <div class="stat-desc">Across all properties</div>
+  {% if properties %}
+    <div class="flex items-end justify-between gap-4">
+      <div>
+        <h2 class="text-xl font-semibold tracking-tight">Portfolio</h2>
+        <p class="text-sm text-muted-foreground">Edit, publish, or review your Properties.</p>
+      </div>
+      <p class="text-sm text-muted-foreground">{{ page_obj.paginator.count }} total</p>
     </div>
-
-    <div class="stat bg-base-100 shadow-soft rounded-2xl">
-        <div class="stat-figure text-warning">
-            <c-ui.icon name="heart" classes="h-8 w-8" />
-        </div>
-        <div class="stat-title">Total Favorites</div>
-        <div class="stat-value text-warning">{{ total_favorites|default:0 }}</div>
-        <div class="stat-desc">From all users</div>
-    </div>
+    {% include "properties/partials/property_grid.html" with properties=properties page_obj=page_obj %}
+  {% else %}
+    <c-ui.empty-state
+      title="Add your first Property"
+      subtitle="Create a draft, add its details and photos, then publish when it is ready."
+      icon="home"
+      action_url="{% url 'properties:create' %}"
+      action_text="Add Property"
+    />
+  {% endif %}
 </div>
-
-<!-- Properties Management -->
-{% if properties %}
-    <!-- Filter and Sort -->
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-        <div class="flex items-center space-x-3">
-            <div class="dropdown">
-                <div tabindex="0" role="button" class="btn btn-outline btn-sm">
-                    <c-ui.icon name="filter" classes="h-4 w-4 mr-2" />
-                    Filter
-                </div>
-                <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow-large bg-base-100 rounded-box w-52">
-                    <li><a>All Properties</a></li>
-                    <li><a>For Sale</a></li>
-                    <li><a>For Rent</a></li>
-                    <li><a>Recently Added</a></li>
-                </ul>
-            </div>
-
-            <div class="dropdown">
-                <div tabindex="0" role="button" class="btn btn-outline btn-sm">
-                    <c-ui.icon name="sort-ascending" classes="h-4 w-4 mr-2" />
-                    Sort
-                </div>
-                <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow-large bg-base-100 rounded-box w-52">
-                    <li><a>Newest First</a></li>
-                    <li><a>Oldest First</a></li>
-                    <li><a>Price: High to Low</a></li>
-                    <li><a>Price: Low to High</a></li>
-                </ul>
-            </div>
-        </div>
-
-        <div class="text-sm text-base-content/60">
-            {{ properties|length }} propert{{ properties|length|pluralize:"y,ies" }}
-        </div>
-    </div>
-
-    <!-- Properties -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-        {% for property in properties %}
-            <div class="card bg-base-100 shadow-soft hover:shadow-large transition-all duration-300">
-                <!-- Property Image -->
-                <figure class="relative h-48">
-                    {% if property.images.first %}
-                        <img src="{{ property.images.first.image.url }}"
-                             alt="{{ property.name }}"
-                             class="w-full h-full object-cover">
-                    {% else %}
-                        <div class="w-full h-full surface-placeholder flex items-center justify-center">
-                            <c-ui.icon name="home" classes="h-12 w-12 text-secondary-400" />
-                        </div>
-                    {% endif %}
-
-                    <!-- Status Badge -->
-                    <div class="absolute top-3 left-3">
-                        <span class="badge badge-primary badge-sm">{{ property.get_property_type_display }}</span>
-                    </div>
-
-                    <!-- Actions Menu -->
-                    <div class="absolute top-3 right-3">
-                        <div class="dropdown dropdown-end">
-                            <div tabindex="0" role="button" class="btn btn-circle btn-sm bg-white/90 border-0">
-                                <c-ui.icon name="dots-vertical" classes="h-4 w-4" />
-                            </div>
-                            <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow-large bg-base-100 rounded-box w-40">
-                                <li><a href="{% url 'properties:detail' property.pk %}">View</a></li>
-                                <li><a href="{% url 'properties:edit' property.pk %}">Edit</a></li>
-                                <li><a class="text-error">Delete</a></li>
-                            </ul>
-                        </div>
-                    </div>
-                </figure>
-
-                <!-- Property Details -->
-                <div class="card-body p-4">
-                    <h3 class="card-title text-lg line-clamp-1">{{ property.name }}</h3>
-                    <p class="text-base-content/60 text-sm line-clamp-2 mb-3">{{ property.full_address }}</p>
-
-                    <!-- Property Stats -->
-                    <div class="flex items-center justify-between text-sm text-base-content/70 mb-4">
-                        <div class="flex items-center space-x-3">
-                            <span>{{ property.property_type }}</span>
-                        </div>
-                        <span class="font-bold text-accent">${{ property.price|floatformat:0 }}</span>
-                    </div>
-
-                    <!-- Property Metrics -->
-                    <div class="flex items-center justify-between text-xs text-base-content/60 mb-4">
-                        <span>{{ property.view_count|default:0 }} views</span>
-                        <span>{{ property.created_at|timesince }} ago</span>
-                    </div>
-
-                    <!-- Action Buttons -->
-                    <div class="card-actions justify-end">
-                        <a href="{% url 'properties:edit' property.pk %}" class="btn btn-outline btn-sm">Edit</a>
-                        <a href="{% url 'properties:detail' property.pk %}" class="btn btn-primary btn-sm">View</a>
-                    </div>
-                </div>
-            </div>
-        {% endfor %}
-    </div>
-
-    <!-- Pagination -->
-    {% if page_obj %}
-        <div class="mt-8">
-            <c-ui.pagination :page_obj="page_obj" />
-        </div>
-    {% endif %}
-
-{% else %}
-    <!-- Empty State -->
-    <div class="text-center py-16">
-        <div class="w-32 h-32 bg-base-200 rounded-full flex items-center justify-center mx-auto mb-6">
-            <c-ui.icon name="home" classes="h-16 w-16 text-base-content/40" />
-        </div>
-        <h3 class="text-2xl font-semibold text-base-content mb-2">No properties yet</h3>
-        <p class="text-base-content/60 mb-8 max-w-md mx-auto">
-            Start building your property portfolio by adding your first listing.
-        </p>
-        <a href="{% url 'properties:create' %}" class="btn btn-primary btn-lg">
-            <c-ui.icon name="plus" classes="h-5 w-5 mr-2" />
-            Add Your First Property
-        </a>
-    </div>
-{% endif %}
 {% endblock %}

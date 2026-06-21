@@ -1,16 +1,15 @@
-{% load static %}
 <c-vars property />
-
 <button
+  type="button"
   hx-post="{% url 'properties:favorite_toggle' property.pk %}"
   hx-swap="outerHTML"
-  class="btn btn-circle btn-sm border-0 bg-white/90 shadow-soft transition-all duration-200 hover:bg-white"
+  class="inline-flex size-9 items-center justify-center rounded-full border bg-background/95 text-muted-foreground shadow-xs backdrop-blur transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+  aria-label="{% if property.is_favorited %}Remove {{ property.name }} from favorites{% else %}Add {{ property.name }} to favorites{% endif %}"
 >
-  <span class="htmx-indicator loading loading-spinner loading-xs"></span>
-
+  <span class="htmx-indicator size-4 animate-spin rounded-full border-2 border-muted-foreground/30 border-t-foreground"></span>
   <c-ui.icon
     name="heart"
     variant="{% if property.is_favorited %}solid{% else %}outline{% endif %}"
-    classes="h-4 w-4 transition-colors duration-200 htmx-indicator-hide {{ property.is_favorited|yesno:'text-error,text-base-content/60' }}"
+    classes="size-4 htmx-indicator-hide {% if property.is_favorited %}text-destructive{% endif %}"
   />
 </button>

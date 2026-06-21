@@ -2,7 +2,6 @@
 
 Improvements for modern Django and Python:
 - Use settings.AUTH_USER_MODEL instead of direct User import.
-- Add validators for phone and CNIC fields.
 - Safer upload paths that handle unsaved instances.
 - Published manager helper and small convenience methods.
 - DB indexes and conditional UniqueConstraint for primary images.
@@ -19,7 +18,9 @@ from django.db.models import Index, Q, UniqueConstraint
 from django.urls import reverse
 
 from apps.shared.models import BaseModel
-from apps.shared.validators import cnic_validator, phone_validator
+
+# Historical migrations import these names from this module.
+from apps.shared.validators import cnic_validator, phone_validator  # noqa: F401
 
 if TYPE_CHECKING:
     from django.db.models.manager import RelatedManager
@@ -67,8 +68,6 @@ class Property(BaseModel):
     )
     name = models.CharField(max_length=255)
     full_address = models.CharField(max_length=255)
-    phone_number = models.CharField(max_length=16, validators=[phone_validator])
-    cnic = models.CharField(max_length=15, validators=[cnic_validator])
     property_type = models.CharField(max_length=10, choices=PROPERTY_TYPE)
     description = models.TextField(blank=True)
     # Use 2 decimal places for currency precision. Note: changing this requires a migration.

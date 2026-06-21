@@ -33,6 +33,7 @@ classifiers = [
 
 [dependency-groups]
 dev = [
+    "daphne>=4.0.0",
     "django-debug-toolbar==6.2.0",
     "factory-boy>=3.3.0",
     "remote-pdb>=2.1.0",

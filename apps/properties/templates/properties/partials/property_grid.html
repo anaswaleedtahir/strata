@@ -1,18 +1,17 @@
-{% load static %}
-
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-    {% for property in properties %}
-        <c-properties.property-card :property="property" />
-    {% empty %}
-        <div class="col-span-full">
-            <c-ui.empty-state title="No properties found" subtitle="Try adjusting your search criteria or check back later for new listings." />
-        </div>
-    {% endfor %}
+<div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+  {% for property in properties %}
+    <c-properties.property-card :property="property" />
+  {% empty %}
+    <div class="sm:col-span-2 lg:col-span-3">
+      <c-ui.empty-state
+        title="No Properties found"
+        subtitle="Try broadening your search or clearing one of the filters."
+        icon="search"
+      />
+    </div>
+  {% endfor %}
 </div>
 
-<!-- Pagination -->
 {% if page_obj %}
-    <div class="mt-8">
-        <c-ui.pagination :page_obj="page_obj" />
-    </div>
+  <div class="mt-8"><c-ui.pagination :page_obj="page_obj" /></div>
 {% endif %}

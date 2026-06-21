@@ -1,97 +1,95 @@
 {% load heroicons widget_tweaks %}
 <c-vars field label="" placeholder="" :required="False" icon="" rows=4 help_text="" />
 
-<div class="form-control w-full">
+<div class="space-y-2">
+  {% if field.field.widget.input_type == "checkbox" %}
+    <div class="flex items-start gap-3">
+      {% render_field field class="mt-0.5 size-4 shrink-0 rounded-sm border border-primary accent-primary focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" %}
+      <div class="grid gap-1.5 leading-none">
+        {% if label %}
+          <label for="{{ field.id_for_label }}" class="text-sm font-medium leading-none">
+            {{ label }}
+            {% if required %}<span class="text-destructive" aria-hidden="true">*</span>{% endif %}
+          </label>
+        {% endif %}
+        {% with hint=help_text|default:field.help_text %}
+          {% if hint %}<p class="text-sm text-muted-foreground">{{ hint }}</p>{% endif %}
+        {% endwith %}
+      </div>
+    </div>
+  {% else %}
     {% if label %}
-        <label class="label" for="{{ field.id_for_label }}">
-            <span class="label-text font-medium text-base-content">
-                {{ label }}
-                {% if required %}
-                    <span class="text-error">*</span>
-                {% endif %}
-            </span>
-        </label>
+      <label for="{{ field.id_for_label }}" class="text-sm font-medium leading-none">
+        {{ label }}
+        {% if required %}<span class="text-destructive" aria-hidden="true">*</span>{% endif %}
+      </label>
     {% endif %}
 
-    {% with placeholder_value=placeholder|default:'' rows_value=rows|default:4 %}
-    <div class="relative" {% if field.field.widget.input_type == 'password' %}x-data="{ showPassword: false }"{% endif %}>
-        {% if field|widget_type == 'textarea' %}
-            {% if field.errors %}
-                {% render_field field class="textarea textarea-bordered w-full textarea-error" rows=rows_value placeholder=placeholder_value %}
-            {% else %}
-                {% render_field field class="textarea textarea-bordered w-full" rows=rows_value placeholder=placeholder_value %}
-            {% endif %}
-        {% elif field|widget_type == 'select' %}
-            {% if field.errors %}
-                {% render_field field class="select select-bordered w-full select-error" %}
-            {% else %}
-                {% render_field field class="select select-bordered w-full" %}
-            {% endif %}
-        {% elif field.field.widget.input_type == 'password' %}
-            {% if field.errors %}
-                <label class="input input-bordered input-error flex items-center gap-2">
-                    {% render_field field class="grow" placeholder=placeholder_value %}
-                    <button type="button"
-                            class="btn btn-ghost btn-xs btn-circle -mr-2 min-h-0 h-8 w-8 text-base-content/60"
-                            @click.prevent="showPassword = !showPassword; $el.closest('label').querySelector('input').type = showPassword ? 'text' : 'password'"
-                            :aria-label="showPassword ? 'Hide password' : 'Show password'"
-                            :aria-pressed="showPassword.toString()">
-                        <span x-show="!showPassword" class="[&_svg]:h-5 [&_svg]:w-5">{% heroicon 'eye' %}</span>
-                        <span x-show="showPassword" x-cloak class="[&_svg]:h-5 [&_svg]:w-5">{% heroicon 'eye-off' %}</span>
-                    </button>
-                </label>
-            {% else %}
-                <label class="input input-bordered flex items-center gap-2">
-                    {% render_field field class="grow" placeholder=placeholder_value %}
-                    <button type="button"
-                            class="btn btn-ghost btn-xs btn-circle -mr-2 min-h-0 h-8 w-8 text-base-content/60"
-                            @click.prevent="showPassword = !showPassword; $el.closest('label').querySelector('input').type = showPassword ? 'text' : 'password'"
-                            :aria-label="showPassword ? 'Hide password' : 'Show password'"
-                            :aria-pressed="showPassword.toString()">
-                        <span x-show="!showPassword" class="[&_svg]:h-5 [&_svg]:w-5">{% heroicon 'eye' %}</span>
-                        <span x-show="showPassword" x-cloak class="[&_svg]:h-5 [&_svg]:w-5">{% heroicon 'eye-off' %}</span>
-                    </button>
-                </label>
-            {% endif %}
+    {% with placeholder_value=placeholder|default:"" rows_value=rows|default:4 %}
+      <div
+        class="relative"
+        {% if field.field.widget.input_type == "password" %}x-data="{ showPassword: false }"{% endif %}
+      >
+        {% if field|widget_type == "textarea" %}
+          {% if field.errors %}
+            {% render_field field class="flex min-h-32 w-full rounded-md border border-destructive bg-transparent px-3 py-2 text-sm shadow-xs placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-destructive disabled:cursor-not-allowed disabled:opacity-50" rows=rows_value placeholder=placeholder_value aria-invalid="true" %}
+          {% else %}
+            {% render_field field class="flex min-h-32 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50" rows=rows_value placeholder=placeholder_value %}
+          {% endif %}
+        {% elif field|widget_type == "select" %}
+          {% if field.errors %}
+            {% render_field field class="flex h-9 w-full appearance-none rounded-md border border-destructive bg-background px-3 py-1 text-sm shadow-xs focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-destructive disabled:cursor-not-allowed disabled:opacity-50" aria-invalid="true" %}
+          {% else %}
+            {% render_field field class="flex h-9 w-full appearance-none rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50" %}
+          {% endif %}
+          <span class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-muted-foreground [&_svg]:size-4">
+            {% heroicon "chevron-down" %}
+          </span>
+        {% elif field.field.widget.input_type == "password" %}
+          {% if field.errors %}
+            {% render_field field class="flex h-9 w-full rounded-md border border-destructive bg-transparent px-3 py-1 pr-10 text-sm shadow-xs placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-destructive disabled:cursor-not-allowed disabled:opacity-50" placeholder=placeholder_value aria-invalid="true" %}
+          {% else %}
+            {% render_field field class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 pr-10 text-sm shadow-xs placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50" placeholder=placeholder_value %}
+          {% endif %}
+          <button
+            type="button"
+            class="absolute right-1 top-1/2 inline-flex size-7 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring"
+            @click.prevent="showPassword = !showPassword; $el.parentElement.querySelector('input').type = showPassword ? 'text' : 'password'"
+            :aria-label="showPassword ? 'Hide password' : 'Show password'"
+            :aria-pressed="showPassword.toString()"
+          >
+            <span x-show="!showPassword" class="[&_svg]:size-4">{% heroicon "eye" %}</span>
+            <span x-show="showPassword" x-cloak class="[&_svg]:size-4">{% heroicon "eye-off" %}</span>
+          </button>
         {% else %}
-            {% if icon and field.errors %}
-                <label class="input input-bordered input-error flex items-center gap-2">
-                    {% render_field field class="grow" placeholder=placeholder_value %}
-                    <span class="pointer-events-none flex h-5 w-5 shrink-0 items-center justify-center text-base-content/40 [&_svg]:h-5 [&_svg]:w-5">
-                        {% heroicon icon %}
-                    </span>
-                </label>
-            {% elif icon %}
-                <label class="input input-bordered flex items-center gap-2">
-                    {% render_field field class="grow" placeholder=placeholder_value %}
-                    <span class="pointer-events-none flex h-5 w-5 shrink-0 items-center justify-center text-base-content/40 [&_svg]:h-5 [&_svg]:w-5">
-                        {% heroicon icon %}
-                    </span>
-                </label>
-            {% elif field.errors %}
-                {% render_field field class="input input-bordered w-full input-error" placeholder=placeholder_value %}
+          {% if icon %}
+            <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-muted-foreground [&_svg]:size-4">
+              {% heroicon icon %}
+            </span>
+          {% endif %}
+          {% if field.errors and icon %}
+            {% render_field field class="flex h-9 w-full rounded-md border border-destructive bg-transparent py-1 pl-9 pr-3 text-sm shadow-xs transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-destructive disabled:cursor-not-allowed disabled:opacity-50" placeholder=placeholder_value aria-invalid="true" %}
+          {% elif field.errors %}
+            {% render_field field class="flex h-9 w-full rounded-md border border-destructive bg-transparent px-3 py-1 text-sm shadow-xs transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-destructive disabled:cursor-not-allowed disabled:opacity-50" placeholder=placeholder_value aria-invalid="true" %}
+          {% else %}
+            {% if icon %}
+              {% render_field field class="flex h-9 w-full rounded-md border border-input bg-transparent py-1 pl-9 pr-3 text-sm shadow-xs transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50" placeholder=placeholder_value %}
             {% else %}
-                {% render_field field class="input input-bordered w-full" placeholder=placeholder_value %}
+              {% render_field field class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50" placeholder=placeholder_value %}
             {% endif %}
+          {% endif %}
         {% endif %}
-    </div>
+      </div>
     {% endwith %}
 
     {% if field.errors %}
-        <label class="label">
-            <span class="label-text-alt text-error">
-                {{ field.errors.0 }}
-            </span>
-        </label>
+      <p class="text-sm font-medium text-destructive" id="{{ field.id_for_label }}-error">
+        {{ field.errors.0 }}
+      </p>
     {% endif %}
 
     {% with hint=help_text|default:field.help_text %}
-        {% if hint %}
-            <label class="label">
-                <span class="label-text-alt text-base-content/60">
-                    {{ hint }}
-                </span>
-            </label>
-        {% endif %}
+      {% if hint %}<p class="text-sm text-muted-foreground">{{ hint }}</p>{% endif %}
     {% endwith %}
+  {% endif %}
 </div>

@@ -1,174 +1,77 @@
-{% extends '_layouts/dashboard.html' %}
-{% load static %}
+{% extends "_layouts/dashboard.html" %}
 
-{% block title %}Profile - Strata{% endblock %}
-
-{% block page_title %}My Profile{% endblock %}
+{% block title %}{% if form %}Edit profile{% else %}Profile{% endif %} — Strata{% endblock %}
+{% block page_title %}{% if form %}Edit profile{% else %}Profile{% endif %}{% endblock %}
 
 {% block page_actions %}
-<a href="{% url 'users:profile_edit' %}" class="btn btn-primary">
-    <c-ui.icon name="pencil" classes="h-4 w-4 mr-2" />
-    Edit Profile
-</a>
+  {% if not form %}
+    <c-button href="{% url 'users:profile_edit' %}">
+      <c-ui.icon name="pencil" classes="size-4" /> Edit profile
+    </c-button>
+  {% endif %}
 {% endblock %}
 
 {% block dashboard_content %}
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-    <!-- Profile Information -->
-    <div class="lg:col-span-2 space-y-6">
-        <!-- Basic Info Card -->
-        <div class="card bg-base-100 shadow-soft">
-            <div class="card-body">
-                <div class="flex items-center space-x-6 mb-6">
-                    <div class="avatar placeholder">
-                        <div class="bg-primary-100 text-primary-600 rounded-full w-20 h-20">
-                            <span class="text-2xl font-bold">
-                                {{ user.first_name|first|default:user.username|first|upper }}
-                            </span>
-                        </div>
-                    </div>
-                    <div>
-                        <h2 class="text-2xl font-bold text-base-content">
-                            {{ user.first_name }} {{ user.last_name }}
-                        </h2>
-                        <p class="text-base-content/60">@{{ user.username }}</p>
-                        <p class="text-base-content/60">{{ user.email }}</p>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <h3 class="font-semibold text-base-content mb-2">Account Details</h3>
-                        <div class="space-y-2 text-sm">
-                            <div class="flex justify-between">
-                                <span class="text-base-content/60">Member since:</span>
-                                <span>{{ user.date_joined|date:"M d, Y" }}</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-base-content/60">Last login:</span>
-                                <span>{{ user.last_login|date:"M d, Y" }}</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-base-content/60">Account status:</span>
-                                <span class="badge badge-success badge-sm">Active</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div>
-                        <h3 class="font-semibold text-base-content mb-2">Activity Summary</h3>
-                        <div class="space-y-2 text-sm">
-                            <div class="flex justify-between">
-                                <span class="text-base-content/60">Properties listed:</span>
-                                <span>{{ user.properties.count }}</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-base-content/60">Favorites:</span>
-                                <span>{{ user.favorites.count }}</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-base-content/60">Profile views:</span>
-                                <span>0</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+<div class="mx-auto max-w-3xl">
+  {% if form %}
+    <c-card>
+      <c-card.header>
+        <c-card.title>Personal information</c-card.title>
+        <c-card.description>Keep your name and sign-in email current.</c-card.description>
+      </c-card.header>
+      <c-card.content>
+        {% include "users/partials/profile_form.html" %}
+      </c-card.content>
+    </c-card>
+  {% else %}
+    <div class="grid gap-6 md:grid-cols-[minmax(0,1fr)_18rem]">
+      <c-card>
+        <c-card.header>
+          <div class="flex items-center gap-4">
+            <div class="flex size-14 items-center justify-center rounded-full bg-secondary text-lg font-semibold">
+              {{ user.first_name|slice:":1"|default:"U"|upper }}
             </div>
-        </div>
-
-        <!-- Recent Activity -->
-        <div class="card bg-base-100 shadow-soft">
-            <div class="card-body">
-                <h3 class="card-title text-xl mb-4">Recent Activity</h3>
-
-                {% if user.properties.exists %}
-                    <div class="space-y-4">
-                        {% for property in user.properties.all|slice:":5" %}
-                            <div class="flex items-center space-x-4 p-3 bg-base-200 rounded-lg">
-                                {% if property.images.first %}
-                                    <img src="{{ property.images.first.image.url }}"
-                                         alt="{{ property.name }}"
-                                         class="w-12 h-12 object-cover rounded-lg">
-                                {% else %}
-                                    <div class="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center">
-                                        <c-ui.icon name="home" classes="h-6 w-6 text-primary-600" />
-                                    </div>
-                                {% endif %}
-                                <div class="flex-1">
-                                    <h4 class="font-medium text-base-content">{{ property.name }}</h4>
-                                    <p class="text-sm text-base-content/60">Listed {{ property.created_at|timesince }} ago</p>
-                                </div>
-                                <div class="text-right">
-                                    <p class="font-semibold text-accent">${{ property.price|floatformat:0 }}</p>
-                                    <p class="text-xs text-base-content/60">{{ property.view_count|default:0 }} views</p>
-                                </div>
-                            </div>
-                        {% endfor %}
-                    </div>
-                {% else %}
-                    <div class="text-center py-8">
-                        <c-ui.icon name="home" classes="h-16 w-16 text-base-content/40 mx-auto mb-4" />
-                        <p class="text-base-content/60 mb-4">No properties listed yet</p>
-                        <a href="{% url 'properties:create' %}" class="btn btn-primary btn-sm">List Your First Property</a>
-                    </div>
-                {% endif %}
+            <div>
+              <c-card.title>{{ user.first_name }} {{ user.last_name }}</c-card.title>
+              <c-card.description>{{ user.email }}</c-card.description>
             </div>
-        </div>
+          </div>
+        </c-card.header>
+        <c-card.content>
+          <dl class="grid gap-5 sm:grid-cols-2">
+            <div>
+              <dt class="text-sm text-muted-foreground">Member since</dt>
+              <dd class="mt-1 font-medium">{{ user.date_joined|date:"M j, Y" }}</dd>
+            </div>
+            <div>
+              <dt class="text-sm text-muted-foreground">Last sign in</dt>
+              <dd class="mt-1 font-medium">{{ user.last_login|date:"M j, Y"|default:"First session" }}</dd>
+            </div>
+            <div>
+              <dt class="text-sm text-muted-foreground">Account status</dt>
+              <dd class="mt-1"><c-badge variant="secondary">Active</c-badge></dd>
+            </div>
+          </dl>
+        </c-card.content>
+      </c-card>
+
+      <c-card>
+        <c-card.header>
+          <c-card.title>Account</c-card.title>
+        </c-card.header>
+        <c-card.content class="grid gap-2">
+          <c-button href="{% url 'properties:create' %}" variant="outline" class="justify-start">
+            <c-ui.icon name="plus" classes="size-4" /> Add Property
+          </c-button>
+          <c-button href="{% url 'chat:conversation_list' %}" variant="outline" class="justify-start">
+            <c-ui.icon name="chat" classes="size-4" /> Messages
+          </c-button>
+          <c-button href="{% url 'users:password_change' %}" variant="outline" class="justify-start">
+            <c-ui.icon name="key" classes="size-4" /> Change password
+          </c-button>
+        </c-card.content>
+      </c-card>
     </div>
-
-    <!-- Sidebar -->
-    <div class="space-y-6">
-        <!-- Quick Actions -->
-        <div class="card bg-base-100 shadow-soft">
-            <div class="card-body">
-                <h3 class="card-title text-lg mb-4">Quick Actions</h3>
-                <div class="space-y-3">
-                    <a href="{% url 'properties:create' %}" class="btn btn-outline w-full justify-start">
-                        <c-ui.icon name="plus" classes="h-4 w-4 mr-2" />
-                        Add Property
-                    </a>
-                    <a href="{% url 'properties:my-properties' %}" class="btn btn-outline w-full justify-start">
-                        <c-ui.icon name="home" classes="h-4 w-4 mr-2" />
-                        My Properties
-                    </a>
-                    <a href="{% url 'properties:favorites' %}" class="btn btn-outline w-full justify-start">
-                        <c-ui.icon name="heart" classes="h-4 w-4 mr-2" />
-                        Favorites
-                    </a>
-                    <a href="{% url 'users:password_change' %}" class="btn btn-outline w-full justify-start">
-                        <c-ui.icon name="key" classes="h-4 w-4 mr-2" />
-                        Change Password
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Account Settings -->
-        <div class="card bg-base-100 shadow-soft">
-            <div class="card-body">
-                <h3 class="card-title text-lg mb-4">Account Settings</h3>
-                <div class="space-y-3">
-                    <div class="form-control">
-                        <label class="label cursor-pointer">
-                            <span class="label-text">Email notifications</span>
-                            <input type="checkbox" class="toggle toggle-primary" checked>
-                        </label>
-                    </div>
-                    <div class="form-control">
-                        <label class="label cursor-pointer">
-                            <span class="label-text">SMS notifications</span>
-                            <input type="checkbox" class="toggle toggle-primary">
-                        </label>
-                    </div>
-                    <div class="form-control">
-                        <label class="label cursor-pointer">
-                            <span class="label-text">Marketing emails</span>
-                            <input type="checkbox" class="toggle toggle-primary">
-                        </label>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+  {% endif %}
 </div>
 {% endblock %}

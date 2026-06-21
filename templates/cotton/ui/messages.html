@@ -1,56 +1,17 @@
-{% load static %}
-
-<div class="fixed top-20 right-4 z-50 space-y-2" x-data="{ messages: [] }" x-init="
-    // Auto-hide messages after 5 seconds
-    setTimeout(() => {
-        document.querySelectorAll('.alert-auto-hide').forEach(alert => {
-            alert.style.opacity = '0';
-            alert.style.transform = 'translateX(100%)';
-            setTimeout(() => alert.remove(), 300);
-        });
-    }, 5000);
-">
-    {% for message in messages %}
-        <div class="alert alert-auto-hide animate-slide-in-right max-w-md
-            {% if message.tags == 'error' %}alert-error
-            {% elif message.tags == 'warning' %}alert-warning
-            {% elif message.tags == 'success' %}alert-success
-            {% elif message.tags == 'info' %}alert-info
-            {% else %}alert-info{% endif %}
-            shadow-large transition-all duration-300"
-            x-data="{ show: true }"
-            x-show="show"
-            x-transition:enter="transition ease-out duration-300"
-            x-transition:enter-start="opacity-0 transform translate-x-full"
-            x-transition:enter-end="opacity-100 transform translate-x-0"
-            x-transition:leave="transition ease-in duration-300"
-            x-transition:leave-start="opacity-100 transform translate-x-0"
-            x-transition:leave-end="opacity-0 transform translate-x-full">
-
-            <div class="flex items-start space-x-3">
-                <!-- Icon -->
-                <div class="flex-shrink-0">
-                    {% if message.tags == 'error' %}
-                        <c-ui.icon name="exclamation-circle" />
-                    {% elif message.tags == 'warning' %}
-                        <c-ui.icon name="exclamation" />
-                    {% elif message.tags == 'success' %}
-                        <c-ui.icon name="check-circle" />
-                    {% else %}
-                        <c-ui.icon name="information-circle" />
-                    {% endif %}
-                </div>
-
-                <!-- Message Content -->
-                <div class="flex-1 min-w-0">
-                    <p class="text-sm font-medium">{{ message }}</p>
-                </div>
-
-                <!-- Close Button -->
-                <button @click="show = false" class="flex-shrink-0 ml-4">
-                    <c-ui.icon name="x" classes="h-4 w-4" />
-                </button>
-            </div>
-        </div>
-    {% endfor %}
+<div class="pointer-events-none fixed right-4 top-20 z-50 grid w-[calc(100%-2rem)] max-w-sm gap-2" aria-live="polite">
+  {% for message in messages %}
+    <div
+      x-data="{ show: true }"
+      x-show="show"
+      x-transition
+      class="pointer-events-auto flex items-start gap-3 rounded-lg border bg-background p-4 shadow-lg animate-in slide-in-from-top-2 {% if message.tags == 'error' %}border-destructive/50{% endif %}"
+      role="{% if message.tags == 'error' %}alert{% else %}status{% endif %}"
+    >
+      <c-ui.icon name="{% if message.tags == 'error' %}exclamation-circle{% elif message.tags == 'success' %}check-circle{% else %}information-circle{% endif %}" classes="mt-0.5 size-5 {% if message.tags == 'error' %}text-destructive{% else %}text-foreground{% endif %}" />
+      <p class="flex-1 text-sm">{{ message }}</p>
+      <button type="button" @click="show = false" class="rounded-sm text-muted-foreground hover:text-foreground focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring" aria-label="Dismiss message">
+        <c-ui.icon name="x" classes="size-4" />
+      </button>
+    </div>
+  {% endfor %}
 </div>

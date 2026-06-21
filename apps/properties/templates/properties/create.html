@@ -1,17 +1,16 @@
-{% extends '_layouts/base.html' %}
-{% load static %}
+{% extends "_layouts/base.html" %}
 
-{% block title %}Add Property - Strata{% endblock %}
+{% block title %}Add Property — Strata{% endblock %}
 
 {% block content %}
-<div class="max-w-5xl mx-auto">
-    <!-- Page Header -->
-    <div class="text-center mb-8">
-        <h1 class="text-3xl font-display font-bold text-base-content mb-2">Add New Property</h1>
-        <p class="text-base-content/60">List your property and reach thousands of potential buyers or renters</p>
-    </div>
-
-    <!-- Property Form Component -->
-    {% include 'properties/partials/property_form.html' with form=form is_edit_mode=False %}
+<div class="mx-auto max-w-4xl space-y-8">
+  <header class="space-y-2">
+    <c-button href="{% url 'properties:my-properties' %}" variant="ghost" size="sm" class="-ml-3">
+      <c-ui.icon name="arrow-left" classes="size-4" /> My Properties
+    </c-button>
+    <h1 class="text-3xl font-bold tracking-tight">Add a Property</h1>
+    <p class="text-muted-foreground">Create a draft or publish when every detail is ready.</p>
+  </header>
+  {% include "properties/partials/property_form.html" with form=form is_edit_mode=False %}
 </div>
 {% endblock %}

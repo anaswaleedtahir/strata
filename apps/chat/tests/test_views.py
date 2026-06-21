@@ -3,7 +3,7 @@ import time
 from unittest import skip
 
 from channels.db import database_sync_to_async
-from channels.testing import WebsocketCommunicator
+from channels.testing.websocket import WebsocketCommunicator
 from django.contrib.auth import get_user_model
 from django.test import TransactionTestCase, override_settings
 
@@ -29,8 +29,6 @@ class ConversationListViewTestCase(TransactionTestCase):
             user=self.user2,
             name="Property 1",
             full_address="123 Test St",
-            phone_number="03001234567",
-            cnic="12345-1234567-1",
             property_type="House",
             description="Test property 1",
             price=100000,
@@ -39,8 +37,6 @@ class ConversationListViewTestCase(TransactionTestCase):
             user=self.user3,
             name="Property 2",
             full_address="456 Test Ave",
-            phone_number="03001234568",
-            cnic="12345-1234567-2",
             property_type="Apartment",
             description="Test property 2",
             price=150000,
@@ -185,8 +181,6 @@ class ConversationDetailViewTestCase(TransactionTestCase):
             user=self.user2,
             name="Test Property",
             full_address="123 Test St",
-            phone_number="03001234567",
-            cnic="12345-1234567-1",
             property_type="House",
             description="Test property",
             price=100000,
@@ -334,8 +328,7 @@ class ConversationDetailViewTestCase(TransactionTestCase):
         self.client.force_login(self.user1)
         response = self.client.get(f"/chat/conversations/{self.conversation.id}/")
         content = response.content.decode()
-        self.assertIn("ring-2 ring-primary-400 ring-offset-2", content)
-        self.assertIn("badge badge-primary badge-xs", content)
+        self.assertIn("ring-2 ring-ring ring-offset-2", content)
         self.assertIn("New", content)
 
     def test_sender_name_and_timestamp_displayed(self):
@@ -363,8 +356,6 @@ class StartConversationViewTestCase(TransactionTestCase):
             user=self.user2,
             name="Test Property",
             full_address="123 Test St",
-            phone_number="03001234567",
-            cnic="12345-1234567-1",
             property_type="House",
             description="Test property",
             price=100000,
@@ -454,8 +445,6 @@ class OfflineMessageHandlingTestCase(TransactionTestCase):
             user=self.user2,
             name="Test Property",
             full_address="123 Test St, Test City, TS 12345",
-            phone_number="03001234567",
-            cnic="12345-1234567-1",
             property_type="House",
             description="A test property",
             price=100000,
@@ -536,8 +525,6 @@ class OfflineMessageHandlingTestCase(TransactionTestCase):
             user=user2,
             name="Test Property",
             full_address="123 Test St",
-            phone_number="03001234567",
-            cnic="12345-1234567-1",
             property_type="House",
             description="Test property",
             price=100000,
@@ -587,8 +574,6 @@ class OfflineMessageHandlingTestCase(TransactionTestCase):
             user=user2,
             name="Test Property",
             full_address="123 Test St",
-            phone_number="03001234567",
-            cnic="12345-1234567-1",
             property_type="House",
             description="Test property",
             price=100000,

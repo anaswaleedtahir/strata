@@ -1,66 +1,30 @@
-{% extends '_layouts/base.html' %}
-
-{% block main_class %}{% endblock %}
+{% extends "_layouts/base.html" %}
 
 {% block content %}
-<div class="flex min-h-screen bg-base-200">
-    <!-- Sidebar (hidden on mobile, shown on desktop) -->
-    <aside class="hidden lg:flex lg:flex-col lg:w-64 bg-base-100 shadow-medium">
-        <div class="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
-            <div class="flex items-center flex-shrink-0 px-4">
-                <h2 class="text-lg font-display font-semibold text-base-content">Dashboard</h2>
-            </div>
-            <nav class="mt-8 flex-1 px-2 space-y-1">
-                {% block sidebar_nav %}
-                <a href="{% url 'properties:my-properties' %}"
-                   class="group flex items-center px-2 py-2 text-sm font-medium rounded-lg hover:bg-primary-50 hover:text-primary-600 {% if request.resolver_match.url_name == 'my-properties' %}bg-primary-100 text-primary-700{% else %}text-base-content{% endif %}">
-                    <c-ui.icon name="home" classes="mr-3 h-5 w-5" />
-                    My Properties
-                </a>
-                <a href="{% url 'properties:favorites' %}"
-                   class="group flex items-center px-2 py-2 text-sm font-medium rounded-lg hover:bg-primary-50 hover:text-primary-600 {% if request.resolver_match.url_name == 'favorites' %}bg-primary-100 text-primary-700{% else %}text-base-content{% endif %}">
-                    <c-ui.icon name="heart" classes="mr-3 h-5 w-5" />
-                    Favorites
-                </a>
-                <a href="{% url 'users:profile' %}"
-                   class="group flex items-center px-2 py-2 text-sm font-medium rounded-lg hover:bg-primary-50 hover:text-primary-600 {% if request.resolver_match.url_name == 'profile' %}bg-primary-100 text-primary-700{% else %}text-base-content{% endif %}">
-                    <c-ui.icon name="user" classes="mr-3 h-5 w-5" />
-                    Profile
-                </a>
-                {% endblock %}
-            </nav>
-        </div>
-    </aside>
-
-    <!-- Main content -->
-    <div class="flex-1 flex flex-col overflow-hidden">
-        <!-- Page header -->
-        <header class="bg-base-100 shadow-soft">
-            <div class="px-4 sm:px-6 lg:px-8">
-                <div class="flex justify-between items-center py-6">
-                    <div class="flex items-center">
-                        <!-- Mobile menu button -->
-                        <button type="button" class="lg:hidden -ml-0.5 -mt-0.5 h-12 w-12 inline-flex items-center justify-center rounded-md text-base-content hover:text-primary-600 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-500">
-                            <span class="sr-only">Open sidebar</span>
-                            <c-ui.icon name="menu" classes="h-6 w-6" />
-                        </button>
-                        <h1 class="ml-4 lg:ml-0 text-2xl font-display font-bold text-base-content">
-                            {% block page_title %}Dashboard{% endblock %}
-                        </h1>
-                    </div>
-                    <div class="flex items-center space-x-4">
-                        {% block page_actions %}{% endblock %}
-                    </div>
-                </div>
-            </div>
-        </header>
-
-        <!-- Page content -->
-        <main class="flex-1 overflow-y-auto">
-            <div class="px-4 sm:px-6 lg:px-8 py-8">
-                {% block dashboard_content %}{% endblock %}
-            </div>
-        </main>
+<div class="space-y-8">
+  <header class="flex flex-col gap-4 border-b pb-6 sm:flex-row sm:items-end sm:justify-between">
+    <div class="space-y-1">
+      <p class="text-sm font-medium text-muted-foreground">Workspace</p>
+      <h1 class="text-3xl font-bold tracking-tight">{% block page_title %}Dashboard{% endblock %}</h1>
     </div>
+    <div class="flex flex-wrap items-center gap-2">{% block page_actions %}{% endblock %}</div>
+  </header>
+
+  <nav class="flex gap-1 overflow-x-auto rounded-lg bg-muted p-1" aria-label="Workspace">
+    <a href="{% url 'properties:my-properties' %}" class="inline-flex h-8 shrink-0 items-center gap-2 rounded-md px-3 text-sm font-medium {% if request.resolver_match.url_name == 'my-properties' %}bg-background shadow-xs{% else %}text-muted-foreground hover:text-foreground{% endif %}">
+      <c-ui.icon name="home" classes="size-4" /> My Properties
+    </a>
+    <a href="{% url 'properties:favorites' %}" class="inline-flex h-8 shrink-0 items-center gap-2 rounded-md px-3 text-sm font-medium {% if request.resolver_match.url_name == 'favorites' %}bg-background shadow-xs{% else %}text-muted-foreground hover:text-foreground{% endif %}">
+      <c-ui.icon name="heart" classes="size-4" /> Favorites
+    </a>
+    <a href="{% url 'chat:conversation_list' %}" class="inline-flex h-8 shrink-0 items-center gap-2 rounded-md px-3 text-sm font-medium {% if request.resolver_match.app_name == 'chat' %}bg-background shadow-xs{% else %}text-muted-foreground hover:text-foreground{% endif %}">
+      <c-ui.icon name="chat" classes="size-4" /> Messages
+    </a>
+    <a href="{% url 'users:profile' %}" class="inline-flex h-8 shrink-0 items-center gap-2 rounded-md px-3 text-sm font-medium {% if request.resolver_match.app_name == 'users' %}bg-background shadow-xs{% else %}text-muted-foreground hover:text-foreground{% endif %}">
+      <c-ui.icon name="user" classes="size-4" /> Profile
+    </a>
+  </nav>
+
+  {% block dashboard_content %}{% endblock %}
 </div>
 {% endblock %}

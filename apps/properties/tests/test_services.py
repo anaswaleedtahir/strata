@@ -12,8 +12,6 @@ class PropertyCreateTests(TestCase):
             "name": "Test House",
             "description": "Nice place",
             "full_address": "123 Main St",
-            "phone_number": "+92-3001234567",
-            "cnic": "12345-1234567-1",
             "property_type": "House",
             "price": "5000000.00",
             "bedrooms": 3,

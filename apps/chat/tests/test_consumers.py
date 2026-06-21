@@ -1,7 +1,7 @@
 from unittest.mock import AsyncMock, patch
 
 from channels.db import database_sync_to_async
-from channels.testing import WebsocketCommunicator
+from channels.testing.websocket import WebsocketCommunicator
 from django.contrib.auth import get_user_model
 from django.test import TransactionTestCase, override_settings
 
@@ -39,8 +39,6 @@ class ChatConsumerTestCase(TransactionTestCase):
             user=self.user2,
             name="Test Property",
             full_address="123 Test St, Test City, TS 12345",
-            phone_number="03001234567",
-            cnic="12345-1234567-1",
             property_type="House",
             description="A test property",
             price=100000,
@@ -225,8 +223,6 @@ class MessageTypeProtocolTestCase(TransactionTestCase):
             user=self.user2,
             name="Test Property",
             full_address="123 Test St, Test City, TS 12345",
-            phone_number="03001234567",
-            cnic="12345-1234567-1",
             property_type="House",
             description="A test property",
             price=100000,

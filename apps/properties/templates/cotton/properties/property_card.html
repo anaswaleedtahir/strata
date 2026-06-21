@@ -1,100 +1,77 @@
-{% load static %}
+{% load property_tags %}
 <c-vars property />
 
-<div class="card property-card bg-base-100 shadow-soft overflow-hidden" data-property-card>
-    <!-- Property Image -->
-    <figure class="relative h-48 overflow-hidden">
-        {% if property.images.first %}
-            <img src="{{ property.images.first.image.url }}"
-                 alt="{{ property.name }}"
-                 class="w-full h-full object-cover transition-transform duration-300 hover:scale-105">
-        {% else %}
-            <div class="w-full h-full surface-placeholder flex items-center justify-center">
-                <c-ui.icon name="home" classes="h-16 w-16 text-secondary-400" />
-            </div>
-        {% endif %}
-
-        <!-- Property Type Badge -->
-        <div class="absolute top-3 left-3">
-            <span class="badge badge-primary badge-sm font-medium">
-                {{ property.get_property_type_display }}
-            </span>
+<c-card class="group overflow-hidden transition-shadow hover:shadow-md" data-property-card>
+  <div class="relative aspect-[4/3] overflow-hidden bg-muted">
+    <a href="{% url 'properties:detail' property.pk %}" aria-label="View {{ property.name }}">
+      {% if property.images.first %}
+        <img
+          src="{{ property.images.first.image.url }}"
+          alt="{{ property.name }}"
+          class="size-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+          loading="lazy"
+        >
+      {% else %}
+        <div class="surface-placeholder flex size-full items-center justify-center text-muted-foreground">
+          <c-ui.icon name="home" classes="size-12" />
         </div>
+      {% endif %}
+    </a>
 
-        <!-- Favorite Button -->
-        {% if user.is_authenticated and user != property.user %}
-            <div class="absolute top-3 right-3"
-                 @favorite-toggled.window="if ($event.detail.propertyId === {{ property.pk }} && !$event.detail.isFavorited && window.location.pathname.includes('favorites')) { $el.closest('[data-property-card]').remove(); }">
-                <c-properties.favorite-button :property="property" />
-            </div>
-        {% endif %}
-
-        <!-- Price Badge -->
-        <div class="absolute bottom-3 left-3">
-            <span class="badge badge-secondary badge-lg price-tag text-secondary-content">
-                ${{ property.price|floatformat:0 }}
-                {% if property.property_type == 'rent' %}/month{% endif %}
-            </span>
-        </div>
-    </figure>
-
-    <!-- Property Details -->
-    <div class="card-body p-4">
-        <!-- Title and Location -->
-        <div class="mb-3">
-            <h3 class="card-title text-lg font-semibold text-base-content line-clamp-2 mb-1">
-                {{ property.name }}
-            </h3>
-            <p class="text-base-content/60 text-sm flex items-center">
-                <c-ui.icon name="location-marker" classes="h-4 w-4 mr-1" />
-                {{ property.full_address|truncatechars:30 }}
-            </p>
-        </div>
-
-        <!-- Property Features -->
-        <div class="flex items-center space-x-4 text-sm text-base-content/70 mb-4">
-            <div class="flex items-center">
-                <c-ui.icon name="office-building" classes="h-4 w-4 mr-1" />
-                {{ property.property_type }}
-            </div>
-            <div class="flex items-center">
-                <c-ui.icon name="calendar" classes="h-4 w-4 mr-1" />
-                {{ property.created_at|date:"M Y" }}
-            </div>
-        </div>
-
-        <!-- Description -->
-        {% if property.description %}
-            <p class="text-base-content/70 text-sm line-clamp-2 mb-4">
-                {{ property.description|truncatechars:100 }}
-            </p>
-        {% endif %}
-
-        <!-- Owner Info -->
-        <div class="flex items-center justify-between">
-            <div class="flex items-center space-x-2">
-                <div class="avatar placeholder">
-                    <div class="bg-secondary-100 text-secondary-700 rounded-full w-8 h-8">
-                        <span class="text-xs font-semibold">
-                            {{ property.user.first_name|first|default:property.user.username|first|upper }}
-                        </span>
-                    </div>
-                </div>
-                <div>
-                    <p class="text-sm font-medium text-base-content">
-                        {{ property.user.first_name|default:property.user.username }}
-                    </p>
-                    <p class="text-xs text-base-content/60">
-                        {{ property.created_at|timesince }} ago
-                    </p>
-                </div>
-            </div>
-
-            <!-- View Details Button -->
-            <a href="{% url 'properties:detail' property.pk %}"
-               class="btn btn-primary btn-sm">
-                View Details
-            </a>
-        </div>
+    <div class="absolute left-3 top-3 flex gap-2">
+      <c-badge variant="secondary" class="bg-background/95 backdrop-blur">{{ property.get_property_type_display }}</c-badge>
+      {% if user == property.user %}
+        <c-badge variant="{% if property.is_published %}default{% else %}outline{% endif %}" class="bg-background/95 text-foreground backdrop-blur">
+          {% if property.is_published %}Published{% else %}Draft{% endif %}
+        </c-badge>
+      {% endif %}
     </div>
-</div>
+
+    {% if user.is_authenticated and user != property.user %}
+      <div
+        class="absolute right-3 top-3"
+        @favorite-toggled.window="if ($event.detail.propertyId === {{ property.pk }} && !$event.detail.isFavorited && window.location.pathname.includes('favorites')) { $el.closest('[data-property-card]').remove(); }"
+      >
+        <c-properties.favorite-button :property="property" />
+      </div>
+    {% endif %}
+  </div>
+
+  <c-card.content class="space-y-4 p-5">
+    <div class="space-y-1">
+      <div class="flex items-start justify-between gap-4">
+        <h2 class="line-clamp-1 font-semibold tracking-tight">{{ property.name }}</h2>
+        <span class="price-tag shrink-0 text-sm font-semibold">{{ property.price|pkr_compact }}</span>
+      </div>
+      <p class="flex items-start gap-1.5 text-sm text-muted-foreground">
+        <c-ui.icon name="location-marker" classes="mt-0.5 size-4 shrink-0" />
+        <span class="line-clamp-1">{{ property.full_address }}</span>
+      </p>
+    </div>
+
+    <div class="flex flex-wrap gap-x-4 gap-y-2 text-xs text-muted-foreground">
+      {% if property.bedrooms is not None %}
+        <span class="flex items-center gap-1"><c-ui.icon name="home" classes="size-3.5" /> {{ property.bedrooms }} bed{{ property.bedrooms|pluralize }}</span>
+      {% endif %}
+      {% if property.bathrooms is not None %}
+        <span class="flex items-center gap-1"><c-ui.icon name="sparkles" classes="size-3.5" /> {{ property.bathrooms }} bath{{ property.bathrooms|pluralize }}</span>
+      {% endif %}
+      {% if property.area %}
+        <span>{{ property.area|floatformat:0 }} sq ft</span>
+      {% endif %}
+    </div>
+
+    <div class="flex items-center justify-between border-t pt-4">
+      <div class="min-w-0">
+        <p class="truncate text-sm font-medium">{{ property.user.first_name|default:"Property Owner" }}</p>
+        <p class="text-xs text-muted-foreground">Listed {{ property.created_at|timesince }} ago</p>
+      </div>
+      <div class="flex gap-2">
+        {% if user == property.user %}
+          <c-button href="{% url 'properties:edit' property.pk %}" variant="outline" size="sm">Edit</c-button>
+        {% endif %}
+        <c-button href="{% url 'properties:detail' property.pk %}" size="sm">View</c-button>
+      </div>
+    </div>
+  </c-card.content>
+</c-card>

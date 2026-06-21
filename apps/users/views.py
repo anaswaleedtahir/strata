@@ -7,6 +7,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.views import View
 
 from apps.shared.exceptions import ApplicationError
@@ -58,6 +59,16 @@ class SignupView(HTMXMixin, View):
 
 
 class LoginView(HTMXMixin, View):
+    def _success_url(self, request):
+        next_url = request.POST.get("next") or request.GET.get("next")
+        if next_url and url_has_allowed_host_and_scheme(
+            next_url,
+            allowed_hosts={request.get_host()},
+            require_https=request.is_secure(),
+        ):
+            return next_url
+        return reverse("properties:list")
+
     def _get_cooloff_message(self, prefix):
         cooloff_time = getattr(settings, "AXES_COOLOFF_TIME", None)
         if cooloff_time:
@@ -103,14 +114,17 @@ class LoginView(HTMXMixin, View):
                         user,
                         backend="django.contrib.auth.backends.ModelBackend",
                     )
+                    if not request.POST.get("remember_me"):
+                        request.session.set_expiry(0)
                     messages.success(
                         request, f"Welcome back, {user.first_name or user.email}!"
                     )
+                    success_url = self._success_url(request)
                     if self.is_htmx:
                         response = HttpResponse()
-                        response["HX-Redirect"] = reverse("properties:list")
+                        response["HX-Redirect"] = success_url
                         return response
-                    return redirect("properties:list")
+                    return redirect(success_url)
                 else:
                     form.add_error(None, "Your account has been disabled.")
             else:

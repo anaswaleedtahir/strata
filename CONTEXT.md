@@ -10,9 +10,17 @@ Server-rendered Django + HTMX real-estate platform. Property listings, owner pro
 A real-estate listing record (attributes, images, documents) owned by exactly one User.
 _Avoid_: Listing, ad, post
 
+**Property price**:
+The asking price of a Property, always denominated in Pakistani rupees (PKR).
+_Avoid_: Dollar price, currency-agnostic price
+
 **Owner**:
 The User who created a Property. Authoritative term for the seller-side actor.
 _Avoid_: Lister, seller, agent
+
+**Owner contact**:
+Buyer-to-Owner communication that occurs only through a Conversation; direct email, phone, and identity details remain private.
+_Avoid_: Direct contact, public contact details
 
 **Favorite**:
 A User-to-Property association recording interest. One per (User, Property) pair.
@@ -64,7 +72,7 @@ A page or fragment owned by one Django app, under `apps/<app>/templates/<app>/`.
 _Avoid_: Putting app pages in project-root `templates/<app>/`
 
 **Field primitive**:
-The single reusable form control at `templates/_components/forms/field.html`. Renders any bound form field via `widget_tweaks` (`render_field`). App form partials compose fields; they do not hand-build `<input>` markup.
+The single reusable form control at `templates/cotton/forms/field.html`. Renders any bound form field via `widget_tweaks` (`render_field`). App form partials compose fields; they do not hand-build `<input>` markup.
 _Avoid_: `input.html`, per-type field templates, scattering `add_class` across pages
 
 **Form partial**:
@@ -75,12 +83,18 @@ _Avoid_: Calling full-page templates "partials"
 A template fragment returned when `request.htmx` is true. No `extends`; swapped into an existing DOM target. Colocated with the owning app under `apps/<app>/templates/<app>/partials/`.
 _Avoid_: Extending `base.html` in a partial, putting partials in root `_components/<app>/`
 
+**UI primitive**:
+A project-owned Cotton component for one foundational control or interaction, using stock shadcn visual tokens and optionally scaffolded from shadcn-django.
+_Avoid_: DaisyUI component, vendor widget
+
 ## Relationships
 
 - A **User** owns zero or more **Properties**
+- A **Property** has exactly one **Property price**
 - A **Property** has zero or more **PropertyImages** and zero or more **Favorites**
 - A **Favorite** belongs to exactly one **User** and one **Property**
 - A **Conversation** has exactly two **Participants** (Users) and references exactly one **Property**
+- **Owner contact** always creates or resumes a **Conversation** about one **Property**
 - A **Conversation** contains zero or more **Messages**
 - A **Message** has exactly one sender (Participant) and one read state per recipient
 
@@ -92,6 +106,10 @@ _Avoid_: Extending `base.html` in a partial, putting partials in root `_componen
 - **Selector** → may call other Selectors; never mutates
 - **Form** → may call shared validators; never calls Service or Selector
 - **Model** → no business logic in `save()`; constraints at DB level; properties for trivial derived values
+
+## Flagged ambiguities
+
+- Property-level phone and CNIC fields conflicted with private **Owner contact** — resolved: remove both from **Property**; any future identity verification belongs to a separate Owner-level concept.
 
 ## Example dialogue
 

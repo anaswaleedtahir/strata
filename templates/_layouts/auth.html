@@ -1,31 +1,23 @@
-{% extends '_layouts/base.html' %}
+{% extends "_layouts/base.html" %}
 
-{% block main_class %}min-h-screen flex items-center justify-center bg-base-200 px-4{% endblock %}
+{% block main_class %}mx-auto flex w-full max-w-7xl flex-1 items-center justify-center px-4 py-12 sm:px-6{% endblock %}
 
 {% block content %}
 <div class="w-full max-w-md">
-    <div class="card bg-base-100 shadow-medium border border-base-300">
-        <div class="card-body p-8">
-            <!-- Logo -->
-            <div class="text-center mb-8">
-                <div class="inline-flex items-center justify-center w-16 h-16 bg-primary rounded-xl mb-4">
-                    <c-ui.icon name="home" variant="solid" classes="h-8 w-8 text-base-100" />
-                </div>
-                <h1 class="text-2xl font-display font-bold text-primary">
-                    {% block auth_title %}Strata{% endblock %}
-                </h1>
-                <p class="text-base-content/60 mt-2">
-                    {% block auth_subtitle %}Welcome back{% endblock %}
-                </p>
-            </div>
-
-            {% block auth_content %}{% endblock %}
-        </div>
-    </div>
-
-    <!-- Additional Links -->
-    <div class="text-center mt-6">
-        {% block auth_footer %}{% endblock %}
-    </div>
+  <c-card>
+    <c-card.header class="space-y-2 text-center">
+      <a href="{% url 'properties:list' %}" class="mx-auto flex size-10 items-center justify-center rounded-lg bg-primary text-primary-foreground" aria-label="Strata home">
+        <c-ui.icon name="home" variant="solid" classes="size-5" />
+      </a>
+      <c-card.title class="text-2xl">{% block auth_title %}Strata{% endblock %}</c-card.title>
+      <c-card.description>{% block auth_subtitle %}Welcome back{% endblock %}</c-card.description>
+    </c-card.header>
+    <c-card.content>
+      {% block auth_content %}{% endblock %}
+    </c-card.content>
+  </c-card>
+  <div class="mt-6 text-center text-sm text-muted-foreground">
+    {% block auth_footer %}{% endblock %}
+  </div>
 </div>
 {% endblock %}

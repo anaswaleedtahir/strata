@@ -1,126 +1,175 @@
-{% load static %}
+{% load property_tags %}
 
-<div class="property-detail-content">
-    <!-- Property Images -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
-        {% if property.images.first %}
-            <div class="lg:col-span-1">
-                <img src="{{ property.images.first.image.url }}"
-                     alt="{{ property.name }}"
-                     class="w-full h-96 object-cover rounded-2xl">
-            </div>
-            <div class="grid grid-cols-2 gap-4">
-                {% for image in property.images.all|slice:"1:5" %}
-                    <img src="{{ image.image.url }}"
-                         alt="{{ property.name }}"
-                         class="w-full h-44 object-cover rounded-xl">
-                {% endfor %}
-            </div>
-        {% else %}
-            <div class="lg:col-span-2 h-96 surface-placeholder rounded-xl flex items-center justify-center">
-                <c-ui.icon name="home" classes="h-24 w-24 text-secondary-400" />
-            </div>
+<article class="space-y-8">
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <c-button href="{% url 'properties:list' %}" variant="ghost" size="sm" class="-ml-3">
+      <c-ui.icon name="arrow-left" classes="size-4" /> Back to Properties
+    </c-button>
+    {% if user.is_authenticated and user != property.user %}
+      <c-properties.favorite-button :property="property" />
+    {% endif %}
+  </div>
+
+  <header class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+    <div class="space-y-3">
+      <div class="flex flex-wrap gap-2">
+        <c-badge variant="secondary">{{ property.get_property_type_display }}</c-badge>
+        {% if is_owner %}
+          <c-badge variant="{% if property.is_published %}default{% else %}outline{% endif %}">
+            {% if property.is_published %}Published{% else %}Draft{% endif %}
+          </c-badge>
         {% endif %}
+      </div>
+      <h1 class="text-3xl font-bold tracking-tight sm:text-4xl">{{ property.name }}</h1>
+      <p class="flex items-start gap-2 text-muted-foreground">
+        <c-ui.icon name="location-marker" classes="mt-0.5 size-5 shrink-0" />
+        {{ property.full_address }}
+      </p>
     </div>
+    <p class="price-tag text-2xl font-bold">{{ property.price|pkr }}</p>
+  </header>
 
-    <!-- Property Details -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <!-- Main Content -->
-        <div class="lg:col-span-2 space-y-8">
-            <!-- Property Features -->
-            <div class="card bg-base-100 shadow-soft">
-                <div class="card-body">
-                    <h2 class="card-title text-xl mb-4">Property Features</h2>
-                    <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
-                        <div class="flex items-center space-x-2">
-                            <c-ui.icon name="home" classes="h-5 w-5 text-primary" />
-                            <span>{{ property.property_type }}</span>
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <c-ui.icon name="calendar" classes="h-5 w-5 text-primary" />
-                            <span>{{ property.created_at|date:"M Y" }}</span>
-                        </div>
-                    </div>
-                </div>
+  <section class="grid gap-4 lg:grid-cols-3" aria-label="Property photos">
+    {% if property.images.first %}
+      <img src="{{ property.images.first.image.url }}" alt="{{ property.name }}" class="h-80 w-full rounded-xl object-cover lg:col-span-2 lg:h-[30rem]">
+      <div class="grid grid-cols-2 gap-4 lg:grid-cols-1">
+        {% for image in property.images.all|slice:"1:3" %}
+          <img src="{{ image.image.url }}" alt="{{ property.name }} photo {{ forloop.counter|add:1 }}" class="h-36 w-full rounded-xl object-cover lg:h-[14.5rem]">
+        {% empty %}
+          <div class="surface-placeholder hidden rounded-xl lg:block"></div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="surface-placeholder flex h-80 items-center justify-center rounded-xl text-muted-foreground lg:col-span-3 lg:h-[30rem]">
+        <c-ui.icon name="home" classes="size-20" />
+      </div>
+    {% endif %}
+  </section>
+
+  <div class="grid gap-8 lg:grid-cols-[minmax(0,1fr)_22rem]">
+    <div class="space-y-6">
+      <c-card>
+        <c-card.header>
+          <c-card.title>Property details</c-card.title>
+          <c-card.description>The essentials at a glance.</c-card.description>
+        </c-card.header>
+        <c-card.content>
+          <dl class="grid grid-cols-2 gap-6 sm:grid-cols-3">
+            <div>
+              <dt class="text-sm text-muted-foreground">Type</dt>
+              <dd class="mt-1 font-medium">{{ property.get_property_type_display }}</dd>
             </div>
-
-            <!-- Description -->
-            {% if property.description %}
-                <div class="card bg-base-100 shadow-soft">
-                    <div class="card-body">
-                        <h2 class="card-title text-xl mb-4">Description</h2>
-                        <div class="space-y-4 text-base-content/80 leading-relaxed">
-                            {{ property.description|linebreaks }}
-                        </div>
-                    </div>
-                </div>
+            {% if property.bedrooms is not None %}
+              <div>
+                <dt class="text-sm text-muted-foreground">Bedrooms</dt>
+                <dd class="mt-1 font-medium">{{ property.bedrooms }}</dd>
+              </div>
             {% endif %}
-        </div>
-
-        <!-- Sidebar -->
-        <div class="space-y-6">
-            <!-- Contact Owner -->
-            <div class="card bg-base-100 shadow-soft">
-                <div class="card-body">
-                    <h3 class="card-title text-lg mb-4">Contact Owner</h3>
-                    <div class="flex items-center space-x-3 mb-4">
-                        <div class="avatar placeholder">
-                            <div class="bg-secondary-100 text-secondary-700 rounded-full w-12 h-12">
-                                <span class="text-lg font-semibold">
-                                    {{ property.user.first_name|first|default:property.user.username|first|upper }}
-                                </span>
-                            </div>
-                        </div>
-                        <div>
-                            <p class="font-semibold text-base-content">
-                                {{ property.user.first_name|default:property.user.username }}
-                            </p>
-                            <p class="text-sm text-base-content/60">Property Owner</p>
-                        </div>
-                    </div>
-
-                    <!-- Phone Number Display -->
-                    <div class="mb-4 p-3 bg-base-200 rounded-lg">
-                        <p class="text-sm text-base-content/60 mb-1">Phone Number</p>
-                        <p class="font-medium text-base-content">{{ property.phone_number }}</p>
-                    </div>
-
-                    {% if user.is_authenticated and user != property.user %}
-                        <div class="space-y-3">
-                            <a href="{% url 'chat:start_conversation' property.pk %}" class="btn btn-primary w-full">
-                                <c-ui.icon name="chat" classes="h-4 w-4 mr-2" />
-                                Send Message
-                            </a>
-                        </div>
-                    {% elif not user.is_authenticated %}
-                        <div class="text-center">
-                            <p class="text-base-content/60 mb-3">Sign in to contact the owner</p>
-                            <a href="{% url 'users:login' %}" class="btn btn-primary w-full">Sign In</a>
-                        </div>
-                    {% endif %}
-                </div>
+            {% if property.bathrooms is not None %}
+              <div>
+                <dt class="text-sm text-muted-foreground">Bathrooms</dt>
+                <dd class="mt-1 font-medium">{{ property.bathrooms }}</dd>
+              </div>
+            {% endif %}
+            {% if property.area %}
+              <div>
+                <dt class="text-sm text-muted-foreground">Area</dt>
+                <dd class="mt-1 font-medium">{{ property.area|floatformat:0 }} sq ft</dd>
+              </div>
+            {% endif %}
+            <div>
+              <dt class="text-sm text-muted-foreground">Listed</dt>
+              <dd class="mt-1 font-medium">{{ property.created_at|date:"M j, Y" }}</dd>
             </div>
+          </dl>
+        </c-card.content>
+      </c-card>
 
-            <!-- Property Stats -->
-            <div class="card bg-base-100 shadow-soft">
-                <div class="card-body">
-                    <h3 class="card-title text-lg mb-4">Property Stats</h3>
-                    <div class="space-y-3">
-                        <div class="flex justify-between">
-                            <span class="text-base-content/60">Listed</span>
-                            <span class="font-medium">{{ property.created_at|timesince }} ago</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-base-content/60">Views</span>
-                            <span class="font-medium">{{ property.view_count|default:0 }}</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-base-content/60">Property ID</span>
-                            <span class="font-medium">#{{ property.pk }}</span>
-                        </div>
-                    </div>
-                </div>
+      <c-card>
+        <c-card.header>
+          <c-card.title>Description</c-card.title>
+        </c-card.header>
+        <c-card.content>
+          {% if property.description %}
+            <div class="prose prose-neutral max-w-none text-sm leading-7 text-muted-foreground">
+              {{ property.description|linebreaks }}
             </div>
-        </div>
+          {% else %}
+            <p class="text-sm text-muted-foreground">The Owner has not added a description yet.</p>
+          {% endif %}
+        </c-card.content>
+      </c-card>
+
+      {% if is_owner and property.documents %}
+        <c-card>
+          <c-card.header>
+            <c-card.title>Private documents</c-card.title>
+            <c-card.description>Only you and administrators can download this file.</c-card.description>
+          </c-card.header>
+          <c-card.content>
+            <c-button href="{% url 'properties:download_document' property.pk %}" variant="outline">
+              <c-ui.icon name="download" classes="size-4" /> Download document
+            </c-button>
+          </c-card.content>
+        </c-card>
+      {% endif %}
     </div>
-</div>
+
+    <aside class="space-y-4">
+      <c-card class="lg:sticky lg:top-20">
+        <c-card.header>
+          <c-card.title>{% if is_owner %}Manage Property{% else %}Contact Owner{% endif %}</c-card.title>
+          <c-card.description>
+            {% if is_owner %}Update its details or publication status.{% else %}Direct contact details stay private.{% endif %}
+          </c-card.description>
+        </c-card.header>
+        <c-card.content class="space-y-4">
+          <div class="flex items-center gap-3">
+            <div class="flex size-10 items-center justify-center rounded-full bg-secondary text-sm font-semibold">
+              {{ property.user.first_name|slice:":1"|default:"O"|upper }}
+            </div>
+            <div>
+              <p class="font-medium">{{ property.user.first_name|default:"Property Owner" }}</p>
+              <p class="text-sm text-muted-foreground">Owner</p>
+            </div>
+          </div>
+
+          {% if is_owner %}
+            <div class="grid gap-2">
+              <c-button href="{% url 'properties:edit' property.pk %}">
+                <c-ui.icon name="pencil" classes="size-4" /> Edit Property
+              </c-button>
+              <c-alert_dialog>
+                <c-alert_dialog.trigger>
+                  <c-button type="button" variant="outline" class="w-full text-destructive hover:text-destructive">
+                    <c-ui.icon name="trash" classes="size-4" /> Delete Property
+                  </c-button>
+                </c-alert_dialog.trigger>
+                <c-alert_dialog.content>
+                  <c-alert_dialog.header>
+                    <c-alert_dialog.title>Delete this Property?</c-alert_dialog.title>
+                    <c-alert_dialog.description>This permanently removes the Property, its images, Favorites, and Conversations.</c-alert_dialog.description>
+                  </c-alert_dialog.header>
+                  <c-alert_dialog.footer>
+                    <c-alert_dialog.cancel>Cancel</c-alert_dialog.cancel>
+                    <form method="post" action="{% url 'properties:delete' property.pk %}">
+                      {% csrf_token %}
+                      <c-button type="submit" variant="destructive">Delete Property</c-button>
+                    </form>
+                  </c-alert_dialog.footer>
+                </c-alert_dialog.content>
+              </c-alert_dialog>
+            </div>
+          {% elif user.is_authenticated %}
+            <c-button href="{% url 'chat:start_conversation' property.pk %}" class="w-full">
+              <c-ui.icon name="chat" classes="size-4" /> Message Owner
+            </c-button>
+            <p class="text-xs leading-5 text-muted-foreground">Your Conversation is private and always tied to this Property.</p>
+          {% else %}
+            <c-button href="{% url 'users:login' %}?next={{ request.path|urlencode }}" class="w-full">Sign in to message</c-button>
+          {% endif %}
+        </c-card.content>
+      </c-card>
+    </aside>
+  </div>
+</article>

@@ -1,63 +1,40 @@
 <!DOCTYPE html>
 {% load static tailwind_cli %}
-<html lang="en" data-theme="strata">
-
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Strata{% endblock %}</title>
-
-    <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml" href="{% static 'images/favicon.svg' %}">
-
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,400&display=swap" rel="stylesheet">
-
-    <!-- Tailwind CSS with DaisyUI -->
-    {% tailwind_css %}
-
-    <!-- HTMX -->
-    <script
-      src="https://cdn.jsdelivr.net/npm/htmx.org@1.9.10/dist/htmx.min.js"
-      integrity="sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8nO7UC"
-      crossorigin="anonymous"
-      defer
-    ></script>
-
-    <!-- Alpine.js -->
-    <script
-      src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"
-      integrity="sha384-Rpe/8orFUm5Q1GplYBHxbuA8Az8O8C5sAoOsdbRWkqPjKFaxPgGZipj4zeHL7lxX"
-      crossorigin="anonymous"
-      defer
-    ></script>
-
-    {% block extra_head %}{% endblock %}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>{% block title %}Strata{% endblock %}</title>
+  <link rel="icon" type="image/svg+xml" href="{% static 'images/favicon.svg' %}">
+  {% tailwind_css %}
+  <script
+    src="https://cdn.jsdelivr.net/npm/htmx.org@1.9.10/dist/htmx.min.js"
+    integrity="sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8nO7UC"
+    crossorigin="anonymous"
+    defer
+  ></script>
+  <script
+    src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"
+    integrity="sha384-Rpe/8orFUm5Q1GplYBHxbuA8Az8O8C5sAoOsdbRWkqPjKFaxPgGZipj4zeHL7lxX"
+    crossorigin="anonymous"
+    defer
+  ></script>
+  {% block extra_head %}{% endblock %}
 </head>
-
-<body class="min-h-screen bg-base-200"
-      hx-headers='{"x-csrftoken": "{{ csrf_token }}"}'
-      hx-on:htmx:before-request="this.classList.add('htmx-loading')"
-      hx-on:htmx:after-request="this.classList.remove('htmx-loading')">
-    <!-- Navigation -->
-    <c-navigation.navbar />
-
-    <!-- Messages -->
-    {% if messages %}
-        <c-ui.messages />
-    {% endif %}
-
-    <!-- Main Content -->
-    <main class="{% block main_class %}container mx-auto px-4 py-8{% endblock %}">
-        {% block content %}{% endblock %}
-    </main>
-
-    <!-- Footer -->
-    <c-navigation.footer />
-
-    {% block extra_scripts %}{% endblock %}
+<body
+  class="flex min-h-screen flex-col"
+  hx-headers='{"x-csrftoken": "{{ csrf_token }}"}'
+>
+  <a href="#main-content" class="sr-only z-[100] rounded-md bg-background px-4 py-2 focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:ring-2 focus:ring-ring">
+    Skip to content
+  </a>
+  <c-navigation.navbar />
+  {% if messages %}<c-ui.messages />{% endif %}
+  <main id="main-content" class="{% block main_class %}mx-auto w-full max-w-7xl flex-1 px-4 py-8 sm:px-6 lg:px-8{% endblock %}">
+    {% block content %}{% endblock %}
+  </main>
+  <c-navigation.footer />
+  {% block extra_scripts %}{% endblock %}
 </body>
-
 </html>

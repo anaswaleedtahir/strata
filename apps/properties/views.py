@@ -1,9 +1,10 @@
+"""HTTP views for Property discovery and management."""
+
 import logging
 import os
 
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
 from django.http import (
     FileResponse,
@@ -17,12 +18,13 @@ from django.urls import reverse
 from django.views import View
 from django_htmx.http import trigger_client_event
 
-from apps.properties.forms import PropertyForm
+from apps.properties.forms import PropertyFilterForm, PropertyForm
 from apps.properties.models import Property
 from apps.properties.selectors import (
     favorite_exists,
     favorite_ids_for_user,
     property_get_with_related,
+    property_counts_for_user,
     property_list_favorites_for_user,
     property_list_for_user,
     property_list_published,
@@ -35,7 +37,6 @@ from apps.properties.services import (
 )
 from apps.shared.exceptions import ApplicationError
 from apps.shared.mixins import HTMXMixin, OwnerRequiredMixin
-from apps.shared.validators import cnic_validator, phone_validator
 
 logger = logging.getLogger(__name__)
 
@@ -46,10 +47,25 @@ class PropertyListView(HTMXMixin, View):
         show_my_properties = request.GET.get("my_properties") == "true"
 
         user = request.user if request.user.is_authenticated else None
+        filter_form = PropertyFilterForm(request.GET)
+        filters = {}
+        if filter_form.is_valid():
+            cleaned_data = filter_form.cleaned_data
+            filters = {
+                "query": cleaned_data.get("q", ""),
+                "property_type": cleaned_data.get("property_type", ""),
+                "min_price": cleaned_data.get("min_price"),
+                "max_price": cleaned_data.get("max_price"),
+                "bedrooms": cleaned_data.get("bedrooms"),
+                "bathrooms": cleaned_data.get("bathrooms"),
+                "ordering": cleaned_data.get("sort") or "newest",
+            }
+
         properties = property_list_published(
             user=user,
             show_favorites=show_favorites,
             show_my_properties=show_my_properties,
+            **filters,
         )
 
         if not request.user.is_authenticated:
@@ -72,10 +88,11 @@ class PropertyListView(HTMXMixin, View):
             "properties": page_obj.object_list,
             "show_favorites": show_favorites,
             "show_my_properties": show_my_properties,
+            "filter_form": filter_form,
         }
 
         if self.is_htmx:
-            return render(request, "properties/partials/property_grid.html", context)
+            return render(request, "properties/partials/property_results.html", context)
         return render(request, "properties/list.html", context)
 
 
@@ -121,8 +138,12 @@ class PropertyCreateView(LoginRequiredMixin, HTMXMixin, View):
 
         if form.is_valid():
             try:
+                form_data = {
+                    **form.cleaned_data,
+                    "is_published": request.POST.get("intent") == "publish",
+                }
                 property_obj = property_create(
-                    user=request.user, form_data=form.cleaned_data, images=images
+                    user=request.user, form_data=form_data, images=images
                 )
             except ApplicationError as e:
                 form.add_error(None, e.message)
@@ -181,9 +202,13 @@ class PropertyEditView(LoginRequiredMixin, OwnerRequiredMixin, HTMXMixin, View):
 
         if form.is_valid():
             try:
+                form_data = {
+                    **form.cleaned_data,
+                    "is_published": request.POST.get("intent") == "publish",
+                }
                 property_obj = property_update(
                     property_obj=property_obj,
-                    form_data=form.cleaned_data,
+                    form_data=form_data,
                     images=new_images,
                     delete_image_ids=delete_image_ids,
                     remove_document=remove_document,
@@ -227,7 +252,11 @@ class MyPropertiesListView(LoginRequiredMixin, View):
         properties = property_list_for_user(user=request.user)
         page_obj = Paginator(properties, 10).get_page(request.GET.get("page", 1))
 
-        context = {"properties": page_obj.object_list, "page_obj": page_obj}
+        context = {
+            "properties": page_obj.object_list,
+            "page_obj": page_obj,
+            "property_counts": property_counts_for_user(user=request.user),
+        }
         return render(request, "properties/my-properties.html", context)
 
 
@@ -302,61 +331,3 @@ class PropertyDeleteView(LoginRequiredMixin, OwnerRequiredMixin, HTMXMixin, View
             response["HX-Redirect"] = reverse("properties:list")
             return response
         return redirect("properties:list")
-
-
-class PropertyValidateStepView(LoginRequiredMixin, View):
-    STEP_FIELDS = {
-        "1": ["name", "property_type", "price", "full_address"],
-        "2": ["bedrooms", "bathrooms", "area", "phone_number", "cnic"],
-        "3": [],
-        "4": [],
-    }
-
-    def post(self, request):
-        step = request.POST.get("step")
-        if not step or step not in self.STEP_FIELDS:
-            return JsonResponse({"error": "Invalid step parameter"}, status=400)
-
-        fields_to_validate = self.STEP_FIELDS[step]
-        if not fields_to_validate:
-            return JsonResponse({"valid": True})
-
-        form = PropertyForm(request.POST, request.FILES)
-        form.is_valid()
-        errors = {
-            field: form.errors[field]
-            for field in fields_to_validate
-            if field in form.errors
-        }
-
-        if errors:
-            return JsonResponse({"valid": False, "errors": errors})
-        return JsonResponse({"valid": True})
-
-
-class ValidatePhoneView(View):
-    def post(self, request):
-        phone_number = request.POST.get("phone_number", "").strip()
-        if not phone_number:
-            return HttpResponse("", status=200)
-
-        try:
-            phone_validator(phone_number)
-            return HttpResponse("", status=200)
-        except ValidationError as e:
-            error_html = f'<div class="invalid-feedback d-block">{e.message}</div>'
-            return HttpResponse(error_html, status=200)
-
-
-class ValidateCNICView(View):
-    def post(self, request):
-        cnic = request.POST.get("cnic", "").strip()
-        if not cnic:
-            return HttpResponse("", status=200)
-
-        try:
-            cnic_validator(cnic)
-            return HttpResponse("", status=200)
-        except ValidationError as e:
-            error_html = f'<div class="invalid-feedback d-block">{e.message}</div>'
-            return HttpResponse(error_html, status=200)

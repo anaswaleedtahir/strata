@@ -1,35 +1,25 @@
-{% load static %}
-
 <form method="post" class="space-y-6">
-    {% csrf_token %}
+  {% csrf_token %}
 
-    <!-- Form Errors -->
-    {% if form.non_field_errors %}
-        <div class="alert alert-error">
-            <c-ui.icon name="exclamation-circle" classes="h-6 w-6" />
-            <div>
-                {% for error in form.non_field_errors %}
-                    <div>{{ error }}</div>
-                {% endfor %}
-            </div>
-        </div>
-    {% endif %}
+  {% if form.non_field_errors %}
+    <c-alert variant="destructive">
+      <c-ui.icon name="exclamation-circle" classes="size-4" />
+      <c-alert.description>
+        {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+      </c-alert.description>
+    </c-alert>
+  {% endif %}
 
-    <!-- Name Fields -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <c-forms.field :field="form.first_name" label="First Name" placeholder="Enter your first name" required />
-        <c-forms.field :field="form.last_name" label="Last Name" placeholder="Enter your last name" required />
-    </div>
+  <div class="grid gap-6 sm:grid-cols-2">
+    <c-forms.field :field="form.first_name" label="First name" placeholder="First name" required />
+    <c-forms.field :field="form.last_name" label="Last name" placeholder="Last name" required />
+  </div>
+  <c-forms.field :field="form.email" label="Email" placeholder="you@example.com" icon="at-symbol" required />
 
-    <!-- Email Field -->
-    <c-forms.field :field="form.email" label="Email" placeholder="Enter your email" icon="at-symbol" required />
-
-    <!-- Submit Button -->
-    <div class="flex justify-end space-x-4">
-        <a href="{% url 'users:profile' %}" class="btn btn-outline">Cancel</a>
-        <button type="submit" class="btn btn-primary">
-            <c-ui.icon name="check" classes="h-5 w-5 mr-2" />
-            Update Profile
-        </button>
-    </div>
+  <div class="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+    <c-button href="{% url 'users:profile' %}" variant="outline">Cancel</c-button>
+    <c-button type="submit">
+      <c-ui.icon name="check" classes="size-4" /> Save changes
+    </c-button>
+  </div>
 </form>

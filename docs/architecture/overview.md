@@ -16,7 +16,7 @@ Strata is a modern Django-based real estate management platform with a component
 
 ### Frontend
 - **Tailwind CSS 4** - Utility-first CSS framework built by `django-tailwind-cli`
-- **DaisyUI** - Component library built on Tailwind
+- **Project-owned shadcn UI** - Stock shadcn-style Cotton primitives built on Tailwind
 - **Django Cotton** - Reusable template components
 - **HTMX** - Dynamic HTML interactions without JavaScript
 - **Alpine.js** - Lightweight JavaScript framework

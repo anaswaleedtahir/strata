@@ -10,9 +10,6 @@ from apps.properties.views import (
     PropertyEditView,
     PropertyFavoriteToggleView,
     PropertyListView,
-    PropertyValidateStepView,
-    ValidateCNICView,
-    ValidatePhoneView,
 )
 
 app_name = "properties"
@@ -35,8 +32,4 @@ urlpatterns = [
     path("<int:pk>/delete/", PropertyDeleteView.as_view(), name="delete"),
     path("my-properties/", MyPropertiesListView.as_view(), name="my-properties"),
     path("favorites/", FavoritesListView.as_view(), name="favorites"),
-    # Validation endpoints
-    path("validate/step/", PropertyValidateStepView.as_view(), name="validate_step"),
-    path("validate/phone/", ValidatePhoneView.as_view(), name="validate_phone"),
-    path("validate/cnic/", ValidateCNICView.as_view(), name="validate_cnic"),
 ]

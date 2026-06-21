@@ -78,8 +78,6 @@ class SeedLocalCommandTests(TestCase):
                 "name": name,
                 "description": "A nice place",
                 "full_address": "123 Test Street",
-                "phone_number": "+92-3001234567",
-                "cnic": "12345-1234567-1",
                 "property_type": "House",
                 "price": "10000000.00",
                 "bedrooms": 3,

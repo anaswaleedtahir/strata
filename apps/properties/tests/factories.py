@@ -11,8 +11,6 @@ class PropertyFactory(factory.django.DjangoModelFactory):
     user = factory.SubFactory(UserFactory)
     name = factory.Sequence(lambda n: f"Property {n}")
     full_address = factory.Faker("address")
-    phone_number = "+92-3001234567"
-    cnic = "12345-1234567-1"
     property_type = "House"
     price = factory.Faker("pydecimal", left_digits=6, right_digits=2, positive=True)
     is_published = True

@@ -1,112 +1,74 @@
-{% extends '_layouts/base.html' %}
-{% load static %}
+{% extends "_layouts/dashboard.html" %}
 
-{% block title %}My Conversations - Strata{% endblock %}
+{% block title %}Messages — Strata{% endblock %}
+{% block page_title %}Messages{% endblock %}
 
-{% block content %}
-<div class="max-w-5xl mx-auto">
-    <!-- Page Header -->
-    <div class="mb-8">
-        <h1 class="text-3xl lg:text-4xl font-display font-bold text-base-content mb-2">
-            My Conversations
-        </h1>
-        <p class="text-base-content/70">
-            View and manage your property inquiries
-        </p>
-    </div>
+{% block page_actions %}
+  <c-button href="{% url 'properties:list' %}" variant="outline">
+    <c-ui.icon name="search" classes="size-4" /> Browse Properties
+  </c-button>
+{% endblock %}
 
-    <!-- Conversations List -->
-    {% if conversations %}
-        <div class="space-y-4">
-            {% for conversation in conversations %}
-                <a href="{% url 'chat:conversation_detail' conversation.id %}" class="card bg-base-100 shadow-soft hover:shadow-lg transition-all duration-200 block">
-                    <div class="card-body">
-                        <div class="flex items-start justify-between">
-                            <!-- Left: Participant & Property Info -->
-                            <div class="flex items-start space-x-4 flex-1">
-                                <!-- Property Image Thumbnail -->
-                                <div class="flex-shrink-0">
-                                    {% with primary_image=conversation.property.primary_image %}
-                                        {% if primary_image %}
-                                            <img src="{{ primary_image.image.url }}"
-                                                 alt="{{ conversation.property.name }}"
-                                                 class="w-16 h-16 object-cover rounded-lg">
-                                        {% else %}
-                                            <div class="w-16 h-16 bg-base-200 rounded-lg flex items-center justify-center">
-                                                <c-ui.icon name="home" classes="h-8 w-8 text-base-content/30" />
-                                            </div>
-                                        {% endif %}
-                                    {% endwith %}
-                                </div>
+{% block dashboard_content %}
+<div class="mx-auto max-w-4xl space-y-6">
+  <div>
+    <h2 class="text-xl font-semibold tracking-tight">Conversations</h2>
+    <p class="text-sm text-muted-foreground">Private messages about specific Properties.</p>
+  </div>
 
-                                <!-- Conversation Details -->
-                                <div class="flex-1 min-w-0">
-                                    <div class="flex items-center space-x-2 mb-1">
-                                        <h3 class="font-semibold text-base-content truncate">
-                                            {{ conversation.other_participant.email }}
-                                        </h3>
-                                        {% if conversation.unread_count > 0 %}
-                                            <span class="badge badge-primary badge-sm">
-                                                {{ conversation.unread_count }}
-                                            </span>
-                                        {% endif %}
-                                    </div>
-
-                                    <!-- Property Context with Link -->
-                                    <a href="{{ conversation.property.get_absolute_url }}"
-                                       class="flex items-center text-sm text-primary hover:text-primary-focus mb-2 w-fit"
-                                       onclick="event.stopPropagation();">
-                                        <c-ui.icon name="home" classes="h-4 w-4 mr-1" />
-                                        <span class="truncate">{{ conversation.property.name }}</span>
-                                    </a>
-
-                                    <!-- Last Message Preview -->
-                                    {% with last_message=conversation.messages.last %}
-                                        {% if last_message %}
-                                            <p class="text-sm text-base-content/70 truncate">
-                                                {% if last_message.sender == user %}
-                                                    <span class="font-medium">You:</span>
-                                                {% endif %}
-                                                {{ last_message.content|truncatechars:60 }}
-                                            </p>
-                                        {% else %}
-                                            <p class="text-sm text-base-content/50 italic">
-                                                No messages yet
-                                            </p>
-                                        {% endif %}
-                                    {% endwith %}
-                                </div>
-                            </div>
-
-                            <!-- Right: Timestamp -->
-                            <div class="text-right ml-4">
-                                <span class="text-xs text-base-content/50">
-                                    {{ conversation.updated_at|timesince }} ago
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                </a>
-            {% endfor %}
-        </div>
-    {% else %}
-        <!-- Empty State -->
-        <div class="card bg-base-100 shadow-soft">
-            <div class="card-body text-center py-16">
-                <div class="flex justify-center mb-4">
-                    <c-ui.icon name="chat" classes="h-24 w-24 text-base-content/20" />
+  {% if conversations %}
+    <div class="divide-y overflow-hidden rounded-xl border">
+      {% for conversation in conversations %}
+        <a href="{% url 'chat:conversation_detail' conversation.id %}" class="flex gap-4 bg-card p-4 transition-colors hover:bg-accent/50 sm:p-5">
+          <div class="size-14 shrink-0 overflow-hidden rounded-lg bg-muted">
+            {% with primary_image=conversation.property.primary_image %}
+              {% if primary_image %}
+                <img src="{{ primary_image.image.url }}" alt="{{ conversation.property.name }}" class="size-full object-cover">
+              {% else %}
+                <div class="surface-placeholder flex size-full items-center justify-center text-muted-foreground">
+                  <c-ui.icon name="home" classes="size-6" />
                 </div>
-                <h3 class="text-xl font-semibold text-base-content mb-2">
-                    No conversations yet
-                </h3>
-                <p class="text-base-content/60 mb-6">
-                    Start a conversation by messaging a property owner
-                </p>
-                <a href="{% url 'properties:list' %}" class="btn btn-primary">
-                    Browse Properties
-                </a>
+              {% endif %}
+            {% endwith %}
+          </div>
+
+          <div class="min-w-0 flex-1">
+            <div class="flex items-start justify-between gap-3">
+              <div class="min-w-0">
+                <div class="flex items-center gap-2">
+                  <h3 class="truncate font-medium">{{ conversation.other_participant.first_name|default:"Strata member" }}</h3>
+                  {% if conversation.unread_count > 0 %}
+                    <c-badge>{{ conversation.unread_count }} new</c-badge>
+                  {% endif %}
+                </div>
+                <p class="truncate text-sm text-muted-foreground">{{ conversation.property.name }}</p>
+              </div>
+              <time class="shrink-0 text-xs text-muted-foreground">{{ conversation.updated_at|timesince }} ago</time>
             </div>
-        </div>
-    {% endif %}
+
+            {% with last_message=conversation.messages.last %}
+              <p class="mt-2 truncate text-sm {% if not last_message %}italic text-muted-foreground{% endif %}">
+                {% if last_message %}
+                  {% if last_message.sender == user %}<span class="font-medium">You: </span>{% endif %}
+                  {{ last_message.content }}
+                {% else %}
+                  No messages yet
+                {% endif %}
+              </p>
+            {% endwith %}
+          </div>
+          <c-ui.icon name="chevron-right" classes="mt-5 size-4 shrink-0 text-muted-foreground" />
+        </a>
+      {% endfor %}
+    </div>
+  {% else %}
+    <c-ui.empty-state
+      title="No conversations yet"
+      subtitle="Open a Property and message its Owner to start a private Conversation."
+      icon="chat"
+      action_url="{% url 'properties:list' %}"
+      action_text="Browse Properties"
+    />
+  {% endif %}
 </div>
 {% endblock %}

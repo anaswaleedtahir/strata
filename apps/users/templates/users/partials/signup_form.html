@@ -1,49 +1,28 @@
-{% load static %}
+<form method="post" class="space-y-5">
+  {% csrf_token %}
 
-<form method="post" class="space-y-6">
-    {% csrf_token %}
+  {% if form.non_field_errors %}
+    <c-alert variant="destructive">
+      <c-ui.icon name="exclamation-circle" classes="size-4" />
+      <c-alert.description>
+        {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+      </c-alert.description>
+    </c-alert>
+  {% endif %}
 
-    <!-- Form Errors -->
-    {% if form.non_field_errors %}
-        <div class="alert alert-error">
-            <c-ui.icon name="exclamation-circle" classes="h-6 w-6" />
-            <div>
-                {% for error in form.non_field_errors %}
-                    <div>{{ error }}</div>
-                {% endfor %}
-            </div>
-        </div>
-    {% endif %}
+  <div class="grid gap-5 sm:grid-cols-2">
+    <c-forms.field :field="form.first_name" label="First name" placeholder="Amina" required />
+    <c-forms.field :field="form.last_name" label="Last name" placeholder="Khan" required />
+  </div>
+  <c-forms.field :field="form.email" label="Email" placeholder="you@example.com" icon="at-symbol" required />
+  <c-forms.field :field="form.password1" label="Password" placeholder="Create a strong password" required />
+  <c-forms.field :field="form.password2" label="Confirm password" placeholder="Repeat your password" required />
 
-    <!-- Name Fields -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <c-forms.field :field="form.first_name" label="First Name" placeholder="Enter your first name" required />
-        <c-forms.field :field="form.last_name" label="Last Name" placeholder="Enter your last name" required />
-    </div>
+  <p class="text-xs leading-5 text-muted-foreground">
+    By creating an account, you agree to use Strata responsibly and keep Property information accurate.
+  </p>
 
-    <!-- Email Field -->
-    <c-forms.field :field="form.email" label="Email" placeholder="Enter your email" icon="at-symbol" required />
-
-    <!-- Password Fields -->
-    <c-forms.field :field="form.password1" label="Password" placeholder="Create a password" required />
-    <c-forms.field :field="form.password2" label="Confirm Password" placeholder="Confirm your password" required />
-
-    <!-- Terms and Conditions -->
-    <div class="form-control">
-        <label class="label cursor-pointer justify-start">
-            <input type="checkbox" name="terms" class="checkbox checkbox-primary checkbox-sm mr-3" required>
-            <span class="label-text">
-                I agree to the
-                <a href="#" class="link link-primary">Terms of Service</a>
-                and
-                <a href="#" class="link link-primary">Privacy Policy</a>
-            </span>
-        </label>
-    </div>
-
-    <!-- Submit Button -->
-    <button type="submit" class="btn btn-primary w-full">
-        <c-ui.icon name="user-add" classes="h-5 w-5 mr-2" />
-        Create Account
-    </button>
+  <c-button type="submit" class="w-full">
+    <c-ui.icon name="user-add" classes="size-4" /> Create account
+  </c-button>
 </form>

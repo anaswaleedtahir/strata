@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.test import SimpleTestCase
 from django.urls import reverse
+from django_tailwind_cli.config import get_config
 
 
 class DjangoIntegrationSettingsTests(SimpleTestCase):
@@ -9,8 +10,8 @@ class DjangoIntegrationSettingsTests(SimpleTestCase):
         self.assertIn("django_tailwind_cli", settings.INSTALLED_APPS)
         self.assertEqual(settings.TAILWIND_CLI_SRC_CSS, "assets/css/input.css")
         self.assertEqual(settings.TAILWIND_CLI_DIST_CSS, "dist/output.css")
-        self.assertTrue(settings.TAILWIND_CLI_USE_DAISY_UI)
-        self.assertEqual(settings.TAILWIND_CLI_VERSION, "2.8.3")
+        self.assertFalse(settings.TAILWIND_CLI_USE_DAISY_UI)
+        self.assertEqual(settings.TAILWIND_CLI_VERSION, "4.2.2")
 
     def test_base_template_uses_tailwind_cli_and_pinned_cdn_assets(self):
         base_template = (settings.BASE_DIR / "templates/_layouts/base.html").read_text()
@@ -40,6 +41,12 @@ class DjangoIntegrationSettingsTests(SimpleTestCase):
         self.assertTrue(source_path.exists())
         self.assertNotIn(settings.BASE_DIR / "assets", settings.STATICFILES_DIRS)
         self.assertEqual(settings.STATICFILES_DIRS, [settings.BASE_DIR / "static"])
+
+    def test_tailwind_config_resolves_to_version_four(self):
+        config = get_config()
+
+        self.assertGreaterEqual(config.version.major, 4)
+        self.assertFalse(config.use_daisy_ui)
 
     def test_htmx_allauth_and_widget_tweaks_are_configured(self):
         expected_apps = {

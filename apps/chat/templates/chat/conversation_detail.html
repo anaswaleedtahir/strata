@@ -1,181 +1,111 @@
-{% extends '_layouts/base.html' %}
-{% load static %}
+{% extends "_layouts/base.html" %}
+{% load static property_tags %}
 
-{% block title %}Chat with {{ other_participant.email }} - Strata{% endblock %}
+{% block title %}Conversation about {{ conversation.property.name }} — Strata{% endblock %}
 
 {% block extra_head %}
-<script src="{% static 'js/chat-client.js' %}"></script>
+  <script src="{% static 'js/chat-client.js' %}"></script>
 {% endblock %}
 
 {% block content %}
-<div class="max-w-5xl mx-auto">
-    <!-- WebSocket Connection Status Indicator -->
-    <div id="connection-status" class="alert alert-info mb-4 hidden">
-        <c-ui.icon name="information-circle" classes="h-6 w-6 stroke-current" />
-        <span id="connection-status-text">Connecting...</span>
-    </div>
+<div class="mx-auto max-w-5xl space-y-4">
+  <div id="connection-status" class="hidden items-center gap-3 rounded-lg border bg-background p-4 text-sm" role="status">
+    <c-ui.icon name="information-circle" classes="size-5" />
+    <span id="connection-status-text">Connecting…</span>
+  </div>
 
-    <!-- Chat Header -->
-    <div class="card bg-base-100 shadow-soft mb-4">
-        <div class="card-body py-4">
-            <div class="flex items-center justify-between">
-                <!-- Back Button & Participant Info -->
-                <div class="flex items-center space-x-4">
-                    <a href="{% url 'chat:conversation_list' %}" class="btn btn-ghost btn-sm btn-circle">
-                        <c-ui.icon name="chevron-left" />
-                    </a>
-
-                    <div class="avatar placeholder">
-                        <div class="bg-primary-100 text-primary-600 rounded-full w-10 h-10">
-                            <span class="text-sm font-semibold">
-                                {{ other_participant.email|slice:":1"|upper }}
-                            </span>
-                        </div>
-                    </div>
-
-                    <div>
-                        <h2 class="font-semibold text-base-content">
-                            {{ other_participant.email }}
-                        </h2>
-                        <div class="flex items-center text-sm text-base-content/60">
-                            <c-ui.icon name="home" classes="h-4 w-4 mr-1" />
-                            <a href="{% url 'properties:detail' conversation.property.id %}" class="hover:text-primary-600 transition-colors">
-                                {{ conversation.property.name }}
-                            </a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Connection Status Badge -->
-                <div class="flex items-center space-x-2">
-                    <div id="connection-badge" class="badge badge-ghost gap-2">
-                        <span class="loading loading-spinner loading-xs"></span>
-                        <span>Connecting</span>
-                    </div>
-                </div>
-            </div>
+  <c-card>
+    <c-card.content class="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between">
+      <div class="flex min-w-0 items-center gap-3">
+        <c-button href="{% url 'chat:conversation_list' %}" variant="ghost" size="icon" aria-label="Back to Conversations">
+          <c-ui.icon name="chevron-left" classes="size-4" />
+        </c-button>
+        <div class="flex size-10 shrink-0 items-center justify-center rounded-full bg-secondary text-sm font-semibold">
+          {{ other_participant.first_name|slice:":1"|default:"S"|upper }}
         </div>
-    </div>
+        <div class="min-w-0">
+          <h1 class="truncate font-semibold">{{ other_participant.first_name|default:"Strata member" }}</h1>
+          <a href="{% url 'properties:detail' conversation.property.id %}" class="block truncate text-sm text-muted-foreground hover:text-foreground hover:underline">
+            {{ conversation.property.name }}
+          </a>
+        </div>
+      </div>
+      <div id="connection-badge" class="inline-flex w-fit items-center gap-2 rounded-full border px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
+        <span class="size-3 animate-spin rounded-full border border-muted-foreground/30 border-t-foreground"></span>
+        <span>Connecting</span>
+      </div>
+    </c-card.content>
+  </c-card>
 
-    <!-- Property Context Display -->
-    <div class="card bg-base-100 shadow-soft mb-4">
-        <div class="card-body p-4">
-            <div class="flex items-center space-x-4">
-                <!-- Property Image -->
-                {% if conversation.property.images.first %}
-                    <div class="avatar">
-                        <div class="w-16 h-16 rounded-lg">
-                            <img src="{{ conversation.property.images.first.image.url }}" alt="{{ conversation.property.name }}" />
-                        </div>
-                    </div>
-                {% else %}
-                    <div class="avatar placeholder">
-                        <div class="bg-primary-100 text-primary-600 w-16 h-16 rounded-lg">
-                            <c-ui.icon name="home" classes="h-8 w-8" />
-                        </div>
-                    </div>
+  <c-card>
+    <c-card.content class="flex items-center gap-4 p-4">
+      <div class="size-14 shrink-0 overflow-hidden rounded-lg bg-muted">
+        {% if conversation.property.images.first %}
+          <img src="{{ conversation.property.images.first.image.url }}" alt="{{ conversation.property.name }}" class="size-full object-cover">
+        {% else %}
+          <div class="surface-placeholder flex size-full items-center justify-center text-muted-foreground">
+            <c-ui.icon name="home" classes="size-6" />
+          </div>
+        {% endif %}
+      </div>
+      <div class="min-w-0 flex-1">
+        <p class="truncate font-medium">{{ conversation.property.name }}</p>
+        <p class="price-tag text-sm text-muted-foreground">{{ conversation.property.price|pkr }}</p>
+      </div>
+      <c-button href="{% url 'properties:detail' conversation.property.id %}" variant="outline" size="sm">View Property</c-button>
+    </c-card.content>
+  </c-card>
+
+  <c-card class="overflow-hidden">
+    <div id="messages-container" class="h-[min(60vh,36rem)] space-y-4 overflow-y-auto bg-muted/30 p-4 sm:p-6" aria-live="polite">
+      {% if chat_messages %}
+        {% for message in chat_messages %}
+          <div class="flex {% if message.sender == user %}justify-end{% else %}justify-start{% endif %}" data-message-id="{{ message.id }}">
+            <div class="max-w-[85%] sm:max-w-[70%]">
+              <div class="rounded-2xl px-4 py-2.5 shadow-xs {% if message.sender == user %}bg-primary text-primary-foreground{% else %}border bg-background text-foreground{% endif %}{% if message.was_unread %} ring-2 ring-ring ring-offset-2{% endif %}">
+                <p class="break-words text-sm">{{ message.content }}</p>
+              </div>
+              <div class="mt-1 flex items-center gap-1 px-2 text-xs text-muted-foreground {% if message.sender == user %}justify-end{% endif %}">
+                <time>{{ message.created_at|date:"M j, Y g:i A" }}</time>
+                {% if message.was_unread %}<span class="font-medium text-foreground">New</span>{% endif %}
+                {% if message.sender == user %}
+                  <span aria-label="{% if message.is_read %}Read{% else %}Sent{% endif %}">
+                    <c-ui.icon name="check" classes="size-3.5" />
+                  </span>
                 {% endif %}
-
-                <!-- Property Details -->
-                <div class="flex-1 min-w-0">
-                    <h3 class="font-semibold text-base-content truncate">
-                        {{ conversation.property.name }}
-                    </h3>
-                    <div class="flex items-center space-x-3 text-sm text-base-content/60">
-                        <span class="badge badge-sm badge-primary">{{ conversation.property.get_property_type_display }}</span>
-                        <span class="font-semibold text-accent">
-                            ${{ conversation.property.price|floatformat:0 }}
-                            {% if conversation.property.property_type == 'rent' %}/mo{% endif %}
-                        </span>
-                    </div>
-                </div>
-
-                <!-- View Property Link -->
-                <a href="{% url 'properties:detail' conversation.property.id %}" class="btn btn-sm btn-outline">
-                    <c-ui.icon name="eye" classes="h-4 w-4 mr-1" />
-                    View
-                </a>
+              </div>
             </div>
+          </div>
+        {% endfor %}
+      {% else %}
+        <div class="flex h-full flex-col items-center justify-center text-center text-muted-foreground">
+          <div class="mb-3 flex size-12 items-center justify-center rounded-full bg-muted"><c-ui.icon name="chat" classes="size-6" /></div>
+          <p class="font-medium text-foreground">No messages yet</p>
+          <p class="text-sm">Ask a clear question about this Property.</p>
         </div>
+      {% endif %}
     </div>
 
-    <!-- Messages Container -->
-    <div class="card bg-base-100 shadow-soft mb-4">
-        <div class="card-body p-0">
-            <div id="messages-container" class="h-[500px] overflow-y-auto p-6 space-y-4">
-                {% if chat_messages %}
-                    {% for message in chat_messages %}
-                        <div class="flex {% if message.sender == user %}justify-end{% else %}justify-start{% endif %}" data-message-id="{{ message.id }}">
-                            <div class="max-w-[70%]">
-                                <div class="{% if message.sender == user %}bg-indigo-600 text-white{% else %}bg-gray-200 text-gray-900{% endif %}{% if message.was_unread %} ring-2 ring-primary-400 ring-offset-2{% endif %} rounded-2xl px-4 py-2.5 shadow-sm">
-                                    <p class="text-sm break-words">{{ message.content }}</p>
-                                </div>
-                                <div class="flex items-center {% if message.sender == user %}justify-end{% else %}justify-start{% endif %} mt-1 px-2 space-x-1">
-                                    <span class="text-xs text-gray-500">
-                                        {{ message.created_at|date:"M d, Y g:i A" }}
-                                    </span>
-                                    {% if message.was_unread %}
-                                        <span class="badge badge-primary badge-xs">New</span>
-                                    {% endif %}
-                                    {% if message.sender == user %}
-                                        <!-- Read/Unread indicator -->
-                                        {% if message.is_read %}
-                                            <!-- Double tick for read -->
-                                            <span class="text-blue-500">
-                                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                                                    <path d="M0.41,13.41L6,19L7.41,17.58L1.83,12M22.24,5.58L11.66,16.17L7.5,12L6.07,13.41L11.66,19L23.66,7M18,7L16.59,5.58L10.24,11.93L11.66,13.34L18,7Z"/>
-                                                </svg>
-                                            </span>
-                                        {% else %}
-                                            <!-- Single tick for sent but not read -->
-                                            <span class="text-gray-400">
-                                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                                                    <path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"/>
-                                                </svg>
-                                            </span>
-                                        {% endif %}
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-                    {% endfor %}
-                {% else %}
-                    <div class="flex items-center justify-center h-full">
-                        <div class="text-center">
-                            <c-ui.icon name="chat" classes="h-16 w-16 text-base-content/20 mx-auto mb-4" />
-                            <p class="text-base-content/60">No messages yet. Start the conversation!</p>
-                        </div>
-                    </div>
-                {% endif %}
-            </div>
+    <div class="border-t bg-background p-4">
+      <form id="message-form" class="flex items-end gap-3">
+        <div class="min-w-0 flex-1">
+          <label for="message-input" class="sr-only">Message</label>
+          <textarea
+            id="message-input"
+            name="message"
+            rows="1"
+            class="flex min-h-10 max-h-32 w-full resize-none rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+            placeholder="Write a message…"
+            maxlength="5000"
+          ></textarea>
+          <p class="mt-1 text-xs text-muted-foreground"><span id="char-count">0</span> / 5000</p>
         </div>
+        <c-button type="submit" class="h-10">
+          <c-ui.icon name="paper-airplane" classes="size-4" /> <span class="hidden sm:inline">Send</span>
+        </c-button>
+      </form>
     </div>
-
-    <!-- Message Input -->
-    <div class="card bg-base-100 shadow-soft">
-        <div class="card-body p-4">
-            <form id="message-form" class="flex items-start gap-3">
-                <div class="flex-1">
-                    <textarea
-                        id="message-input"
-                        name="message"
-                        rows="1"
-                        class="textarea textarea-bordered w-full resize-none min-h-[44px] max-h-[120px]"
-                        placeholder="Type your message..."
-                        maxlength="5000"
-                        style="overflow-y: auto;"
-                    ></textarea>
-                    <div class="text-xs text-gray-500 mt-1">
-                        <span id="char-count">0</span> / 5000 characters
-                    </div>
-                </div>
-                <button type="submit" class="btn btn-primary h-[44px] min-h-[44px] px-6">
-                    <c-ui.icon name="paper-airplane" />
-                    Send
-                </button>
-            </form>
-        </div>
-    </div>
+  </c-card>
 </div>
 
 <script>
@@ -296,22 +226,22 @@
 
         messageDiv.innerHTML = `
             <div class="max-w-[70%]">
-                <div class="${isCurrentUser ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-900'} rounded-2xl px-4 py-2.5 shadow-sm">
+                <div class="${isCurrentUser ? 'bg-primary text-primary-foreground' : 'bg-muted text-foreground'} rounded-2xl px-4 py-2.5 shadow-sm">
                     <p class="text-sm break-words">${escapeHtml(data.message)}</p>
                 </div>
                 <div class="flex items-center ${isCurrentUser ? 'justify-end' : 'justify-start'} mt-1 px-2 space-x-1">
-                    <span class="text-xs text-gray-500">
+                    <span class="text-xs text-muted-foreground">
                         ${formatTimestamp(data.created_at)}
                     </span>
                     ${isCurrentUser ? `
                         ${data.is_read ? `
-                            <span class="text-blue-500">
+                            <span class="text-foreground">
                                 <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                                     <path d="M0.41,13.41L6,19L7.41,17.58L1.83,12M22.24,5.58L11.66,16.17L7.5,12L6.07,13.41L11.66,19L23.66,7M18,7L16.59,5.58L10.24,11.93L11.66,13.34L18,7Z"/>
                                 </svg>
                             </span>
                         ` : `
-                            <span class="text-gray-400">
+                            <span class="text-muted-foreground">
                                 <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                                     <path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"/>
                                 </svg>
@@ -364,46 +294,29 @@
 
     // Helper function to update connection badge
     function updateConnectionBadge(status, message) {
+        const baseClass = 'inline-flex items-center gap-2 rounded-full border px-2.5 py-0.5 text-xs font-medium';
+        connectionBadge.className = baseClass;
+
         if (status === 'connected') {
-            connectionBadge.className = 'badge badge-success gap-2';
-            connectionBadge.innerHTML = `
-                <span class="w-2 h-2 bg-success-content rounded-full"></span>
-                <span>Connected</span>
-            `;
-        } else if (status === 'connecting') {
-            connectionBadge.className = 'badge badge-ghost gap-2';
-            connectionBadge.innerHTML = `
-                <span class="loading loading-spinner loading-xs"></span>
-                <span>Connecting</span>
-            `;
-        } else if (status === 'reconnecting') {
-            connectionBadge.className = 'badge badge-warning gap-2';
-            connectionBadge.innerHTML = `
-                <span class="loading loading-spinner loading-xs"></span>
-                <span>Reconnecting</span>
-            `;
+            connectionBadge.innerHTML = '<span class="size-2 rounded-full bg-foreground"></span><span>Connected</span>';
+        } else if (status === 'connecting' || status === 'reconnecting') {
+            connectionBadge.innerHTML = '<span class="size-3 animate-spin rounded-full border border-muted-foreground/30 border-t-foreground"></span><span>' +
+                (status === 'reconnecting' ? 'Reconnecting' : 'Connecting') + '</span>';
         } else if (status === 'error' || status === 'failed') {
-            connectionBadge.className = 'badge badge-error gap-2';
-            connectionBadge.innerHTML = `
-                <span class="w-2 h-2 bg-error-content rounded-full"></span>
-                <span>Disconnected</span>
-            `;
-        } else if (status === 'disconnected') {
-            connectionBadge.className = 'badge badge-ghost gap-2';
-            connectionBadge.innerHTML = `
-                <span class="w-2 h-2 bg-base-content/30 rounded-full"></span>
-                <span>Offline</span>
-            `;
+            connectionBadge.className = baseClass + ' border-destructive/50 text-destructive';
+            connectionBadge.innerHTML = '<span class="size-2 rounded-full bg-destructive"></span><span>Disconnected</span>';
+        } else {
+            connectionBadge.className = baseClass + ' text-muted-foreground';
+            connectionBadge.innerHTML = '<span class="size-2 rounded-full bg-muted-foreground"></span><span>Offline</span>';
         }
     }
 
     // Helper function to show connection alert
     function showConnectionAlert(message, type) {
-        const alertClass = type === 'error' ? 'alert-error' :
-                          type === 'warning' ? 'alert-warning' :
-                          'alert-info';
-
-        connectionStatus.className = `alert ${alertClass} mb-4`;
+        connectionStatus.className = 'mb-4 flex items-center gap-3 rounded-lg border bg-background p-4 text-sm';
+        if (type === 'error') {
+            connectionStatus.classList.add('border-destructive/50', 'text-destructive');
+        }
         connectionStatusText.textContent = message;
         connectionStatus.classList.remove('hidden');
     }
@@ -415,7 +328,7 @@
 
     // Helper function to show rate limit alert with countdown
     function showRateLimitAlert(message, cooldownSeconds) {
-        connectionStatus.className = 'alert alert-warning mb-4';
+        connectionStatus.className = 'mb-4 flex items-center gap-3 rounded-lg border bg-background p-4 text-sm';
         connectionStatus.classList.remove('hidden');
 
         // Start countdown timer
@@ -440,7 +353,6 @@
         const submitButton = messageForm.querySelector('button[type="submit"]');
         messageInput.disabled = true;
         submitButton.disabled = true;
-        submitButton.classList.add('btn-disabled');
 
         // Re-enable after cooldown
         setTimeout(() => {
@@ -453,8 +365,8 @@
         const submitButton = messageForm.querySelector('button[type="submit"]');
         messageInput.disabled = false;
         submitButton.disabled = false;
-        submitButton.classList.remove('btn-disabled');
     }
 
 </script>
+
 {% endblock %}

@@ -76,7 +76,7 @@ Complete index of all Strata documentation.
 
 ### Frontend
 - [Tailwind CSS](https://tailwindcss.com/docs)
-- [DaisyUI](https://daisyui.com/)
+- [shadcn/ui](https://ui.shadcn.com/)
 - [HTMX](https://htmx.org/docs/)
 - [Alpine.js](https://alpinejs.dev/)
 

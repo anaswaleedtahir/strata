@@ -4,25 +4,10 @@ from django import forms
 from django.core.validators import FileExtensionValidator
 
 from apps.properties.models import Property
-from apps.shared.validators import cnic_validator, phone_validator
 
 
 class PropertyForm(forms.ModelForm):
     """Form for creating and editing properties."""
-
-    phone_number = forms.CharField(
-        max_length=16,
-        validators=[phone_validator],
-        help_text="Format: +92-3001234567",
-        label="Phone Number",
-    )
-
-    cnic = forms.CharField(
-        max_length=15,
-        validators=[cnic_validator],
-        help_text="Format: 12345-1234567-1",
-        label="CNIC",
-    )
 
     documents = forms.FileField(
         required=False,
@@ -38,15 +23,12 @@ class PropertyForm(forms.ModelForm):
             "name",
             "description",
             "full_address",
-            "phone_number",
-            "cnic",
             "property_type",
             "price",
             "bedrooms",
             "bathrooms",
             "area",
             "documents",
-            "is_published",
         ]
         widgets = {
             "name": forms.TextInput(),
@@ -57,7 +39,6 @@ class PropertyForm(forms.ModelForm):
             "bedrooms": forms.NumberInput(attrs={"min": "0"}),
             "bathrooms": forms.NumberInput(attrs={"min": "0"}),
             "area": forms.NumberInput(attrs={"step": "0.01", "min": "0"}),
-            "is_published": forms.CheckboxInput(),
         }
         labels = {
             "name": "Property Name",
@@ -68,17 +49,52 @@ class PropertyForm(forms.ModelForm):
             "bedrooms": "Bedrooms",
             "bathrooms": "Bathrooms",
             "area": "Area (sq ft)",
-            "is_published": "Publish Property",
-        }
-        help_texts = {
-            "is_published": "Make this property visible to other users",
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["description"].required = False
-        self.fields["bedrooms"].required = True
-        self.fields["bathrooms"].required = True
+        self.fields["bedrooms"].required = False
+        self.fields["bathrooms"].required = False
         self.fields["area"].required = True
-        if not self.instance.pk:
-            self.fields["is_published"].initial = False
+        self.fields["property_type"].choices = (
+            ("", "Choose a property type"),
+            *Property.PROPERTY_TYPE,
+        )
+
+
+class PropertyFilterForm(forms.Form):
+    """Validate the public Property discovery query string."""
+
+    SORT_CHOICES = (
+        ("newest", "Newest"),
+        ("price_asc", "Price: low to high"),
+        ("price_desc", "Price: high to low"),
+        ("oldest", "Oldest"),
+    )
+
+    q = forms.CharField(required=False, max_length=120, label="Search")
+    property_type = forms.ChoiceField(
+        required=False,
+        choices=(("", "Any property type"), *Property.PROPERTY_TYPE),
+        label="Property type",
+    )
+    min_price = forms.DecimalField(
+        required=False, min_value=0, decimal_places=0, label="Minimum price"
+    )
+    max_price = forms.DecimalField(
+        required=False, min_value=0, decimal_places=0, label="Maximum price"
+    )
+    bedrooms = forms.IntegerField(required=False, min_value=0, label="Bedrooms")
+    bathrooms = forms.IntegerField(required=False, min_value=0, label="Bathrooms")
+    sort = forms.ChoiceField(
+        required=False, choices=SORT_CHOICES, initial="newest", label="Sort by"
+    )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        min_price = cleaned_data.get("min_price")
+        max_price = cleaned_data.get("max_price")
+        if min_price is not None and max_price is not None and min_price > max_price:
+            self.add_error("max_price", "Maximum price must be at least the minimum.")
+        return cleaned_data

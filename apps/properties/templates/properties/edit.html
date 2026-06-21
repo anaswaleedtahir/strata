@@ -1,25 +1,16 @@
-{% extends '_layouts/base.html' %}
-{% load static %}
+{% extends "_layouts/base.html" %}
 
-{% block title %}Edit {{ property.name }} - Strata{% endblock %}
+{% block title %}Edit {{ property.name }} — Strata{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto">
-    <!-- Page Header -->
-    <div class="flex items-center justify-between mb-8">
-        <div>
-            <h1 class="text-3xl font-display font-bold text-base-content mb-2">Edit Property</h1>
-            <p class="text-base-content/60">Update your property information and images</p>
-        </div>
-        <div class="flex items-center space-x-3">
-            <a href="{% url 'properties:detail' property.pk %}" class="btn btn-outline">
-                <c-ui.icon name="eye" classes="h-4 w-4 mr-2" />
-                View Property
-            </a>
-        </div>
-    </div>
-
-    <!-- Property Form -->
-    {% include 'properties/partials/property_form.html' with form=form property=property is_edit_mode=True %}
+<div class="mx-auto max-w-4xl space-y-8">
+  <header class="space-y-2">
+    <c-button href="{% url 'properties:detail' property.pk %}" variant="ghost" size="sm" class="-ml-3">
+      <c-ui.icon name="arrow-left" classes="size-4" /> View Property
+    </c-button>
+    <h1 class="text-3xl font-bold tracking-tight">Edit Property</h1>
+    <p class="text-muted-foreground">Update details, media, or publication status.</p>
+  </header>
+  {% include "properties/partials/property_form.html" with form=form property=property is_edit_mode=True %}
 </div>
 {% endblock %}

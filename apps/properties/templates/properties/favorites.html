@@ -1,93 +1,40 @@
-{% extends '_layouts/base.html' %}
-{% load static %}
+{% extends "_layouts/dashboard.html" %}
 
-{% block title %}My Favorites - Strata{% endblock %}
+{% block title %}Favorites — Strata{% endblock %}
+{% block page_title %}Favorites{% endblock %}
 
-{% block content %}
-<div x-data="{
-    favoriteCount: {{ properties|length }},
-    updateCount() {
-        // Use setTimeout to ensure DOM has updated after element removal
-        setTimeout(() => {
-            this.favoriteCount = document.querySelectorAll('[data-property-card]').length;
-        }, 50);
-    }
-}"
-@favorite-toggled.window="updateCount()">
+{% block page_actions %}
+  <c-button href="{% url 'properties:list' %}" variant="outline">
+    <c-ui.icon name="search" classes="size-4" /> Browse Properties
+  </c-button>
+{% endblock %}
 
-    <!-- Page Header -->
-    <div class="flex items-center justify-between mb-8">
-        <div>
-            <h1 class="text-3xl font-display font-bold text-base-content mb-2">
-                <c-ui.icon name="heart" variant="solid" classes="h-8 w-8 inline-flex mr-3 text-error" />
-                My Favorites
-            </h1>
-            <p class="text-base-content/60">Properties you've saved for later</p>
-        </div>
-
-        <div class="flex items-center space-x-3">
-            <a href="{% url 'properties:list' %}" class="btn btn-outline">
-                <c-ui.icon name="search" classes="h-4 w-4 mr-2" />
-                Browse More
-            </a>
-        </div>
+{% block dashboard_content %}
+<div
+  class="space-y-8"
+  x-data="{ favoriteCount: {{ page_obj.paginator.count }}, updateCount() { this.favoriteCount = Math.max(0, this.favoriteCount - 1) } }"
+  @favorite-toggled.window="if (!$event.detail.isFavorited) updateCount()"
+>
+  <div class="flex items-end justify-between gap-4" x-show="favoriteCount > 0">
+    <div>
+      <h2 class="text-xl font-semibold tracking-tight">Saved Properties</h2>
+      <p class="text-sm text-muted-foreground">A shortlist you can return to anytime.</p>
     </div>
+    <p class="text-sm text-muted-foreground"><span x-text="favoriteCount"></span> saved</p>
+  </div>
 
-    <!-- Favorites Count -->
-    <div x-show="favoriteCount > 0" class="mb-6">
-        <div class="stats shadow-soft">
-            <div class="stat">
-                <div class="stat-figure text-error">
-                    <c-ui.icon name="heart" variant="solid" classes="h-8 w-8" />
-                </div>
-                <div class="stat-title">Favorite Properties</div>
-                <div class="stat-value text-error" x-text="favoriteCount"></div>
-                <div class="stat-desc">Properties you've saved</div>
-            </div>
-        </div>
-    </div>
+  <div x-show="favoriteCount > 0">
+    {% include "properties/partials/property_grid.html" with properties=properties page_obj=page_obj %}
+  </div>
 
-    <!-- Properties -->
-    <div x-show="favoriteCount > 0">
-        {% if properties %}
-            {% include 'properties/partials/property_grid.html' with properties=properties page_obj=page_obj %}
-        {% endif %}
-    </div>
-
-    <!-- Empty State -->
-    <div x-show="favoriteCount === 0" class="text-center py-16">
-        <div class="w-32 h-32 bg-base-200 rounded-full flex items-center justify-center mx-auto mb-6">
-            <c-ui.icon name="heart" classes="h-16 w-16 text-base-content/40" />
-        </div>
-        <h3 class="text-2xl font-semibold text-base-content mb-2">No favorites yet</h3>
-        <p class="text-base-content/60 mb-8 max-w-md mx-auto">
-            Start exploring properties and save the ones you love by clicking the heart icon.
-        </p>
-        <a href="{% url 'properties:list' %}" class="btn btn-primary btn-lg">
-            <c-ui.icon name="search" classes="h-5 w-5 mr-2" />
-            Browse Properties
-        </a>
-    </div>
-
-    <!-- Tips Card -->
-    <div class="mt-12">
-        <div class="card bg-base-100 border border-base-300 shadow-soft">
-            <div class="card-body">
-                <div class="flex items-start space-x-4">
-                    <div class="flex-shrink-0">
-                        <div class="w-12 h-12 bg-accent-100 rounded-full flex items-center justify-center">
-                            <c-ui.icon name="light-bulb" classes="h-6 w-6 text-accent-600" />
-                        </div>
-                    </div>
-                    <div>
-                        <h3 class="font-semibold text-base-content mb-2">Pro Tip</h3>
-                        <p class="text-base-content/70 text-sm">
-                            Save properties to your favorites to compare them later, track price changes, and never lose track of properties you're interested in.
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+  <div x-show="favoriteCount === 0" x-cloak>
+    <c-ui.empty-state
+      title="No Favorites yet"
+      subtitle="Save Properties while browsing to build a shortlist here."
+      icon="heart"
+      action_url="{% url 'properties:list' %}"
+      action_text="Browse Properties"
+    />
+  </div>
 </div>
 {% endblock %}

@@ -256,12 +256,6 @@ class Command(BaseCommand):
                 "name": f"Seed Property {index}",
                 "description": fake.paragraph(nb_sentences=4),
                 "full_address": fake.address().replace("\n", ", ")[:255],
-                "phone_number": f"+92-{random.randint(3000000000, 3499999999)}",
-                "cnic": (
-                    f"{random.randint(10000, 99999)}-"
-                    f"{random.randint(1000000, 9999999)}-"
-                    f"{random.randint(0, 9)}"
-                ),
                 "property_type": property_type,
                 "price": Decimal(random.randrange(7500000, 75000000, 50000)),
                 "bedrooms": bedrooms,

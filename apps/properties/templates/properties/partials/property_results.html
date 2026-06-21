@@ -1,0 +1,15 @@
+<section id="property-results" class="space-y-6" aria-live="polite">
+  <div class="flex items-center justify-between gap-4">
+    <div>
+      <h2 class="text-xl font-semibold tracking-tight">Available Properties</h2>
+      <p class="text-sm text-muted-foreground">
+        {{ page_obj.paginator.count }} result{{ page_obj.paginator.count|pluralize }}
+      </p>
+    </div>
+    <div class="htmx-indicator flex items-center gap-2 text-sm text-muted-foreground">
+      <span class="size-4 animate-spin rounded-full border-2 border-muted-foreground/30 border-t-foreground"></span>
+      Updating
+    </div>
+  </div>
+  {% include "properties/partials/property_grid.html" with properties=properties page_obj=page_obj %}
+</section>

@@ -31,7 +31,7 @@ Comprehensive documentation is available in the [`docs/`](./docs/) directory:
 
 ### Frontend
 - **Tailwind CSS 4** - Utility-first CSS framework, built by Django
-- **DaisyUI** - Component library
+- **Project-owned shadcn UI** - Stock shadcn-style Cotton primitives
 - **Django Cotton** - Reusable template components
 - **HTMX** - Dynamic interactions
 - **Alpine.js** - Lightweight JavaScript framework
@@ -108,7 +108,7 @@ grid/
 - Utility-first CSS with Tailwind
 - Progressive enhancement with HTMX
 - Minimal JavaScript with Alpine.js
-- Components from DaisyUI
+- Project-owned shadcn-style primitives built with Cotton
 
 ---
 
@@ -204,7 +204,7 @@ AWS_MEDIA_BUCKET_NAME=your-bucket-name
 
 ## 🎨 Frontend Development
 
-The frontend uses Tailwind CSS 4 with DaisyUI for styling, Django Cotton for reusable template components, and pinned CDN HTMX/Alpine scripts for browser behavior.
+The frontend uses Tailwind CSS 4 with project-owned shadcn-style primitives, Django Cotton for reusable template components, and pinned CDN HTMX/Alpine scripts for browser behavior. `shadcn_django` is used only to scaffold source templates; it is not a runtime dependency.
 
 **Quick Start:**
 ```bash
@@ -216,10 +216,7 @@ just build-css           # Production Tailwind build
 - [Frontend Architecture](./docs/architecture/frontend.md) - Architecture and design decisions
 - [Frontend Setup Guide](./docs/development/frontend-setup.md) - Development workflow and best practices
 
-**Custom Theme:**
-- Primary: Indigo (#6366f1)
-- Secondary: Purple (#d946ef)
-- Accent: Orange (#f97316)
+The light theme follows stock shadcn neutral tokens. Dark tokens are defined for a later theme switcher.
 
 ---
 
@@ -268,6 +265,6 @@ See [Contributing Guide](./docs/guides/contributing.md) for detailed guidelines 
 ### External Resources
 - [Django Documentation](https://docs.djangoproject.com/)
 - [Tailwind CSS Documentation](https://tailwindcss.com/docs)
-- [DaisyUI Documentation](https://daisyui.com/)
+- [shadcn/ui Documentation](https://ui.shadcn.com/)
 - [HTMX Documentation](https://htmx.org/docs/)
 - [Alpine.js Documentation](https://alpinejs.dev/)

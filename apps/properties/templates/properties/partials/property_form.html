@@ -1,406 +1,93 @@
-{% load static %}
+<form method="post" enctype="multipart/form-data" class="space-y-6">
+  {% csrf_token %}
 
-<div x-data="propertyForm()">
-    <!-- Progress Bar -->
-    <div class="mb-12">
-        <ul class="steps w-full">
-            <li class="step" :class="currentStep >= 1 ? 'step-primary' : ''">Basic Info</li>
-            <li class="step" :class="currentStep >= 2 ? 'step-primary' : ''">Details</li>
-            <li class="step" :class="currentStep >= 3 ? 'step-primary' : ''">Images</li>
-            <li class="step" :class="currentStep >= 4 ? 'step-primary' : ''">Review</li>
-        </ul>
+  {% if form.non_field_errors %}
+    <c-alert variant="destructive">
+      <c-ui.icon name="exclamation-circle" classes="size-4" />
+      <c-alert.description>
+        {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+      </c-alert.description>
+    </c-alert>
+  {% endif %}
+
+  <c-card>
+    <c-card.header>
+      <c-card.title>Property information</c-card.title>
+      <c-card.description>Describe what makes this Property useful to prospective buyers or renters.</c-card.description>
+    </c-card.header>
+    <c-card.content class="grid gap-6">
+      <c-forms.field :field="form.name" label="Property name" placeholder="e.g. Three-bedroom home in Gulberg" required />
+      <div class="grid gap-6 sm:grid-cols-2">
+        <c-forms.field :field="form.property_type" label="Property type" required />
+        <c-forms.field :field="form.price" label="Price (PKR)" placeholder="15000000" required />
+      </div>
+      <c-forms.field :field="form.full_address" label="Full address" placeholder="Street, area, and city" icon="location-marker" required />
+      <c-forms.field :field="form.description" label="Description" placeholder="Condition, nearby amenities, access, and other useful details" rows=7 />
+    </c-card.content>
+  </c-card>
+
+  <c-card>
+    <c-card.header>
+      <c-card.title>Specifications</c-card.title>
+      <c-card.description>Bedrooms and bathrooms can be left empty for plots.</c-card.description>
+    </c-card.header>
+    <c-card.content class="grid gap-6 sm:grid-cols-3">
+      <c-forms.field :field="form.bedrooms" label="Bedrooms" placeholder="3" />
+      <c-forms.field :field="form.bathrooms" label="Bathrooms" placeholder="2" />
+      <c-forms.field :field="form.area" label="Area (sq ft)" placeholder="1200" required />
+    </c-card.content>
+  </c-card>
+
+  <c-card>
+    <c-card.header>
+      <c-card.title>Media and documents</c-card.title>
+      <c-card.description>Add clear Property photos. Documents remain private to the Owner and administrators.</c-card.description>
+    </c-card.header>
+    <c-card.content class="space-y-6">
+      <div class="space-y-2">
+        <label for="id_images" class="text-sm font-medium">Property images</label>
+        <input id="id_images" type="file" name="images" multiple accept="image/*" class="flex min-h-9 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs file:mr-3 file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring">
+        <p class="text-sm text-muted-foreground">JPG, PNG, or WebP. Up to 5MB each.</p>
+      </div>
+
+      {% if is_edit_mode and property.images.exists %}
+        <div class="space-y-3">
+          <p class="text-sm font-medium">Current images</p>
+          <div class="grid grid-cols-2 gap-4 sm:grid-cols-3">
+            {% for image in property.images.all %}
+              <label class="group relative overflow-hidden rounded-lg border">
+                <img src="{{ image.image.url }}" alt="{{ property.name }}" class="aspect-[4/3] size-full object-cover">
+                <span class="absolute inset-x-2 bottom-2 flex items-center gap-2 rounded-md bg-background/95 px-2 py-1.5 text-xs shadow-sm">
+                  <input type="checkbox" name="delete_image_ids" value="{{ image.id }}" class="size-4 accent-destructive">
+                  Remove
+                </span>
+              </label>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+
+      <c-forms.field :field="form.documents" label="Private document (PDF)" />
+      {% if is_edit_mode and property.documents %}
+        <label class="flex items-start gap-3 rounded-lg border p-4">
+          <input type="checkbox" name="remove_document" value="true" class="mt-0.5 size-4 accent-destructive">
+          <span>
+            <span class="block text-sm font-medium">Remove current document</span>
+            <span class="block text-sm text-muted-foreground">{{ property.documents.name }}</span>
+          </span>
+        </label>
+      {% endif %}
+    </c-card.content>
+  </c-card>
+
+  <div class="flex flex-col-reverse gap-3 rounded-xl border bg-background p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+    <p class="text-sm text-muted-foreground">
+      {% if is_edit_mode and property.is_published %}Currently published{% else %}Currently a draft{% endif %}
+    </p>
+    <div class="flex flex-col-reverse gap-2 sm:flex-row">
+      <c-button href="{% if is_edit_mode %}{% url 'properties:detail' property.pk %}{% else %}{% url 'properties:list' %}{% endif %}" variant="ghost">Cancel</c-button>
+      <c-button type="submit" name="intent" value="draft" variant="outline">Save draft</c-button>
+      <c-button type="submit" name="intent" value="publish">Publish Property</c-button>
     </div>
-
-    <form x-ref="propertyForm" method="post" enctype="multipart/form-data" class="space-y-6">
-        {% csrf_token %}
-
-        {% if form.non_field_errors %}
-            <div class="alert alert-error">
-                <c-ui.icon name="exclamation-circle" classes="h-6 w-6" />
-                <div>
-                    {% for error in form.non_field_errors %}
-                        <div>{{ error }}</div>
-                    {% endfor %}
-                </div>
-            </div>
-        {% endif %}
-
-        <!-- Step 1: Basic Information -->
-        <div x-show="currentStep === 1" x-transition class="card bg-base-100 shadow-lg">
-            <div class="card-body">
-                <h2 class="card-title text-2xl mb-6">Basic Information</h2>
-
-                <div class="space-y-6">
-                    <div>
-                        <c-forms.field :field="form.name" label="Property Title" placeholder="e.g., Beautiful 3BR House in Downtown" required />
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <c-forms.field :field="form.property_type" label="Property Type" placeholder="Select property type" required />
-                        </div>
-
-                        <div>
-                            <c-forms.field :field="form.price" label="Price" placeholder="Enter price" icon="currency-dollar" required />
-                        </div>
-                    </div>
-
-                    <div>
-                        <c-forms.field :field="form.full_address" label="Address" placeholder="Enter full address" icon="location-marker" required />
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Step 2: Property Details -->
-        <div x-show="currentStep === 2" x-transition class="card bg-base-100 shadow-lg">
-            <div class="card-body">
-                <h2 class="card-title text-2xl mb-6">Property Details</h2>
-
-                <div class="space-y-6">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div>
-                            <c-forms.field :field="form.bedrooms" label="Bedrooms" placeholder="Number of bedrooms" required />
-                        </div>
-
-                        <div>
-                            <c-forms.field :field="form.bathrooms" label="Bathrooms" placeholder="Number of bathrooms" required />
-                        </div>
-
-                        <div>
-                            <c-forms.field :field="form.area" label="Area (sq ft)" placeholder="Property area" required />
-                        </div>
-                    </div>
-
-                    <div>
-                        <c-forms.field :field="form.description" label="Description" placeholder="Describe your property, its features, and what makes it special..." rows=6 />
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <c-forms.field :field="form.phone_number" label="Phone Number" placeholder="+92-3001234567" required />
-                        </div>
-
-                        <div>
-                            <c-forms.field :field="form.cnic" label="CNIC" placeholder="12345-1234567-1" required />
-                        </div>
-                    </div>
-
-                    <div class="form-control">
-                        <label class="label cursor-pointer justify-start gap-3">
-                            <input type="checkbox" name="is_published" class="checkbox checkbox-primary" {% if form.is_published.value %}checked{% endif %}>
-                            <span class="label-text">
-                                <strong>Publish Property</strong>
-                                <br>
-                                <small class="text-base-content/60">Make this property visible to other users</small>
-                            </span>
-                        </label>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Step 3: Images -->
-        <div x-show="currentStep === 3" x-transition>
-            {% if not is_edit_mode or property.images.count == 0 %}
-                <div class="card bg-base-100 shadow-lg">
-                    <div class="card-body">
-                        <h2 class="card-title text-2xl mb-6">Property Images</h2>
-
-                        <div class="border-2 border-dashed border-base-300 rounded-2xl p-8 text-center hover:border-primary transition-colors">
-                            <c-ui.icon name="cloud-upload" classes="h-16 w-16 text-base-content/40 mx-auto mb-4" />
-                            <h3 class="text-lg font-semibold text-base-content mb-2">Upload Property Images</h3>
-                            <p class="text-base-content/60 mb-4">Drag and drop images here, or click to browse</p>
-                            <input type="file" name="images" multiple accept="image/*" class="file-input file-input-bordered file-input-primary w-full max-w-xs">
-                            <p class="text-xs text-base-content/50 mt-2">Supported formats: JPG, PNG, WebP. Max 10 images.</p>
-                        </div>
-                    </div>
-                </div>
-            {% endif %}
-
-            {% if is_edit_mode and property.images.count > 0 %}
-                <div class="card bg-base-100 shadow-lg">
-                    <div class="card-body">
-                        <h2 class="card-title text-2xl mb-6">Current Images</h2>
-
-                        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
-                            {% for image in property.images.all %}
-                                <div class="relative group">
-                                    <img src="{{ image.image.url }}" alt="Property image" class="w-full h-32 object-cover rounded-lg">
-                                    <div class="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
-                                        <label class="cursor-pointer">
-                                            <input type="checkbox" name="delete_image_ids" value="{{ image.id }}" class="checkbox checkbox-error">
-                                            <span class="text-white text-sm ml-2">Delete</span>
-                                        </label>
-                                    </div>
-                                    {% if image.is_primary %}
-                                        <div class="absolute top-2 left-2">
-                                            <span class="badge badge-primary badge-sm">Primary</span>
-                                        </div>
-                                    {% endif %}
-                                </div>
-                            {% endfor %}
-                        </div>
-
-                        <div class="border-2 border-dashed border-base-300 rounded-xl p-6 text-center">
-                            <h3 class="text-lg font-semibold text-base-content mb-2">Add More Images</h3>
-                            <input type="file" name="images" multiple accept="image/*" class="file-input file-input-bordered file-input-primary w-full max-w-xs">
-                        </div>
-                    </div>
-                </div>
-            {% endif %}
-        </div>
-
-        <!-- Step 4: Review -->
-        <div x-show="currentStep === 4" x-transition class="card bg-base-100 shadow-lg">
-            <div class="card-body">
-                <h2 class="card-title text-2xl mb-6">Review Your Property</h2>
-
-                <div class="alert alert-info mb-6">
-                    <c-ui.icon name="information-circle" classes="h-6 w-6" />
-                    <span>Please review all information before submitting. You can go back to any step to make changes.</span>
-                </div>
-
-                <div class="bg-base-200 rounded-xl p-6 space-y-4">
-                    <h3 class="font-semibold text-lg mb-4">Property Summary</h3>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="flex flex-col">
-                            <span class="text-sm text-base-content/60">Property Title</span>
-                            <span class="font-medium" x-text="formData.name || '-'"></span>
-                        </div>
-
-                        <div class="flex flex-col">
-                            <span class="text-sm text-base-content/60">Property Type</span>
-                            <span class="font-medium" x-text="getPropertyTypeLabel()"></span>
-                        </div>
-
-                        <div class="flex flex-col">
-                            <span class="text-sm text-base-content/60">Price</span>
-                            <span class="font-medium" x-text="formData.price ? '$' + formData.price : '-'"></span>
-                        </div>
-
-                        <div class="flex flex-col">
-                            <span class="text-sm text-base-content/60">Address</span>
-                            <span class="font-medium" x-text="formData.full_address || '-'"></span>
-                        </div>
-
-                        <div class="flex flex-col">
-                            <span class="text-sm text-base-content/60">Bedrooms</span>
-                            <span class="font-medium" x-text="formData.bedrooms || '-'"></span>
-                        </div>
-
-                        <div class="flex flex-col">
-                            <span class="text-sm text-base-content/60">Bathrooms</span>
-                            <span class="font-medium" x-text="formData.bathrooms || '-'"></span>
-                        </div>
-
-                        <div class="flex flex-col">
-                            <span class="text-sm text-base-content/60">Area</span>
-                            <span class="font-medium" x-text="formData.area ? formData.area + ' sq ft' : '-'"></span>
-                        </div>
-
-                        <div class="flex flex-col">
-                            <span class="text-sm text-base-content/60">Phone Number</span>
-                            <span class="font-medium" x-text="formData.phone_number || '-'"></span>
-                        </div>
-
-                        <div class="flex flex-col">
-                            <span class="text-sm text-base-content/60">CNIC</span>
-                            <span class="font-medium" x-text="formData.cnic || '-'"></span>
-                        </div>
-
-                        <div class="flex flex-col">
-                            <span class="text-sm text-base-content/60">Status</span>
-                            <span class="font-medium" x-text="formData.is_published ? 'Published' : 'Draft'"></span>
-                        </div>
-                    </div>
-
-                    <div class="flex flex-col" x-show="formData.description">
-                        <span class="text-sm text-base-content/60">Description</span>
-                        <span class="font-medium" x-text="formData.description"></span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Navigation Buttons -->
-        <div class="flex justify-between items-center">
-            <div class="flex items-center space-x-3">
-                <button type="button" @click="prevStep()" x-show="currentStep > 1" class="btn btn-outline">
-                    <c-ui.icon name="chevron-left" classes="h-5 w-5 mr-2" />
-                    Previous
-                </button>
-
-                {% if is_edit_mode %}
-                    <button
-                        type="button"
-                        hx-post="{% url 'properties:delete' property.pk %}"
-                        hx-confirm="Are you sure you want to delete this property? This action cannot be undone."
-                        hx-target="body"
-                        class="btn btn-error btn-outline"
-                    >
-                        <c-ui.icon name="trash" classes="h-4 w-4 mr-2" />
-                        Delete Property
-                    </button>
-                {% endif %}
-            </div>
-
-            <div class="flex space-x-3 ml-auto">
-                <a href="{% if is_edit_mode %}{% url 'properties:detail' property.pk %}{% else %}{% url 'properties:list' %}{% endif %}"
-                   class="btn btn-ghost">Cancel</a>
-
-                <button type="button" @click="nextStep()" x-show="currentStep < totalSteps" class="btn btn-primary" id="nextStepBtn">
-                    Next Step
-                    <c-ui.icon name="chevron-right" classes="h-5 w-5 ml-2" />
-                </button>
-
-                <button type="submit" x-show="currentStep === totalSteps" class="btn btn-primary">
-                    {% if is_edit_mode %}
-                        <c-ui.icon name="check" classes="h-5 w-5 mr-2" />
-                        Update Property
-                    {% else %}
-                        <c-ui.icon name="plus" classes="h-5 w-5 mr-2" />
-                        Create Property
-                    {% endif %}
-                </button>
-            </div>
-        </div>
-    </form>
-</div>
-
-<script>
-function propertyForm() {
-    return {
-        currentStep: 1,
-        totalSteps: 4,
-        maxStepReached: 1,
-        formData: {
-            name: '',
-            property_type: '',
-            price: '',
-            full_address: '',
-            bedrooms: '',
-            bathrooms: '',
-            area: '',
-            description: '',
-            phone_number: '',
-            cnic: '',
-            is_published: false
-        },
-
-        init() {
-            this.updateFormData();
-        },
-
-        nextStep() {
-            if (this.currentStep < this.totalSteps) {
-                this.validateStepWithDjango();
-            }
-        },
-
-        async validateStepWithDjango() {
-            const nextButton = document.getElementById('nextStepBtn');
-            if (nextButton) {
-                nextButton.disabled = true;
-                nextButton.innerHTML = '<span class="loading loading-spinner loading-sm"></span> Validating...';
-            }
-
-            this.clearStepErrors();
-
-            const formData = new FormData(this.$refs.propertyForm);
-            formData.append('step', this.currentStep);
-
-            try {
-                const response = await fetch('{% url "properties:validate_step" %}', {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-CSRFToken': '{{ csrf_token }}',
-                    },
-                });
-
-                const result = await response.json();
-
-                if (result.valid) {
-                    this.updateFormData();
-                    this.currentStep++;
-                    if (this.currentStep > this.maxStepReached) {
-                        this.maxStepReached = this.currentStep;
-                    }
-                } else {
-                    this.displayStepErrors(result.errors);
-                }
-            } catch (error) {
-                console.error('Validation error:', error);
-                alert('An error occurred while validating the form. Please try again.');
-            } finally {
-                if (nextButton) {
-                    nextButton.disabled = false;
-                    nextButton.textContent = 'Next Step';
-                }
-            }
-        },
-
-        clearStepErrors() {
-            document.querySelectorAll('.field-error').forEach(el => el.remove());
-            document.querySelectorAll('.input-error, .select-error, .textarea-error').forEach(el => {
-                el.classList.remove('input-error', 'select-error', 'textarea-error');
-            });
-        },
-
-        displayStepErrors(errors) {
-            for (const fieldName in errors) {
-                const fieldErrors = errors[fieldName];
-                const field = document.querySelector('[name="' + fieldName + '"]');
-                if (field) {
-                    if (field.tagName === 'SELECT') {
-                        field.classList.add('select-error');
-                    } else if (field.tagName === 'TEXTAREA') {
-                        field.classList.add('textarea-error');
-                    } else {
-                        field.classList.add('input-error');
-                    }
-
-                    const errorDiv = document.createElement('div');
-                    errorDiv.className = 'field-error text-error text-sm mt-1';
-                    errorDiv.textContent = fieldErrors[0];
-
-                    const fieldContainer = field.closest('.form-control') || field.parentElement;
-                    fieldContainer.appendChild(errorDiv);
-                }
-            }
-        },
-
-        prevStep() {
-            if (this.currentStep > 1) {
-                this.currentStep--;
-            }
-        },
-
-        updateFormData() {
-            this.formData.name = document.querySelector('[name=name]')?.value || '';
-            this.formData.property_type = document.querySelector('[name=property_type]')?.value || '';
-            this.formData.price = document.querySelector('[name=price]')?.value || '';
-            this.formData.full_address = document.querySelector('[name=full_address]')?.value || '';
-            this.formData.bedrooms = document.querySelector('[name=bedrooms]')?.value || '';
-            this.formData.bathrooms = document.querySelector('[name=bathrooms]')?.value || '';
-            this.formData.area = document.querySelector('[name=area]')?.value || '';
-            this.formData.description = document.querySelector('[name=description]')?.value || '';
-            this.formData.phone_number = document.querySelector('[name=phone_number]')?.value || '';
-            this.formData.cnic = document.querySelector('[name=cnic]')?.value || '';
-            this.formData.is_published = document.querySelector('[name=is_published]')?.checked || false;
-        },
-
-        getPropertyTypeLabel() {
-            const value = this.formData.property_type;
-            if (!value) {
-                return '-';
-            }
-            const select = document.querySelector('[name=property_type]');
-            const selectedOption = Array.from(select?.options || []).find(option => option.value === value);
-            return selectedOption?.text || value;
-        }
-    }
-}
-</script>
+  </div>
+</form>

@@ -1,125 +1,61 @@
-{% extends '_layouts/base.html' %}
-{% load static %}
+{% extends "_layouts/base.html" %}
 
-{% block title %}
-    {% if show_my_properties %}
-        My Properties - Strata
-    {% elif show_favorites %}
-        Favorites - Strata
-    {% else %}
-        Properties - Strata
-    {% endif %}
-{% endblock %}
-
-{% block main_class %}p-0 m-0{% endblock %}
+{% block title %}Browse Properties — Strata{% endblock %}
 
 {% block content %}
-<!-- Hero Section -->
-<div class="hero-survey border-b border-base-300 mb-8">
-    <div class="container mx-auto py-16 md:py-20 px-4 text-center">
-        <p class="text-secondary-600 font-medium tracking-wide uppercase text-sm mb-3">Property marketplace</p>
-        <h1 class="text-4xl md:text-5xl font-display font-bold text-primary mb-4">
-            {% if show_my_properties %}
-                My Properties
-            {% elif show_favorites %}
-                Your Favorites
-            {% else %}
-                Find your next place
-            {% endif %}
-        </h1>
-        <p class="text-lg text-base-content/70 mb-8 max-w-xl mx-auto">
-            {% if show_my_properties %}
-                Manage and track your property listings
-            {% elif show_favorites %}
-                Properties you've saved for later
-            {% else %}
-                Browse listings from owners and managers in your area
-            {% endif %}
-        </p>
-
-        {% if not show_my_properties and not show_favorites %}
-            <!-- Search Bar -->
-            <div class="max-w-2xl mx-auto">
-                <div class="join w-full shadow-soft">
-                    <input type="text"
-                           placeholder="City, neighborhood, or property type…"
-                           class="input input-bordered join-item flex-1 bg-base-100">
-                    <button class="btn btn-primary join-item">
-                        <c-ui.icon name="search" />
-                        Search
-                    </button>
-                </div>
-            </div>
-        {% endif %}
+<div class="space-y-10">
+  <header class="mx-auto max-w-3xl space-y-4 text-center">
+    <c-badge variant="secondary">Property marketplace</c-badge>
+    <div class="space-y-3">
+      <h1 class="text-4xl font-bold tracking-tight sm:text-5xl">Find a Property that fits</h1>
+      <p class="text-lg text-muted-foreground">
+        Search verified details, compare prices in PKR, and contact Owners privately through Strata.
+      </p>
     </div>
+  </header>
+
+  <c-card>
+    <c-card.content class="p-5 sm:p-6">
+      <form
+        method="get"
+        action="{% url 'properties:list' %}"
+        class="space-y-5"
+        hx-get="{% url 'properties:list' %}"
+        hx-target="#property-results"
+        hx-swap="outerHTML"
+        hx-push-url="true"
+        hx-indicator="#property-results"
+      >
+        <div class="grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+          <c-forms.field
+            :field="filter_form.q"
+            label="Search"
+            placeholder="Property name, area, or address"
+            icon="search"
+          />
+          <c-button type="submit" class="w-full lg:w-auto">
+            <c-ui.icon name="search" classes="size-4" /> Search Properties
+          </c-button>
+        </div>
+
+        <c-separator />
+
+        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <c-forms.field :field="filter_form.property_type" label="Property type" />
+          <c-forms.field :field="filter_form.min_price" label="Minimum price (PKR)" placeholder="5,000,000" />
+          <c-forms.field :field="filter_form.max_price" label="Maximum price (PKR)" placeholder="50,000,000" />
+          <c-forms.field :field="filter_form.sort" label="Sort by" />
+          <c-forms.field :field="filter_form.bedrooms" label="Minimum bedrooms" placeholder="Any" />
+          <c-forms.field :field="filter_form.bathrooms" label="Minimum bathrooms" placeholder="Any" />
+          <div class="flex items-end gap-2 sm:col-span-2">
+            <c-button type="submit" variant="outline" class="flex-1">Apply filters</c-button>
+            <c-button href="{% url 'properties:list' %}" variant="ghost">Clear</c-button>
+          </div>
+        </div>
+      </form>
+    </c-card.content>
+  </c-card>
+
+  {% include "properties/partials/property_results.html" %}
 </div>
-
-<!-- Main Content Container -->
-<div class="container mx-auto px-4 pb-8">
-    <!-- Filters and Actions -->
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-        <div class="flex items-center space-x-4">
-            <!-- Filter Buttons -->
-            <div class="dropdown">
-                <div tabindex="0" role="button" class="btn btn-outline">
-                    <c-ui.icon name="filter" classes="h-4 w-4 mr-2" />
-                    Filters
-                </div>
-                <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow-large bg-base-100 rounded-box w-52">
-                    <li><a>Property Type</a></li>
-                    <li><a>Price Range</a></li>
-                    <li><a>Bedrooms</a></li>
-                    <li><a>Bathrooms</a></li>
-                </ul>
-            </div>
-
-            <!-- Sort Dropdown -->
-            <div class="dropdown">
-                <div tabindex="0" role="button" class="btn btn-outline">
-                    <c-ui.icon name="sort-ascending" classes="h-4 w-4 mr-2" />
-                    Sort By
-                </div>
-                <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow-large bg-base-100 rounded-box w-52">
-                    <li><a>Price: Low to High</a></li>
-                    <li><a>Price: High to Low</a></li>
-                    <li><a>Newest First</a></li>
-                    <li><a>Oldest First</a></li>
-                </ul>
-            </div>
-        </div>
-
-        <!-- Action Buttons -->
-        <div class="flex items-center space-x-3">
-            {% if user.is_authenticated and not show_favorites %}
-                <a href="{% url 'properties:create' %}" class="btn btn-primary">
-                    <c-ui.icon name="plus" classes="h-4 w-4 mr-2" />
-                    Add Property
-                </a>
-            {% endif %}
-
-            <!-- View Toggle -->
-            <div class="join">
-                <button class="btn btn-outline join-item btn-active">
-                    <c-ui.icon name="view-grid" classes="h-4 w-4" />
-                </button>
-                <button class="btn btn-outline join-item">
-                    <c-ui.icon name="view-list" classes="h-4 w-4" />
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Results Count -->
-    {% if page_obj %}
-        <div class="mb-6">
-            <p class="text-base-content/70">
-                Showing {{ page_obj.start_index }}-{{ page_obj.end_index }} of {{ page_obj.paginator.count }} properties
-            </p>
-        </div>
-    {% endif %}
-
-    <!-- Properties -->
-    {% include 'properties/partials/property_grid.html' with properties=properties page_obj=page_obj %}
-</div>
-
 {% endblock %}

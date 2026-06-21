@@ -71,6 +71,8 @@ Examples:
 
 Form components should keep explicit props for label, placeholder, required state, icon, rows, and help text.
 
+Shared primitives use stock shadcn structure and tokens. `shadcn_django` may scaffold new Cotton source with `uvx shadcn_django@0.24.1 add <component>`; review that output before use and keep it project-owned. Do not add a Node.js pipeline or a runtime UI package.
+
 ## JavaScript
 
 HTMX and Alpine.js are loaded from pinned CDN URLs with SRI in `templates/_layouts/base.html`.
