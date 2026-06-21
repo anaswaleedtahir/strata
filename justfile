@@ -13,7 +13,7 @@ runserver port="8000":
     #!/usr/bin/env bash
     set -euo pipefail
     trap 'kill 0' EXIT INT TERM
-    uv run python manage.py tailwind watch &
+    uv run python manage.py tailwind watch </dev/tty &
     DJANGO_SETTINGS_MODULE=config.django.local uv run uvicorn config.asgi:application --reload --host 127.0.0.1 --port {{port}}
 
 # Start uvicorn only (ASGI + WebSocket support)

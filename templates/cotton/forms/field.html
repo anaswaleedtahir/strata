@@ -63,17 +63,17 @@
           </button>
         {% else %}
           {% if icon %}
-            <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-muted-foreground [&_svg]:size-4">
+            <span class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-muted-foreground [&_svg]:size-4">
               {% heroicon icon %}
             </span>
           {% endif %}
           {% if field.errors and icon %}
-            {% render_field field class="flex h-9 w-full rounded-md border border-destructive bg-transparent py-1 pl-9 pr-3 text-sm shadow-xs transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-destructive disabled:cursor-not-allowed disabled:opacity-50" placeholder=placeholder_value aria-invalid="true" %}
+            {% render_field field class="flex h-9 w-full rounded-md border border-destructive bg-transparent px-3 py-1 pr-10 text-sm shadow-xs transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-destructive disabled:cursor-not-allowed disabled:opacity-50" placeholder=placeholder_value aria-invalid="true" %}
           {% elif field.errors %}
             {% render_field field class="flex h-9 w-full rounded-md border border-destructive bg-transparent px-3 py-1 text-sm shadow-xs transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-destructive disabled:cursor-not-allowed disabled:opacity-50" placeholder=placeholder_value aria-invalid="true" %}
           {% else %}
             {% if icon %}
-              {% render_field field class="flex h-9 w-full rounded-md border border-input bg-transparent py-1 pl-9 pr-3 text-sm shadow-xs transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50" placeholder=placeholder_value %}
+              {% render_field field class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 pr-10 text-sm shadow-xs transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50" placeholder=placeholder_value %}
             {% else %}
               {% render_field field class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50" placeholder=placeholder_value %}
             {% endif %}
