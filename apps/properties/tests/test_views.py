@@ -1,5 +1,8 @@
 import json
+from pathlib import Path
 
+from django.conf import settings
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 from django.urls import reverse
 
@@ -71,3 +74,68 @@ class PropertyListViewTests(TestCase):
             "max_price",
             "Maximum price must be at least the minimum.",
         )
+
+
+class PropertyDownloadDocumentViewTests(TestCase):
+    def _pdf_upload(self, name="document.pdf"):
+        return SimpleUploadedFile(
+            name,
+            b"%PDF-1.4\n1 0 obj\n<<>>\nendobj\ntrailer\n<<>>\n%%EOF",
+            content_type="application/pdf",
+        )
+
+    def test_owner_can_download_document(self):
+        owner = UserFactory()
+        property_obj = PropertyFactory(user=owner)
+        property_obj.documents = self._pdf_upload()
+        property_obj.save(update_fields=["documents"])
+        self.addCleanup(property_obj.documents.delete, save=False)
+        self.client.force_login(owner)
+
+        response = self.client.get(
+            reverse("properties:download_document", args=[property_obj.pk])
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response["Content-Disposition"], 'attachment; filename="document.pdf"'
+        )
+
+    def test_non_owner_receives_forbidden(self):
+        owner = UserFactory()
+        property_obj = PropertyFactory(user=owner)
+        property_obj.documents = self._pdf_upload()
+        property_obj.save(update_fields=["documents"])
+        self.addCleanup(property_obj.documents.delete, save=False)
+        self.client.force_login(UserFactory())
+
+        response = self.client.get(
+            reverse("properties:download_document", args=[property_obj.pk])
+        )
+
+        self.assertEqual(response.status_code, 403)
+
+    def test_anonymous_user_is_redirected_to_login(self):
+        property_obj = PropertyFactory()
+        property_obj.documents = self._pdf_upload()
+        property_obj.save(update_fields=["documents"])
+        self.addCleanup(property_obj.documents.delete, save=False)
+
+        response = self.client.get(
+            reverse("properties:download_document", args=[property_obj.pk])
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("/accounts/login/", response["Location"])
+
+    def test_documents_use_private_media_root(self):
+        property_obj = PropertyFactory()
+        property_obj.documents = self._pdf_upload()
+        property_obj.save(update_fields=["documents"])
+        self.addCleanup(property_obj.documents.delete, save=False)
+
+        stored_path = Path(property_obj.documents.path)
+
+        self.assertTrue(stored_path.is_file())
+        self.assertTrue(stored_path.is_relative_to(settings.PRIVATE_MEDIA_ROOT))
+        self.assertFalse(stored_path.is_relative_to(settings.MEDIA_ROOT))

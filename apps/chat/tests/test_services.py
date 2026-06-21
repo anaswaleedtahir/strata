@@ -185,3 +185,27 @@ class MessageDeliveryTestCase(TransactionTestCase):
             )
 
         self.assertEqual(message.content, "Hello")
+
+
+class ConversationStartTestCase(TransactionTestCase):
+    def test_rejects_unpublished_property(self):
+        owner = User.objects.create_user(
+            email="owner@example.com", password="testpass123"
+        )
+        participant = User.objects.create_user(
+            email="participant@example.com", password="testpass123"
+        )
+        property_obj = Property.objects.create(
+            user=owner,
+            name="Draft Property",
+            full_address="123 Test St, Test City, TS 12345",
+            property_type="House",
+            description="A draft property",
+            price=100000,
+            is_published=False,
+        )
+
+        with self.assertRaisesMessage(ApplicationError, "Property is not available."):
+            services.conversation_start(user=participant, property_obj=property_obj)
+
+        self.assertEqual(Conversation.objects.count(), 0)

@@ -100,6 +100,8 @@ async def rate_limit_check(*, user_id: int, redis_url: str) -> tuple[bool, int]:
 
 
 def conversation_start(*, user, property_obj) -> Conversation:
+    if not property_obj.is_published:
+        raise ApplicationError("Property is not available.")
     if property_obj.user == user:
         raise ApplicationError(
             "You cannot start a conversation with yourself about your own property."

@@ -1,6 +1,11 @@
+from pathlib import Path
+
 from environs import Env
 
 env = Env()
+
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+PRIVATE_MEDIA_ROOT = BASE_DIR / "private_media"
 
 MEDIA_URL = "/media/"
 STATIC_URL = "static/"
@@ -23,6 +28,10 @@ AWS_STATIC_BUCKET_NAME = env.str("AWS_STATIC_BUCKET_NAME", "strata-static")
 STORAGES = {
     "default": {
         "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "private_documents": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+        "OPTIONS": {"location": PRIVATE_MEDIA_ROOT},
     },
     "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
@@ -47,6 +56,17 @@ if USE_S3_MEDIA:
     if AWS_S3_ENDPOINT_URL:
         STORAGES["default"]["OPTIONS"]["endpoint_url"] = AWS_S3_ENDPOINT_URL
     MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/"
+    STORAGES["private_documents"] = {
+        "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+        "OPTIONS": {
+            "bucket_name": AWS_MEDIA_BUCKET_NAME,
+            "file_overwrite": AWS_S3_FILE_OVERWRITE,
+            "default_acl": "private",
+            "querystring_auth": True,
+        },
+    }
+    if AWS_S3_ENDPOINT_URL:
+        STORAGES["private_documents"]["OPTIONS"]["endpoint_url"] = AWS_S3_ENDPOINT_URL
 
 if USE_S3_STATIC:
     AWS_S3_STATIC_CUSTOM_DOMAIN = env.str(

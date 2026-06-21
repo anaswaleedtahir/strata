@@ -33,10 +33,12 @@ classifiers = [
 
 [dependency-groups]
 dev = [
+    "bandit>=1.9.4",
     "daphne>=4.0.0",
     "django-debug-toolbar==6.2.0",
     "factory-boy>=3.3.0",
     "ruff==0.15.2",
+    "ty>=0.0.51",
 ]
 prod = ["gunicorn==25.1.0"]
 
@@ -52,8 +54,5 @@ packages = ["config", "apps"]
 "assets" = "assets"
 "static" = "static"
 
-[tool.ty]
-# Disable strict checks for Django ORM patterns
-disable = [
-    "unresolved-attribute",  # Django models have dynamic attributes
-]
+[tool.ty.rules]
+unresolved-attribute = "ignore"

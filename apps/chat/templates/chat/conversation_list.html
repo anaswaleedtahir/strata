@@ -21,7 +21,7 @@
       {% for conversation in conversations %}
         <a href="{% url 'chat:conversation_detail' conversation.id %}" class="flex gap-4 bg-card p-4 transition-colors hover:bg-accent/50 sm:p-5">
           <div class="size-14 shrink-0 overflow-hidden rounded-lg bg-muted">
-            {% with primary_image=conversation.property.primary_image %}
+            {% with primary_image=conversation.primary_image %}
               {% if primary_image %}
                 <img src="{{ primary_image.image.url }}" alt="{{ conversation.property.name }}" class="size-full object-cover">
               {% else %}
@@ -46,16 +46,14 @@
               <time class="shrink-0 text-xs text-muted-foreground">{{ conversation.updated_at|timesince }} ago</time>
             </div>
 
-            {% with last_message=conversation.messages.last %}
-              <p class="mt-2 truncate text-sm {% if not last_message %}italic text-muted-foreground{% endif %}">
-                {% if last_message %}
-                  {% if last_message.sender == user %}<span class="font-medium">You: </span>{% endif %}
-                  {{ last_message.content }}
+              <p class="mt-2 truncate text-sm {% if not conversation.latest_message_id %}italic text-muted-foreground{% endif %}">
+                {% if conversation.latest_message_id %}
+                  {% if conversation.latest_message_sender_id == user.id %}<span class="font-medium">You: </span>{% endif %}
+                  {{ conversation.latest_message_content }}
                 {% else %}
                   No messages yet
                 {% endif %}
               </p>
-            {% endwith %}
           </div>
           <c-ui.icon name="chevron-right" classes="mt-5 size-4 shrink-0 text-muted-foreground" />
         </a>

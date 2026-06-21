@@ -1,19 +1,33 @@
-from django.db.models import Count, Q, QuerySet
+from django.db.models import Count, OuterRef, Prefetch, Q, QuerySet, Subquery
 from django.shortcuts import get_object_or_404
 
 from apps.chat.models import Conversation
+from apps.properties.models import PropertyImage
 from apps.shared.exceptions import ApplicationError
 
 
 def conversation_list_for_user(*, user) -> list[Conversation]:
+    latest_message = Conversation.messages.rel.related_model.objects.filter(
+        conversation_id=OuterRef("pk")
+    ).order_by("-created_at", "-id")
     conversations = list(
         Conversation.objects.filter(Q(participant_one=user) | Q(participant_two=user))
         .select_related("property", "participant_one", "participant_two")
+        .prefetch_related(
+            Prefetch(
+                "property__images",
+                queryset=PropertyImage.objects.order_by("-is_primary", "created_at"),
+                to_attr="prefetched_images",
+            )
+        )
         .annotate(
             unread_count=Count(
                 "messages",
                 filter=Q(messages__is_read=False) & ~Q(messages__sender=user),
-            )
+            ),
+            latest_message_id=Subquery(latest_message.values("id")[:1]),
+            latest_message_content=Subquery(latest_message.values("content")[:1]),
+            latest_message_sender_id=Subquery(latest_message.values("sender_id")[:1]),
         )
         .order_by("-updated_at")
     )
@@ -22,6 +36,9 @@ def conversation_list_for_user(*, user) -> list[Conversation]:
             conversation.participant_two
             if conversation.participant_one == user
             else conversation.participant_one
+        )
+        conversation.primary_image = next(
+            iter(getattr(conversation.property, "prefetched_images", [])), None
         )
     return conversations
 
@@ -54,4 +71,4 @@ def conversation_get(*, conversation_id: int) -> Conversation | None:
 
 
 def messages_for_conversation(*, conversation: Conversation) -> QuerySet:
-    return conversation.messages.select_related("sender").order_by("created_at")
+    return conversation.messages.select_related("sender").order_by("-created_at", "-id")

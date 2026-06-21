@@ -4,15 +4,19 @@
 {% block title %}Conversation about {{ conversation.property.name }} — Strata{% endblock %}
 
 {% block extra_head %}
-  <script src="{% static 'js/chat-client.js' %}"></script>
+  {% if is_live_page %}
+    <script src="{% static 'js/chat-client.js' %}"></script>
+  {% endif %}
 {% endblock %}
 
 {% block content %}
 <div class="mx-auto max-w-5xl space-y-4">
-  <div id="connection-status" class="hidden items-center gap-3 rounded-lg border bg-background p-4 text-sm" role="status">
-    <c-ui.icon name="information-circle" classes="size-5" />
-    <span id="connection-status-text">Connecting…</span>
-  </div>
+  {% if is_live_page %}
+    <div id="connection-status" class="hidden items-center gap-3 rounded-lg border bg-background p-4 text-sm" role="status">
+      <c-ui.icon name="information-circle" classes="size-5" />
+      <span id="connection-status-text">Connecting…</span>
+    </div>
+  {% endif %}
 
   <c-card>
     <c-card.content class="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between">
@@ -30,10 +34,16 @@
           </a>
         </div>
       </div>
-      <div id="connection-badge" class="inline-flex w-fit items-center gap-2 rounded-full border px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
-        <span class="size-3 animate-spin rounded-full border border-muted-foreground/30 border-t-foreground"></span>
-        <span>Connecting</span>
-      </div>
+      {% if is_live_page %}
+        <div id="connection-badge" class="inline-flex w-fit items-center gap-2 rounded-full border px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
+          <span class="size-3 animate-spin rounded-full border border-muted-foreground/30 border-t-foreground"></span>
+          <span>Connecting</span>
+        </div>
+      {% else %}
+        <div class="inline-flex w-fit items-center gap-2 rounded-full border px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
+          <span>History view</span>
+        </div>
+      {% endif %}
     </c-card.content>
   </c-card>
 
@@ -57,6 +67,23 @@
   </c-card>
 
   <c-card class="overflow-hidden">
+    {% if page_obj.has_next or not is_live_page %}
+      <div class="flex flex-wrap items-center justify-between gap-3 border-b bg-background px-4 py-3 text-sm">
+        <div class="flex gap-2">
+          {% if page_obj.has_next %}
+            <c-button href="?page={{ page_obj.next_page_number }}" variant="outline" size="sm">Older messages</c-button>
+          {% endif %}
+          {% if not is_live_page %}
+            {% if page_obj.has_previous %}
+              <c-button href="?page={{ page_obj.previous_page_number }}" variant="outline" size="sm">Newer messages</c-button>
+            {% endif %}
+            <c-button href="{% url 'chat:conversation_detail' conversation.id %}" variant="ghost" size="sm">Back to latest</c-button>
+          {% endif %}
+        </div>
+        <p class="text-muted-foreground">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</p>
+      </div>
+    {% endif %}
+
     <div id="messages-container" class="h-[min(60vh,36rem)] space-y-4 overflow-y-auto bg-muted/30 p-4 sm:p-6" aria-live="polite">
       {% if chat_messages %}
         {% for message in chat_messages %}
@@ -86,28 +113,31 @@
       {% endif %}
     </div>
 
-    <div class="border-t bg-background p-4">
-      <form id="message-form" class="flex items-end gap-3">
-        <div class="min-w-0 flex-1">
-          <label for="message-input" class="sr-only">Message</label>
-          <textarea
-            id="message-input"
-            name="message"
-            rows="1"
-            class="flex min-h-10 max-h-32 w-full resize-none rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-            placeholder="Write a message…"
-            maxlength="5000"
-          ></textarea>
-          <p class="mt-1 text-xs text-muted-foreground"><span id="char-count">0</span> / 5000</p>
-        </div>
-        <c-button type="submit" class="h-10">
-          <c-ui.icon name="paper-airplane" classes="size-4" /> <span class="hidden sm:inline">Send</span>
-        </c-button>
-      </form>
-    </div>
+    {% if is_live_page %}
+      <div class="border-t bg-background p-4">
+        <form id="message-form" class="flex items-end gap-3">
+          <div class="min-w-0 flex-1">
+            <label for="message-input" class="sr-only">Message</label>
+            <textarea
+              id="message-input"
+              name="message"
+              rows="1"
+              class="flex min-h-10 max-h-32 w-full resize-none rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+              placeholder="Write a message…"
+              maxlength="5000"
+            ></textarea>
+            <p class="mt-1 text-xs text-muted-foreground"><span id="char-count">0</span> / 5000</p>
+          </div>
+          <c-button type="submit" class="h-10">
+            <c-ui.icon name="paper-airplane" classes="size-4" /> <span class="hidden sm:inline">Send</span>
+          </c-button>
+        </form>
+      </div>
+    {% endif %}
   </c-card>
 </div>
 
+{% if is_live_page %}
 <script>
     // Character counter
     const messageInput = document.getElementById('message-input');
@@ -368,5 +398,6 @@
     }
 
 </script>
+{% endif %}
 
 {% endblock %}

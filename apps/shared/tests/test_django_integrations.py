@@ -80,3 +80,21 @@ class DjangoIntegrationSettingsTests(SimpleTestCase):
 
     def test_allauth_urls_are_mounted(self):
         self.assertEqual(reverse("account_login"), "/accounts/login/")
+
+    def test_private_document_storage_is_separate_from_public_media(self):
+        private_storage = settings.STORAGES["private_documents"]
+
+        self.assertEqual(
+            private_storage["BACKEND"], "django.core.files.storage.FileSystemStorage"
+        )
+        self.assertEqual(
+            private_storage["OPTIONS"]["location"], settings.PRIVATE_MEDIA_ROOT
+        )
+        self.assertNotEqual(settings.PRIVATE_MEDIA_ROOT, settings.MEDIA_ROOT)
+
+    def test_health_endpoint_is_plain_text_ok(self):
+        response = self.client.get(reverse("health"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.content, b"ok")
+        self.assertTrue(response["Content-Type"].startswith("text/plain"))

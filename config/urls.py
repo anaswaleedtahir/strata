@@ -18,9 +18,16 @@ Including another URLconf
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
+from django.http import HttpResponse
 from django.urls import include, path
 
+
+def health_check(_request):
+    return HttpResponse("ok", content_type="text/plain")
+
+
 urlpatterns = [
+    path("health/", health_check, name="health"),
     path("admin/", admin.site.urls),
     path("accounts/", include("allauth.urls")),
     path("", include("apps.properties.urls")),

@@ -1,15 +1,29 @@
+from io import BytesIO
 import re
 import time
 from django.contrib.auth import get_user_model
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TransactionTestCase
+from django.urls import reverse
+from PIL import Image
 
+from apps.chat.selectors import conversation_list_for_user
 from apps.chat.models import Conversation, Message
-from apps.properties.models import Property
+from apps.properties.models import Property, PropertyImage
 
 User = get_user_model()
 
 
 class ConversationListViewTestCase(TransactionTestCase):
+    def _png_upload(self, name="image.png"):
+        image_bytes = BytesIO()
+        Image.new("RGB", size=(1, 1), color=(255, 0, 0)).save(image_bytes, format="PNG")
+        return SimpleUploadedFile(
+            name,
+            image_bytes.getvalue(),
+            content_type="image/png",
+        )
+
     def setUp(self):
         self.user1 = User.objects.create_user(
             email="user1@example.com", password="testpass123"
@@ -159,6 +173,79 @@ class ConversationListViewTestCase(TransactionTestCase):
         response = self.client.get("/chat/conversations/")
         self.assertContains(response, self.property1.name)
         self.assertContains(response, self.property2.name)
+
+    def test_conversation_list_uses_latest_message_annotations_and_prefetched_images(
+        self,
+    ):
+        Message.objects.create(
+            conversation=self.conversation1,
+            sender=self.user2,
+            content="Owner message",
+        )
+        Message.objects.create(
+            conversation=self.conversation2,
+            sender=self.user1,
+            content="My latest message",
+        )
+        primary_image = PropertyImage.objects.create(
+            property=self.property1,
+            image=self._png_upload("primary.png"),
+            is_primary=True,
+        )
+        fallback_image = PropertyImage.objects.create(
+            property=self.property2,
+            image=self._png_upload("fallback.png"),
+            is_primary=False,
+        )
+        self.addCleanup(primary_image.image.delete, save=False)
+        self.addCleanup(fallback_image.image.delete, save=False)
+
+        self.client.force_login(self.user1)
+        response = self.client.get("/chat/conversations/")
+
+        self.assertContains(response, "Owner message")
+        self.assertContains(response, "You: ")
+        self.assertContains(response, primary_image.image.url)
+        self.assertContains(response, fallback_image.image.url)
+
+    def test_conversation_list_query_count_is_constant(self):
+        for index in range(8):
+            other_user = User.objects.create_user(
+                email=f"extra{index}@example.com", password="testpass123"
+            )
+            property_obj = Property.objects.create(
+                user=other_user,
+                name=f"Extra Property {index}",
+                full_address=f"{index} Extra St",
+                property_type="House",
+                description="Extra property",
+                price=100000 + index,
+            )
+            conversation = Conversation.objects.create(
+                property=property_obj,
+                participant_one=self.user1,
+                participant_two=other_user,
+            )
+            Message.objects.create(
+                conversation=conversation,
+                sender=other_user,
+                content=f"Message {index}",
+            )
+
+        with self.assertNumQueries(2):
+            conversations = conversation_list_for_user(user=self.user1)
+            preview_data = [
+                (
+                    conversation.other_participant.email,
+                    conversation.latest_message_content,
+                    conversation.latest_message_sender_id,
+                    conversation.primary_image,
+                )
+                for conversation in conversations
+            ]
+
+        self.assertEqual(len(conversations), 10)
+        self.assertTrue(all(len(row) == 4 for row in preview_data))
 
 
 class ConversationDetailViewTestCase(TransactionTestCase):
@@ -338,6 +425,54 @@ class ConversationDetailViewTestCase(TransactionTestCase):
             "Timestamp format not found in response",
         )
 
+    def test_live_page_is_limited_to_latest_fifty_messages(self):
+        Message.objects.all().delete()
+        created_messages = [
+            Message(
+                conversation=self.conversation,
+                sender=self.user1,
+                content=f"Message {i}",
+            )
+            for i in range(120)
+        ]
+        Message.objects.bulk_create(created_messages)
+        self.client.force_login(self.user1)
+
+        response = self.client.get(f"/chat/conversations/{self.conversation.id}/")
+        chat_messages = list(response.context["chat_messages"])
+
+        self.assertEqual(len(chat_messages), 50)
+        self.assertEqual(chat_messages[0].content, "Message 70")
+        self.assertEqual(chat_messages[-1].content, "Message 119")
+        self.assertTrue(response.context["is_live_page"])
+        self.assertContains(response, 'id="message-form"')
+        self.assertContains(response, "Older messages")
+
+    def test_history_page_is_read_only(self):
+        Message.objects.all().delete()
+        created_messages = [
+            Message(
+                conversation=self.conversation,
+                sender=self.user2,
+                content=f"Message {i}",
+            )
+            for i in range(120)
+        ]
+        Message.objects.bulk_create(created_messages)
+        self.client.force_login(self.user1)
+
+        response = self.client.get(
+            f"/chat/conversations/{self.conversation.id}/?page=2"
+        )
+        chat_messages = list(response.context["chat_messages"])
+
+        self.assertEqual(len(chat_messages), 50)
+        self.assertEqual(chat_messages[0].content, "Message 20")
+        self.assertEqual(chat_messages[-1].content, "Message 69")
+        self.assertFalse(response.context["is_live_page"])
+        self.assertNotContains(response, 'id="message-form"')
+        self.assertContains(response, "Back to latest")
+
 
 class StartConversationViewTestCase(TransactionTestCase):
     def setUp(self):
@@ -354,23 +489,24 @@ class StartConversationViewTestCase(TransactionTestCase):
             property_type="House",
             description="Test property",
             price=100000,
+            is_published=True,
         )
 
     def test_unauthenticated_user_redirected(self):
-        response = self.client.get(f"/chat/start/{self.property.id}/")
+        response = self.client.post(f"/chat/start/{self.property.id}/")
         self.assertEqual(response.status_code, 302)
         self.assertIn("/accounts/login/", response.url)
 
     def test_property_owner_cannot_start_conversation(self):
         self.client.force_login(self.user2)
-        response = self.client.get(f"/chat/start/{self.property.id}/")
+        response = self.client.post(f"/chat/start/{self.property.id}/")
         self.assertEqual(response.status_code, 403)
         self.assertIn("yourself", response.content.decode().lower())
 
     def test_create_new_conversation(self):
         self.client.force_login(self.user1)
         self.assertEqual(Conversation.objects.count(), 0)
-        response = self.client.get(f"/chat/start/{self.property.id}/")
+        response = self.client.post(f"/chat/start/{self.property.id}/")
         self.assertEqual(response.status_code, 302)
         self.assertEqual(Conversation.objects.count(), 1)
         conversation = Conversation.objects.first()
@@ -387,15 +523,15 @@ class StartConversationViewTestCase(TransactionTestCase):
         )
         self.client.force_login(self.user1)
         self.assertEqual(Conversation.objects.count(), 1)
-        response = self.client.get(f"/chat/start/{self.property.id}/")
+        response = self.client.post(f"/chat/start/{self.property.id}/")
         self.assertEqual(response.status_code, 302)
         self.assertEqual(Conversation.objects.count(), 1)
         self.assertIn(f"/chat/conversations/{existing_conversation.id}/", response.url)
 
     def test_conversation_uniqueness_constraint(self):
         self.client.force_login(self.user1)
-        response1 = self.client.get(f"/chat/start/{self.property.id}/")
-        response2 = self.client.get(f"/chat/start/{self.property.id}/")
+        response1 = self.client.post(f"/chat/start/{self.property.id}/")
+        response2 = self.client.post(f"/chat/start/{self.property.id}/")
         self.assertEqual(response1.status_code, 302)
         self.assertEqual(response2.status_code, 302)
         self.assertEqual(Conversation.objects.count(), 1)
@@ -403,12 +539,12 @@ class StartConversationViewTestCase(TransactionTestCase):
 
     def test_nonexistent_property_returns_404(self):
         self.client.force_login(self.user1)
-        response = self.client.get("/chat/start/99999/")
+        response = self.client.post("/chat/start/99999/")
         self.assertEqual(response.status_code, 404)
 
     def test_conversation_data_completeness(self):
         self.client.force_login(self.user1)
-        self.client.get(f"/chat/start/{self.property.id}/")
+        self.client.post(f"/chat/start/{self.property.id}/")
         conversation = Conversation.objects.first()
         self.assertIsNotNone(conversation.property)
         self.assertIsNotNone(conversation.participant_one)
@@ -422,6 +558,38 @@ class StartConversationViewTestCase(TransactionTestCase):
         self.assertIn(
             self.user2, [conversation.participant_one, conversation.participant_two]
         )
+
+    def test_get_does_not_create_conversation(self):
+        self.client.force_login(self.user1)
+
+        response = self.client.get(f"/chat/start/{self.property.id}/")
+
+        self.assertEqual(response.status_code, 405)
+        self.assertEqual(Conversation.objects.count(), 0)
+
+    def test_unpublished_property_returns_404_without_creating_conversation(self):
+        self.property.is_published = False
+        self.property.save(update_fields=["is_published"])
+        self.client.force_login(self.user1)
+
+        response = self.client.post(f"/chat/start/{self.property.id}/")
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(Conversation.objects.count(), 0)
+
+    def test_property_detail_renders_post_form_for_message_owner(self):
+        self.client.force_login(self.user1)
+
+        response = self.client.get(
+            reverse("properties:detail", args=[self.property.id])
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(
+            response,
+            f'<form method="post" action="/chat/start/{self.property.id}/">',
+        )
+        self.assertContains(response, "csrfmiddlewaretoken")
 
 
 class HistoricalMessageViewTestCase(TransactionTestCase):

@@ -75,6 +75,14 @@ jobs:
           DEBUG: "True"
           ALLOWED_HOSTS: localhost,127.0.0.1
 
+      - name: Run tests
+        run: uv run python manage.py test
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
+          SECRET_KEY: test-secret-key-for-ci
+          DEBUG: "True"
+          ALLOWED_HOSTS: localhost,127.0.0.1
+
   security:
     runs-on: ubuntu-latest
     steps:
@@ -92,7 +100,7 @@ jobs:
         run: uv sync
 
       - name: Run Bandit security check
-        run: uv run bandit -r apps config -f json -o bandit-report.json || true
+        run: uv run bandit -r apps config --severity-level high --confidence-level high -f json -o bandit-report.json
 
       - name: Upload Bandit report
         uses: actions/upload-artifact@v4

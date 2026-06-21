@@ -161,9 +161,12 @@
               </c-alert_dialog>
             </div>
           {% elif user.is_authenticated %}
-            <c-button href="{% url 'chat:start_conversation' property.pk %}" class="w-full">
-              <c-ui.icon name="chat" classes="size-4" /> Message Owner
-            </c-button>
+            <form method="post" action="{% url 'chat:start_conversation' property.pk %}">
+              {% csrf_token %}
+              <c-button type="submit" class="w-full">
+                <c-ui.icon name="chat" classes="size-4" /> Message Owner
+              </c-button>
+            </form>
             <p class="text-xs leading-5 text-muted-foreground">Your Conversation is private and always tied to this Property.</p>
           {% else %}
             <c-button href="{% url 'account_login' %}?next={{ request.path|urlencode }}" class="w-full">Sign in to message</c-button>

@@ -12,6 +12,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from django.conf import settings
+from django.core.files.storage import storages
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models import Index, Q, UniqueConstraint
@@ -48,6 +49,10 @@ def property_image_upload_path(instance: "PropertyImage", filename: str) -> str:
     return f"properties/images/{prop_id}/{filename}"
 
 
+def private_document_storage():
+    return storages["private_documents"]
+
+
 class Property(BaseModel):
     """Model representing a property."""
 
@@ -81,7 +86,12 @@ class Property(BaseModel):
         validators=[MinValueValidator(0)],
         help_text="Property area in square feet",
     )
-    documents = models.FileField(upload_to=documents_upload_path, blank=True, null=True)
+    documents = models.FileField(
+        upload_to=documents_upload_path,
+        storage=private_document_storage,
+        blank=True,
+        null=True,
+    )
     is_published = models.BooleanField(default=False, db_index=True)
 
     if TYPE_CHECKING:
