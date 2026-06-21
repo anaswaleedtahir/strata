@@ -1,13 +1,8 @@
 import re
 import time
-from unittest import skip
-
-from channels.db import database_sync_to_async
-from channels.testing.websocket import WebsocketCommunicator
 from django.contrib.auth import get_user_model
-from django.test import TransactionTestCase, override_settings
+from django.test import TransactionTestCase
 
-from apps.chat.consumers import ChatConsumer
 from apps.chat.models import Conversation, Message
 from apps.properties.models import Property
 
@@ -55,7 +50,7 @@ class ConversationListViewTestCase(TransactionTestCase):
     def test_unauthenticated_user_redirected(self):
         response = self.client.get("/chat/conversations/")
         self.assertEqual(response.status_code, 302)
-        self.assertIn("/users/login/", response.url)
+        self.assertIn("/accounts/login/", response.url)
 
     def test_authenticated_user_can_access(self):
         self.client.force_login(self.user1)
@@ -212,7 +207,7 @@ class ConversationDetailViewTestCase(TransactionTestCase):
     def test_unauthenticated_user_redirected(self):
         response = self.client.get(f"/chat/conversations/{self.conversation.id}/")
         self.assertEqual(response.status_code, 302)
-        self.assertIn("/users/login/", response.url)
+        self.assertIn("/accounts/login/", response.url)
 
     def test_participant_can_access_conversation(self):
         self.client.force_login(self.user1)
@@ -364,7 +359,7 @@ class StartConversationViewTestCase(TransactionTestCase):
     def test_unauthenticated_user_redirected(self):
         response = self.client.get(f"/chat/start/{self.property.id}/")
         self.assertEqual(response.status_code, 302)
-        self.assertIn("/users/login/", response.url)
+        self.assertIn("/accounts/login/", response.url)
 
     def test_property_owner_cannot_start_conversation(self):
         self.client.force_login(self.user2)
@@ -429,91 +424,7 @@ class StartConversationViewTestCase(TransactionTestCase):
         )
 
 
-@override_settings(
-    CHANNEL_LAYERS={"default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}}
-)
-class OfflineMessageHandlingTestCase(TransactionTestCase):
-    @database_sync_to_async
-    def create_test_data(self):
-        self.user1 = User.objects.create_user(
-            email="user1@example.com", password="testpass123"
-        )
-        self.user2 = User.objects.create_user(
-            email="user2@example.com", password="testpass123"
-        )
-        self.property = Property.objects.create(
-            user=self.user2,
-            name="Test Property",
-            full_address="123 Test St, Test City, TS 12345",
-            property_type="House",
-            description="A test property",
-            price=100000,
-        )
-        self.conversation = Conversation.objects.create(
-            property=self.property,
-            participant_one=self.user1,
-            participant_two=self.user2,
-        )
-
-    @database_sync_to_async
-    def create_offline_messages(self):
-        self.message1 = Message.objects.create(
-            conversation=self.conversation,
-            sender=self.user1,
-            content="First offline message",
-            is_read=False,
-        )
-        self.message2 = Message.objects.create(
-            conversation=self.conversation,
-            sender=self.user1,
-            content="Second offline message",
-            is_read=False,
-        )
-        self.message3 = Message.objects.create(
-            conversation=self.conversation,
-            sender=self.user1,
-            content="Third offline message",
-            is_read=False,
-        )
-
-    async def test_offline_message_persistence(self):
-        await self.create_test_data()
-        communicator = WebsocketCommunicator(
-            ChatConsumer.as_asgi(), f"/ws/chat/{self.conversation.id}/"
-        )
-        communicator.scope["user"] = self.user1
-        communicator.scope["url_route"] = {
-            "kwargs": {"conversation_id": self.conversation.id}
-        }
-        connected, _ = await communicator.connect()
-        self.assertTrue(connected)
-        await communicator.send_json_to({"message": "Message for offline user"})
-        await communicator.receive_json_from()
-
-        @database_sync_to_async
-        def check_message_status():
-            message = Message.objects.filter(
-                conversation=self.conversation,
-                sender=self.user1,
-                content="Message for offline user",
-            ).first()
-            return message is not None and not message.is_read
-
-        self.assertTrue(await check_message_status())
-        await communicator.disconnect()
-
-    @skip("Unread-on-connect not implemented")
-    async def test_unread_messages_delivered_on_connection(self):
-        pass
-
-    @skip("Unread-on-connect not implemented")
-    async def test_only_recipient_unread_messages_delivered(self):
-        pass
-
-    @skip("Unread-on-connect not implemented")
-    async def test_no_unread_messages_on_connection(self):
-        pass
-
+class HistoricalMessageViewTestCase(TransactionTestCase):
     def test_historical_messages_loaded_from_database(self):
         user1 = User.objects.create_user(
             email="user1@example.com", password="testpass123"

@@ -1,5 +1,3 @@
-import time
-
 from django.db.models import Count, Q, QuerySet
 from django.shortcuts import get_object_or_404
 
@@ -57,18 +55,3 @@ def conversation_get(*, conversation_id: int) -> Conversation | None:
 
 def messages_for_conversation(*, conversation: Conversation) -> QuerySet:
     return conversation.messages.select_related("sender").order_by("created_at")
-
-
-async def rate_limit_get_cooldown(
-    *, user_id: int, redis_url: str, rate_limit_window: int
-) -> int:
-    from redis.asyncio import Redis as AsyncRedis
-
-    key = f"rate_limit:chat:{user_id}"
-    async with AsyncRedis.from_url(redis_url, decode_responses=True) as redis:
-        oldest = await redis.zrange(key, 0, 0, withscores=True)
-
-    if oldest:
-        oldest_timestamp = oldest[0][1]
-        return int(oldest_timestamp + rate_limit_window - time.time()) + 1
-    return rate_limit_window

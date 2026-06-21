@@ -14,31 +14,36 @@ def _check_password_strength(password: str) -> None:
         raise ApplicationError(e.message) from e
 
 
-def user_create(*, email: str, password: str, first_name: str, last_name: str) -> User:
+def user_create(
+    *,
+    email: str,
+    password: str | None,
+    first_name: str,
+    last_name: str,
+    user=None,
+) -> User:
     email = email.strip().lower()
 
-    if User.objects.filter(email=email).exists():
+    email_query = User.objects.filter(email=email)
+    if user is not None and user.pk:
+        email_query = email_query.exclude(pk=user.pk)
+    if email_query.exists():
         raise ApplicationError("This email address is already registered.")
 
-    _check_password_strength(password)
+    if password:
+        _check_password_strength(password)
 
-    user = User.objects.create_user(
-        email=email,
-        password=password,
-        first_name=first_name,
-        last_name=last_name,
-    )
+    user = user or User()
+    user.email = email
+    user.first_name = first_name
+    user.last_name = last_name
+    if password:
+        user.set_password(password)
+    else:
+        user.set_unusable_password()
+    user.full_clean()
+    user.save()
     return user
-
-
-def user_password_change(*, user: User, old_password: str, new_password: str) -> None:
-    if not user.check_password(old_password):
-        raise ApplicationError("Current password is incorrect.")
-
-    _check_password_strength(new_password)
-
-    user.set_password(new_password)
-    user.save(update_fields=["password"])
 
 
 def user_update(*, user: User, first_name: str, last_name: str, email: str) -> User:

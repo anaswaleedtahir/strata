@@ -123,7 +123,7 @@ AUTHENTICATION_BACKENDS = [
     "allauth.account.auth_backends.AuthenticationBackend",
 ]
 
-LOGIN_URL = "users:login"
+LOGIN_URL = "account_login"
 
 # ============================================================================
 # INTERNATIONALIZATION

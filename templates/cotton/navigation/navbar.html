@@ -61,9 +61,9 @@
             </div>
             <div class="my-1 h-px bg-border"></div>
             <a href="{% url 'users:profile' %}" class="flex items-center gap-2 rounded-md px-2.5 py-2 text-sm hover:bg-accent focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"><c-ui.icon name="user" classes="size-4" /> Profile</a>
-            <a href="{% url 'users:password_change' %}" class="flex items-center gap-2 rounded-md px-2.5 py-2 text-sm hover:bg-accent focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"><c-ui.icon name="key" classes="size-4" /> Security</a>
+            <a href="{% url 'account_change_password' %}" class="flex items-center gap-2 rounded-md px-2.5 py-2 text-sm hover:bg-accent focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"><c-ui.icon name="key" classes="size-4" /> Security</a>
             <div class="my-1 h-px bg-border"></div>
-            <form method="post" action="{% url 'users:logout' %}">
+            <form method="post" action="{% url 'account_logout' %}">
               {% csrf_token %}
               <button type="submit" class="flex w-full items-center gap-2 rounded-md px-2.5 py-2 text-left text-sm text-destructive hover:bg-accent focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring">
                 <c-ui.icon name="logout" classes="size-4" /> Sign out
@@ -72,8 +72,8 @@
           </div>
         </div>
       {% else %}
-        <c-button href="{% url 'users:login' %}" variant="ghost" size="sm" class="hidden sm:inline-flex">Sign in</c-button>
-        <c-button href="{% url 'users:signup' %}" size="sm">Get started</c-button>
+        <c-button href="{% url 'account_login' %}" variant="ghost" size="sm" class="hidden sm:inline-flex">Sign in</c-button>
+        <c-button href="{% url 'account_signup' %}" size="sm">Get started</c-button>
       {% endif %}
 
     </div>

@@ -44,6 +44,45 @@ class UserCreateTests(TestCase):
                 last_name="Doe",
             )
 
+    def test_creates_user_without_password(self):
+        user = user_create(
+            email="social@example.com",
+            password=None,
+            first_name="Social",
+            last_name="User",
+        )
+        self.assertEqual(user.email, "social@example.com")
+        self.assertFalse(user.has_usable_password())
+
+    def test_allows_existing_user_with_same_email(self):
+        existing = UserFactory(
+            email="oauth@example.com",
+            first_name="Old",
+            last_name="Name",
+        )
+        updated = user_create(
+            email="oauth@example.com",
+            password=None,
+            first_name="OAuth",
+            last_name="User",
+            user=existing,
+        )
+        self.assertEqual(updated.pk, existing.pk)
+        self.assertEqual(updated.email, "oauth@example.com")
+        self.assertEqual(updated.first_name, "OAuth")
+
+    def test_raises_when_email_taken_by_another_user(self):
+        UserFactory(email="taken@example.com")
+        existing = UserFactory(email="mine@example.com")
+        with self.assertRaises(ApplicationError):
+            user_create(
+                email="taken@example.com",
+                password=None,
+                first_name="Jane",
+                last_name="Doe",
+                user=existing,
+            )
+
 
 class UserUpdateTests(TestCase):
     def test_updates_profile(self):

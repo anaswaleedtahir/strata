@@ -9,14 +9,13 @@ from django.core.paginator import Paginator
 from django.http import (
     FileResponse,
     Http404,
-    HttpResponse,
     HttpResponseForbidden,
     JsonResponse,
 )
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views import View
-from django_htmx.http import trigger_client_event
+from django_htmx.http import HttpResponseClientRedirect, trigger_client_event
 
 from apps.properties.forms import PropertyFilterForm, PropertyForm
 from apps.properties.models import Property
@@ -158,11 +157,9 @@ class PropertyCreateView(LoginRequiredMixin, HTMXMixin, View):
                     request, f'Property "{property_obj.name}" created successfully!'
                 )
                 if self.is_htmx:
-                    response = HttpResponse()
-                    response["HX-Redirect"] = reverse(
-                        "properties:detail", args=[property_obj.pk]
+                    return HttpResponseClientRedirect(
+                        reverse("properties:detail", args=[property_obj.pk])
                     )
-                    return response
                 return redirect("properties:detail", pk=property_obj.pk)
 
         template = (
@@ -228,11 +225,9 @@ class PropertyEditView(LoginRequiredMixin, OwnerRequiredMixin, HTMXMixin, View):
                     request, f'Property "{property_obj.name}" updated successfully!'
                 )
                 if self.is_htmx:
-                    response = HttpResponse()
-                    response["HX-Redirect"] = reverse(
-                        "properties:detail", args=[property_obj.pk]
+                    return HttpResponseClientRedirect(
+                        reverse("properties:detail", args=[property_obj.pk])
                     )
-                    return response
                 return redirect("properties:detail", pk=property_obj.pk)
 
         template = (
@@ -327,7 +322,5 @@ class PropertyDeleteView(LoginRequiredMixin, OwnerRequiredMixin, HTMXMixin, View
         messages.success(request, "Property deleted successfully.")
 
         if self.is_htmx:
-            response = HttpResponse()
-            response["HX-Redirect"] = reverse("properties:list")
-            return response
+            return HttpResponseClientRedirect(reverse("properties:list"))
         return redirect("properties:list")

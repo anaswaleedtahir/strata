@@ -166,7 +166,7 @@
             </c-button>
             <p class="text-xs leading-5 text-muted-foreground">Your Conversation is private and always tied to this Property.</p>
           {% else %}
-            <c-button href="{% url 'users:login' %}?next={{ request.path|urlencode }}" class="w-full">Sign in to message</c-button>
+            <c-button href="{% url 'account_login' %}?next={{ request.path|urlencode }}" class="w-full">Sign in to message</c-button>
           {% endif %}
         </c-card.content>
       </c-card>

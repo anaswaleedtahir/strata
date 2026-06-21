@@ -132,7 +132,7 @@ def property_create(*, user, name: str, price: int) -> Property:
 ```python
 # apps/properties/selectors.py
 def property_list_published(*, user=None) -> QuerySet:
-    return Property.published.all().select_related("user")
+    return Property.objects.filter(is_published=True).select_related("user")
 ```
 
 **Thin view example:**

@@ -1,6 +1,4 @@
 import time
-from dataclasses import dataclass
-from enum import Enum
 
 import nh3
 from channels.db import database_sync_to_async
@@ -10,21 +8,6 @@ from apps.shared.exceptions import ApplicationError
 
 RATE_LIMIT_MESSAGES = 10
 RATE_LIMIT_WINDOW = 60
-
-
-class MessageDeliveryStatus(Enum):
-    DELIVERED = "delivered"
-    REJECTED = "rejected"
-    RATE_LIMITED = "rate_limited"
-
-
-@dataclass(frozen=True)
-class MessageDeliveryResult:
-    status: MessageDeliveryStatus
-    message: Message | None = None
-    payload: dict | None = None
-    error_message: str = ""
-    cooldown_seconds: int = 0
 
 
 def message_create(*, conversation: Conversation, sender, content: str) -> Message:
@@ -37,31 +20,24 @@ def message_create(*, conversation: Conversation, sender, content: str) -> Messa
 
 async def message_deliver(
     *, conversation: Conversation, sender, content: str, redis_url: str
-) -> MessageDeliveryResult:
+) -> Message:
     content = content.strip() if isinstance(content, str) else ""
     if not content:
-        return MessageDeliveryResult(
-            status=MessageDeliveryStatus.REJECTED,
-            error_message="Message content cannot be empty",
-        )
+        raise ApplicationError("Message content cannot be empty")
 
     if len(content) > 5000:
-        return MessageDeliveryResult(
-            status=MessageDeliveryStatus.REJECTED,
-            error_message="Message exceeds maximum length of 5000 characters",
-        )
+        raise ApplicationError("Message exceeds maximum length of 5000 characters")
 
     is_allowed, cooldown_seconds = await rate_limit_check(
         user_id=sender.id, redis_url=redis_url
     )
     if not is_allowed:
-        return MessageDeliveryResult(
-            status=MessageDeliveryStatus.RATE_LIMITED,
-            error_message=(
+        raise ApplicationError(
+            (
                 "Rate limit exceeded. Please wait "
                 f"{cooldown_seconds} seconds before sending another message."
             ),
-            cooldown_seconds=cooldown_seconds,
+            extra={"cooldown_seconds": cooldown_seconds},
         )
 
     recipient_id = (
@@ -70,27 +46,13 @@ async def message_deliver(
         else conversation.participant_one_id
     )
     if recipient_id == sender.id:
-        return MessageDeliveryResult(
-            status=MessageDeliveryStatus.REJECTED,
-            error_message="Cannot send messages to yourself",
-        )
+        raise ApplicationError("Cannot send messages to yourself")
 
     sanitized_content = nh3.clean(content, tags=set())
-    message = await database_sync_to_async(message_create)(
+    return await database_sync_to_async(message_create)(
         conversation=conversation,
         sender=sender,
         content=sanitized_content,
-    )
-    return MessageDeliveryResult(
-        status=MessageDeliveryStatus.DELIVERED,
-        message=message,
-        payload={
-            "message": sanitized_content,
-            "sender_id": sender.id,
-            "sender_email": sender.email,
-            "message_id": message.id,
-            "created_at": message.created_at.isoformat(),
-        },
     )
 
 
@@ -113,8 +75,6 @@ def messages_mark_read(*, conversation: Conversation, user) -> None:
 async def rate_limit_check(*, user_id: int, redis_url: str) -> tuple[bool, int]:
     from redis.asyncio import Redis as AsyncRedis
 
-    from apps.chat.selectors import rate_limit_get_cooldown
-
     current_time = time.time()
     key = f"rate_limit:chat:{user_id}"
     window_start = current_time - RATE_LIMIT_WINDOW
@@ -124,14 +84,17 @@ async def rate_limit_check(*, user_id: int, redis_url: str) -> tuple[bool, int]:
             pipe.zremrangebyscore(key, 0, window_start)
             pipe.zadd(key, {str(current_time): current_time})
             pipe.zcard(key)
+            pipe.zrange(key, 0, 0, withscores=True)
             pipe.expire(key, RATE_LIMIT_WINDOW)
-            _, _, message_count, _ = await pipe.execute()
+            _, _, message_count, oldest, _ = await pipe.execute()
 
     if message_count <= RATE_LIMIT_MESSAGES:
         return True, 0
 
-    cooldown = await rate_limit_get_cooldown(
-        user_id=user_id, redis_url=redis_url, rate_limit_window=RATE_LIMIT_WINDOW
+    cooldown = (
+        int(oldest[0][1] + RATE_LIMIT_WINDOW - current_time) + 1
+        if oldest
+        else RATE_LIMIT_WINDOW
     )
     return False, cooldown
 

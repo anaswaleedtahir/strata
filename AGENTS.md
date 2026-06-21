@@ -365,7 +365,6 @@ Open `docs/development/chat-client-test.html` in browser or run programmatically
 
 **Prod:**
 - gunicorn==25.1.0 (process manager with Uvicorn workers)
-- django-compressor==4.6.0
 
 ---
 

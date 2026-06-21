@@ -2,6 +2,7 @@ from allauth.account.adapter import DefaultAccountAdapter
 from django.core.exceptions import ValidationError
 
 from apps.shared.validators import validate_password_strength
+from apps.users.services import user_create
 
 
 class StrataAccountAdapter(DefaultAccountAdapter):
@@ -24,22 +25,21 @@ class StrataAccountAdapter(DefaultAccountAdapter):
 
     def save_user(self, request, user, form, commit=True):
         data = form.cleaned_data
-        email = data.get("email", "").strip().lower()
+        password = data.get("password1") or data.get("password")
+        if commit:
+            return user_create(
+                email=data.get("email", ""),
+                password=password,
+                first_name=data.get("first_name", ""),
+                last_name=data.get("last_name", ""),
+                user=user,
+            )
 
-        user.email = email
+        user.email = data.get("email", "").strip().lower()
         user.first_name = data.get("first_name", "")
         user.last_name = data.get("last_name", "")
-
-        password = data.get("password1") or data.get("password")
         if password:
             user.set_password(password)
         else:
             user.set_unusable_password()
-
-        self.populate_username(request, user)
-        user.full_clean()
-
-        if commit:
-            user.save()
-
         return user

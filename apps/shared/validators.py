@@ -16,14 +16,6 @@ cnic_validator = RegexValidator(
 )
 
 
-def validate_phone(value):
-    phone_validator(value)
-
-
-def validate_cnic(value):
-    cnic_validator(value)
-
-
 def validate_password_strength(password: str):
     if len(password) < 8:
         raise ValidationError("Password must be at least 8 characters long.")

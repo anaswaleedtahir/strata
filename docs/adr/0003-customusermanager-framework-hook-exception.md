@@ -4,7 +4,7 @@ HackSoft says "avoid custom managers." We keep `apps/users/models.CustomUserMana
 
 ## The rule
 
-`CustomUserManager` exists **only** to satisfy framework hooks. **Application code never imports `User.objects.create_user` directly.** All app-level user creation goes through `apps.users.services.user_create(*, email, password, ...)`. The service may delegate to the manager internally; callers don't know.
+`CustomUserManager` exists **only** to satisfy framework hooks. **Application code never imports `User.objects.create_user` directly.** All app-level user creation, including django-allauth's adapter hook, goes through `apps.users.services.user_create(*, email, password, ...)`. The service may delegate to the manager internally; callers don't know.
 
 ## Why this is surprising
 

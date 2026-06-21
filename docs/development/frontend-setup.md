@@ -87,7 +87,7 @@ Browser tests for the chat client live in:
 
 ```text
 docs/development/chat-client-test.html
-docs/development/chat-client-test.js
+docs/development/chat-client-test.html
 ```
 
 ## Static Files

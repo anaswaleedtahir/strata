@@ -18,7 +18,6 @@ There is no Node.js project dependency, no npm build pipeline, and no local Java
 assets/
 └── css/
     ├── input.css          # Tailwind 4 CSS-first source and shadcn tokens
-    └── tw-animate.css     # Vendored animation utilities
 
 static/
 ├── dist/

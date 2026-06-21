@@ -37,8 +37,9 @@ migrate:
     uv run python manage.py migrate
 
 # Seed local development data
-seed *args:
-    uv run python manage.py seed_local {{args}}
+seed:
+    uv run python manage.py shell -c 'from django.contrib.auth import get_user_model; from apps.properties.models import Property; assert not get_user_model().objects.exists() and not Property.objects.exists(), "Seed requires an empty database"'
+    uv run python manage.py loaddata seed_local
 
 # Install Python dependencies
 build:

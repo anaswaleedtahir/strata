@@ -4,7 +4,7 @@
       x-data="{ show: true }"
       x-show="show"
       x-transition
-      class="pointer-events-auto flex items-start gap-3 rounded-lg border bg-background p-4 shadow-lg animate-in slide-in-from-top-2 {% if message.tags == 'error' %}border-destructive/50{% endif %}"
+      class="pointer-events-auto flex items-start gap-3 rounded-lg border bg-background p-4 shadow-lg {% if message.tags == 'error' %}border-destructive/50{% endif %}"
       role="{% if message.tags == 'error' %}alert{% else %}status{% endif %}"
     >
       <c-ui.icon name="{% if message.tags == 'error' %}exclamation-circle{% elif message.tags == 'success' %}check-circle{% else %}information-circle{% endif %}" classes="mt-0.5 size-5 {% if message.tags == 'error' %}text-destructive{% else %}text-foreground{% endif %}" />

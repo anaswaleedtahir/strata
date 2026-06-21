@@ -23,7 +23,11 @@ def property_list_published(
     bathrooms=None,
     ordering: str = "newest",
 ):
-    qs = Property.published.all().select_related("user").prefetch_related("images")
+    qs = (
+        Property.objects.filter(is_published=True)
+        .select_related("user")
+        .prefetch_related("images")
+    )
 
     if user is not None and user.is_authenticated:
         if show_favorites:

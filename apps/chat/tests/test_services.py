@@ -1,4 +1,3 @@
-from unittest import skip
 from unittest.mock import AsyncMock, patch
 
 from channels.db import database_sync_to_async
@@ -10,6 +9,7 @@ from apps.chat import services
 from apps.chat.consumers import ChatConsumer
 from apps.chat.models import Conversation, Message
 from apps.properties.models import Property
+from apps.shared.exceptions import ApplicationError
 
 User = get_user_model()
 
@@ -109,16 +109,6 @@ class RateLimitingTestCase(TransactionTestCase):
         self.assertLessEqual(cooldown, 61)
         await communicator.disconnect()
 
-    @skip("Expects unread-on-connect delivery which is not implemented")
-    async def test_rate_limit_per_user(self):
-        pass
-
-    @skip(
-        "References non-existent rate_limit_storage; Redis-backed rate limit cannot be reset this way"
-    )
-    async def test_rate_limit_resets_after_window(self):
-        pass
-
     async def test_rate_limit_message_not_persisted(self):
         await self.create_test_data()
         communicator = self._make_communicator(self.user1)
@@ -165,15 +155,15 @@ class MessageDeliveryTestCase(TransactionTestCase):
     async def test_rejects_empty_message_without_persisting(self):
         await self.create_test_data()
 
-        result = await services.message_deliver(
-            conversation=self.conversation,
-            sender=self.user1,
-            content="   ",
-            redis_url="redis://unused",
-        )
-
-        self.assertEqual(result.status, services.MessageDeliveryStatus.REJECTED)
-        self.assertEqual(result.error_message, "Message content cannot be empty")
+        with self.assertRaisesMessage(
+            ApplicationError, "Message content cannot be empty"
+        ):
+            await services.message_deliver(
+                conversation=self.conversation,
+                sender=self.user1,
+                content="   ",
+                redis_url="redis://unused",
+            )
 
         @database_sync_to_async
         def message_count():
@@ -187,22 +177,11 @@ class MessageDeliveryTestCase(TransactionTestCase):
         with patch.object(
             services, "rate_limit_check", new=AsyncMock(return_value=(True, 0))
         ):
-            result = await services.message_deliver(
+            message = await services.message_deliver(
                 conversation=self.conversation,
                 sender=self.user1,
                 content='<script>alert("XSS")</script>Hello',
                 redis_url="redis://unused",
             )
 
-        self.assertEqual(result.status, services.MessageDeliveryStatus.DELIVERED)
-        self.assertEqual(result.message.content, "Hello")
-        self.assertEqual(
-            result.payload,
-            {
-                "message": "Hello",
-                "sender_id": self.user1.id,
-                "sender_email": self.user1.email,
-                "message_id": result.message.id,
-                "created_at": result.message.created_at.isoformat(),
-            },
-        )
+        self.assertEqual(message.content, "Hello")

@@ -37,8 +37,8 @@ class FavoriteInlineForProperty(admin.TabularInline):
     model = Favorite
     extra = 0
     can_delete = False
-    readonly_fields = ("user", "favorited_at")
-    fields = ("user", "favorited_at")
+    readonly_fields = ("user", "created_at")
+    fields = ("user", "created_at")
     verbose_name = "User who favorited"
     verbose_name_plural = "Users who favorited this property"
     show_change_link = False

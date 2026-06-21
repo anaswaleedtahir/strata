@@ -6,7 +6,8 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from django.conf import settings
 
 from apps.chat.selectors import conversation_get
-from apps.chat.services import MessageDeliveryStatus, message_deliver
+from apps.chat.services import message_deliver
+from apps.shared.exceptions import ApplicationError
 
 logger = logging.getLogger(__name__)
 
@@ -67,12 +68,28 @@ class ChatConsumer(AsyncWebsocketConsumer):
             return
 
         try:
-            result = await message_deliver(
+            message = await message_deliver(
                 conversation=self.conversation,
                 sender=self.user,
                 content=data.get("message", ""),
                 redis_url=settings.REDIS_URL,
             )
+        except ApplicationError as error:
+            cooldown_seconds = error.extra.get("cooldown_seconds")
+            if cooldown_seconds is None:
+                await self._send_error(error.message)
+            else:
+                await self.send(
+                    text_data=json.dumps(
+                        {
+                            "type": "rate_limit_error",
+                            "message": error.message,
+                            "cooldown_seconds": cooldown_seconds,
+                            "status_code": 429,
+                        }
+                    )
+                )
+            return
         except Exception as exc:
             logger.exception(
                 "Failed to deliver message for conversation %s: %s",
@@ -82,26 +99,16 @@ class ChatConsumer(AsyncWebsocketConsumer):
             await self._send_error("Failed to save message")
             return
 
-        if result.status == MessageDeliveryStatus.REJECTED:
-            await self._send_error(result.error_message)
-            return
-
-        if result.status == MessageDeliveryStatus.RATE_LIMITED:
-            await self.send(
-                text_data=json.dumps(
-                    {
-                        "type": "rate_limit_error",
-                        "message": result.error_message,
-                        "cooldown_seconds": result.cooldown_seconds,
-                        "status_code": 429,
-                    }
-                )
-            )
-            return
-
         await self.channel_layer.group_send(
             self.room_group_name,
-            {"type": "chat_message", **result.payload},
+            {
+                "type": "chat_message",
+                "message": message.content,
+                "sender_id": self.user.id,
+                "sender_email": self.user.email,
+                "message_id": message.id,
+                "created_at": message.created_at.isoformat(),
+            },
         )
 
     async def _send_error(self, message: str):

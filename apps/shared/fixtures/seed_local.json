@@ -1,0 +1,131 @@
+[
+  {
+    "model": "users.user",
+    "pk": 1001,
+    "fields": {
+      "password": "pbkdf2_sha256$1200000$E9h88WvtsfY1L9sOoLIeUM$9wuxSDO4UQQ8IC+VB36e9cw0GRxcsjhFHFdpdFf7VxE=",
+      "last_login": null,
+      "is_superuser": true,
+      "first_name": "Strata",
+      "last_name": "Admin",
+      "is_active": true,
+      "date_joined": "2026-01-01T12:00:00Z",
+      "email": "admin@strata.local",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "users.user",
+    "pk": 1002,
+    "fields": {
+      "password": "pbkdf2_sha256$1200000$ede5VDOnu74ZOYuC29mtzN$vqGSq3Kil2e+BNFHkyUHIEV1OHjkxNNYsjJCE5aY7AQ=",
+      "last_login": null,
+      "is_superuser": false,
+      "first_name": "Amina",
+      "last_name": "Khan",
+      "is_active": true,
+      "date_joined": "2026-01-01T12:00:00Z",
+      "email": "amina@strata.local",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "users.user",
+    "pk": 1003,
+    "fields": {
+      "password": "pbkdf2_sha256$1200000$T9YQdOhOaxXjbW1wmkBF9A$SdBDDVW+jOUes1TSjo3XEjMRAKN3QFLtiS5sqVJ9u+I=",
+      "last_login": null,
+      "is_superuser": false,
+      "first_name": "Omar",
+      "last_name": "Ali",
+      "is_active": true,
+      "date_joined": "2026-01-01T12:00:00Z",
+      "email": "omar@strata.local",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "properties.property",
+    "pk": 1001,
+    "fields": {
+      "created_at": "2026-01-02T12:00:00Z",
+      "updated_at": "2026-01-02T12:00:00Z",
+      "user": 1002,
+      "name": "Gulberg family home",
+      "full_address": "Gulberg, Lahore",
+      "property_type": "House",
+      "description": "Three-bedroom demo property near schools and shops.",
+      "price": "25000000.00",
+      "bedrooms": 3,
+      "bathrooms": 2,
+      "area": "1800.00",
+      "documents": "",
+      "is_published": true
+    }
+  },
+  {
+    "model": "properties.property",
+    "pk": 1002,
+    "fields": {
+      "created_at": "2026-01-03T12:00:00Z",
+      "updated_at": "2026-01-03T12:00:00Z",
+      "user": 1003,
+      "name": "DHA residential plot",
+      "full_address": "DHA Phase 6, Lahore",
+      "property_type": "Plot",
+      "description": "Published demo plot.",
+      "price": "18000000.00",
+      "bedrooms": null,
+      "bathrooms": null,
+      "area": "2250.00",
+      "documents": "",
+      "is_published": true
+    }
+  },
+  {
+    "model": "properties.favorite",
+    "pk": 1001,
+    "fields": {
+      "created_at": "2026-01-04T12:00:00Z",
+      "updated_at": "2026-01-04T12:00:00Z",
+      "user": 1003,
+      "property": 1001
+    }
+  },
+  {
+    "model": "chat.conversation",
+    "pk": 1001,
+    "fields": {
+      "created_at": "2026-01-05T12:00:00Z",
+      "updated_at": "2026-01-05T12:02:00Z",
+      "property": 1001,
+      "participant_one": 1002,
+      "participant_two": 1003
+    }
+  },
+  {
+    "model": "chat.message",
+    "pk": 1001,
+    "fields": {
+      "conversation": 1001,
+      "sender": 1003,
+      "content": "Hi, is this property still available?",
+      "created_at": "2026-01-05T12:01:00Z",
+      "is_read": true
+    }
+  },
+  {
+    "model": "chat.message",
+    "pk": 1002,
+    "fields": {
+      "conversation": 1001,
+      "sender": 1002,
+      "content": "Yes, it is available.",
+      "created_at": "2026-01-05T12:02:00Z",
+      "is_read": false
+    }
+  }
+]

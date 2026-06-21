@@ -5,5 +5,5 @@ Strata replaces DaisyUI with stock shadcn-style components scaffolded by `shadcn
 ## Consequences
 
 - Upstream component updates are reviewed and copied deliberately rather than inherited automatically.
-- `tw-animate-css` is vendored as CSS so production builds do not require npm.
+- Entrance effects use Tailwind's built-in utilities; no animation library is vendored.
 - Django Unfold remains the independent admin design system.

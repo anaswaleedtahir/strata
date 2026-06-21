@@ -36,13 +36,9 @@ dev = [
     "daphne>=4.0.0",
     "django-debug-toolbar==6.2.0",
     "factory-boy>=3.3.0",
-    "remote-pdb>=2.1.0",
     "ruff==0.15.2",
 ]
-prod = [
-    "django-compressor==4.6.0",
-    "gunicorn==25.1.0",
-]
+prod = ["gunicorn==25.1.0"]
 
 [build-system]
 requires = ["hatchling", "hatch-vcs"]

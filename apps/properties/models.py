@@ -9,7 +9,7 @@ Improvements for modern Django and Python:
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from django.conf import settings
 from django.core.validators import MinValueValidator
@@ -24,13 +24,6 @@ from apps.shared.validators import cnic_validator, phone_validator  # noqa: F401
 
 if TYPE_CHECKING:
     from django.db.models.manager import RelatedManager
-
-
-class PublishedManager(models.Manager):
-    """Manager that returns only published properties."""
-
-    def get_queryset(self):
-        return super().get_queryset().filter(is_published=True)
 
 
 def documents_upload_path(instance: "Property", filename: str) -> str:
@@ -91,10 +84,6 @@ class Property(BaseModel):
     documents = models.FileField(upload_to=documents_upload_path, blank=True, null=True)
     is_published = models.BooleanField(default=False, db_index=True)
 
-    # Managers
-    objects = models.Manager()
-    published = PublishedManager()
-
     if TYPE_CHECKING:
         images: RelatedManager[PropertyImage]
         favorited_by: RelatedManager[Favorite]
@@ -111,17 +100,9 @@ class Property(BaseModel):
         return f"<Property id={self.pk!r} name={self.name!r}>"
 
     def get_absolute_url(self) -> str:
-        """Return canonical URL for a property detail page.
+        return reverse("properties:detail", args=[self.pk])
 
-        Note: adjust the URL name if your app uses a different one.
-        """
-        try:
-            return reverse("properties:detail", args=[self.pk])
-        except Exception:
-            # Fallback to a simple path if reverse isn't configured
-            return f"/properties/{self.pk}/"
-
-    def primary_image(self) -> Optional["PropertyImage"]:
+    def primary_image(self) -> "PropertyImage | None":
         """Return the primary image for this property, or the first image if none marked primary."""
         return self.images.filter(is_primary=True).first() or self.images.first()
 
@@ -133,11 +114,10 @@ class PropertyImage(BaseModel):
         Property, on_delete=models.CASCADE, related_name="images"
     )
     image = models.ImageField(upload_to=property_image_upload_path)
-    uploaded_at = models.DateTimeField(auto_now_add=True)
     is_primary = models.BooleanField(default=False, help_text="Mark as primary image")
 
     class Meta:
-        ordering = ["-is_primary", "uploaded_at"]
+        ordering = ["-is_primary", "created_at"]
         verbose_name = "Property Image"
         verbose_name_plural = "Property Images"
         constraints = [
@@ -164,7 +144,6 @@ class Favorite(BaseModel):
     property = models.ForeignKey(
         Property, on_delete=models.CASCADE, related_name="favorited_by"
     )
-    favorited_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         constraints = [
@@ -172,7 +151,7 @@ class Favorite(BaseModel):
                 fields=["user", "property"], name="unique_user_property_favorite"
             )
         ]
-        ordering = ["-favorited_at"]
+        ordering = ["-created_at"]
 
     def __str__(self) -> str:
         return f"{getattr(self.user, 'username', str(self.user))} favorited {self.property.name}"

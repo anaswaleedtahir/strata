@@ -150,12 +150,18 @@ grid/
    just migrate
    ```
 
-6. **Start development server**
+6. **Optionally load demo data into an empty database**
+   ```bash
+   just seed
+   ```
+   Demo accounts use the password `StrataPass1!`.
+
+7. **Start development server**
    ```bash
    just runserver
    ```
 
-7. **Access the application**
+8. **Access the application**
    ```
    http://127.0.0.1:8000
 ```
