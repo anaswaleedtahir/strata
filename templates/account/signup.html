@@ -1,125 +1,54 @@
-{% extends "base.html" %}
+{% extends "_layouts/auth.html" %}
 {% load i18n %}
 
-{% block title %}{% trans "Sign Up" %}{% endblock %}
+{% block title %}{% trans "Sign Up" %} · Strata{% endblock %}
+{% block auth_title %}{% trans "Create your account" %}{% endblock %}
+{% block auth_subtitle %}{% trans "Enter your details to get started" %}{% endblock %}
 
-{% block content %}
-<div class="min-h-screen flex items-center justify-center bg-background">
-    <c-card class='w-[400px]'>
-        <c-card.header>
-            <c-card.title>{% trans "Sign Up" %}</c-card.title>
-            <c-card.description>
-                {% trans "Create your account to get started." %}
-            </c-card.description>
-        </c-card.header>
+{% block auth_content %}
+<form method="post" action="{% url 'account_signup' %}" class="space-y-4">
+  {% csrf_token %}
 
-        <form method="POST" action="{% url 'account_signup' %}">
-            {% csrf_token %}
-            <c-card.content class='space-y-4'>
-                {% if form.non_field_errors %}
-                    <c-alert variant="destructive">
-                        <c-alert.description>
-                            {{ form.non_field_errors }}
-                        </c-alert.description>
-                    </c-alert>
-                {% endif %}
+  {% if form.non_field_errors %}
+    <c-alert variant="destructive"><c-alert.description>{{ form.non_field_errors }}</c-alert.description></c-alert>
+  {% endif %}
 
-                {% if form.email %}
-                    <div class='space-y-2'>
-                        <c-label for="{{ form.email.id_for_label }}">
-                            {{ form.email.label }}
-                        </c-label>
-                        <c-input
-                            type="email"
-                            name="{{ form.email.name }}"
-                            id="{{ form.email.id_for_label }}"
-                            placeholder="Enter your email"
-                            value="{{ form.email.value|default:'' }}"
-                            {{ form.email.field.required|yesno:'required,' }}
-                            class="{{ form.email.errors|yesno:'border-destructive,' }}"
-                        />
-                        {% if form.email.errors %}
-                            <div class="text-destructive text-xs">
-                                {{ form.email.errors }}
-                            </div>
-                        {% endif %}
-                    </div>
-                {% endif %}
+  <div class="grid grid-cols-2 gap-3">
+    <div class="space-y-2">
+      <c-label for="{{ form.first_name.id_for_label }}">{{ form.first_name.label }}</c-label>
+      <c-input type="text" name="{{ form.first_name.name }}" id="{{ form.first_name.id_for_label }}" value="{{ form.first_name.value|default:'' }}" placeholder="Amina" autocomplete="given-name" autofocus {{ form.first_name.field.required|yesno:'required,' }} class="h-10 {{ form.first_name.errors|yesno:'border-destructive,' }}" />
+      {% if form.first_name.errors %}<div class="text-xs text-destructive">{{ form.first_name.errors }}</div>{% endif %}
+    </div>
+    <div class="space-y-2">
+      <c-label for="{{ form.last_name.id_for_label }}">{{ form.last_name.label }}</c-label>
+      <c-input type="text" name="{{ form.last_name.name }}" id="{{ form.last_name.id_for_label }}" value="{{ form.last_name.value|default:'' }}" placeholder="Khan" autocomplete="family-name" {{ form.last_name.field.required|yesno:'required,' }} class="h-10 {{ form.last_name.errors|yesno:'border-destructive,' }}" />
+      {% if form.last_name.errors %}<div class="text-xs text-destructive">{{ form.last_name.errors }}</div>{% endif %}
+    </div>
+  </div>
 
-                {% if form.username %}
-                    <div class='space-y-2'>
-                        <c-label for="{{ form.username.id_for_label }}">
-                            {{ form.username.label }}
-                        </c-label>
-                        <c-input
-                            type="text"
-                            name="{{ form.username.name }}"
-                            id="{{ form.username.id_for_label }}"
-                            placeholder="Choose a username"
-                            value="{{ form.username.value|default:'' }}"
-                            {{ form.username.field.required|yesno:'required,' }}
-                            class="{{ form.username.errors|yesno:'border-destructive,' }}"
-                        />
-                        {% if form.username.errors %}
-                            <div class="text-destructive text-xs">
-                                {{ form.username.errors }}
-                            </div>
-                        {% endif %}
-                    </div>
-                {% endif %}
+  <div class="space-y-2">
+    <c-label for="{{ form.email.id_for_label }}">{{ form.email.label }}</c-label>
+    <c-input type="email" name="{{ form.email.name }}" id="{{ form.email.id_for_label }}" value="{{ form.email.value|default:'' }}" placeholder="you@example.com" autocomplete="email" {{ form.email.field.required|yesno:'required,' }} class="h-10 {{ form.email.errors|yesno:'border-destructive,' }}" />
+    {% if form.email.errors %}<div class="text-xs text-destructive">{{ form.email.errors }}</div>{% endif %}
+  </div>
 
-                <div class='space-y-2'>
-                    <c-label for="{{ form.password1.id_for_label }}">
-                        {{ form.password1.label }}
-                    </c-label>
-                    <c-input
-                        type="password"
-                        name="{{ form.password1.name }}"
-                        id="{{ form.password1.id_for_label }}"
-                        placeholder="Create a password"
-                        {{ form.password1.field.required|yesno:'required,' }}
-                        class="{{ form.password1.errors|yesno:'border-destructive,' }}"
-                    />
-                    {% if form.password1.errors %}
-                        <div class="text-destructive text-xs">
-                            {{ form.password1.errors }}
-                        </div>
-                    {% endif %}
-                </div>
+  <div class="space-y-2">
+    <c-label for="{{ form.password1.id_for_label }}">{{ form.password1.label }}</c-label>
+    <c-input type="password" name="{{ form.password1.name }}" id="{{ form.password1.id_for_label }}" placeholder="Create a password" autocomplete="new-password" {{ form.password1.field.required|yesno:'required,' }} class="h-10 {{ form.password1.errors|yesno:'border-destructive,' }}" />
+    {% if form.password1.errors %}<div class="text-xs text-destructive">{{ form.password1.errors }}</div>{% endif %}
+  </div>
 
-                <div class='space-y-2'>
-                    <c-label for="{{ form.password2.id_for_label }}">
-                        {{ form.password2.label }}
-                    </c-label>
-                    <c-input
-                        type="password"
-                        name="{{ form.password2.name }}"
-                        id="{{ form.password2.id_for_label }}"
-                        placeholder="Confirm your password"
-                        {{ form.password2.field.required|yesno:'required,' }}
-                        class="{{ form.password2.errors|yesno:'border-destructive,' }}"
-                    />
-                    {% if form.password2.errors %}
-                        <div class="text-destructive text-xs">
-                            {{ form.password2.errors }}
-                        </div>
-                    {% endif %}
-                </div>
-            </c-card.content>
+  <div class="space-y-2">
+    <c-label for="{{ form.password2.id_for_label }}">{{ form.password2.label }}</c-label>
+    <c-input type="password" name="{{ form.password2.name }}" id="{{ form.password2.id_for_label }}" placeholder="Confirm your password" autocomplete="new-password" {{ form.password2.field.required|yesno:'required,' }} class="h-10 {{ form.password2.errors|yesno:'border-destructive,' }}" />
+    {% if form.password2.errors %}<div class="text-xs text-destructive">{{ form.password2.errors }}</div>{% endif %}
+  </div>
 
-            <c-card.footer class='flex flex-col space-y-3'>
-                <c-button type="submit" class="w-full">
-                    {% trans "Sign Up" %}
-                </c-button>
+  <c-button type="submit" class="h-10 w-full">{% trans "Create account" %}</c-button>
 
-                <div class="text-center text-sm text-muted-foreground">
-                    {% trans "Already have an account?" %}
-                    <a href="{% url 'account_login' %}" class="text-primary hover:underline">
-                        {% trans "Sign in" %}
-                    </a>
-                </div>
-            </c-card.footer>
-        </form>
-    </c-card>
-</div>
+  <p class="text-center text-sm text-muted-foreground">
+    {% trans "Already have an account?" %}
+    <a href="{% url 'account_login' %}" class="font-medium text-foreground underline underline-offset-4">{% trans "Sign in" %}</a>
+  </p>
+</form>
 {% endblock %}

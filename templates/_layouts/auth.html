@@ -1,23 +1,42 @@
 {% extends "_layouts/base.html" %}
 
-{% block main_class %}mx-auto flex w-full max-w-7xl flex-1 items-center justify-center px-4 py-12 sm:px-6{% endblock %}
+{% block navigation %}{% endblock %}
+{% block footer %}{% endblock %}
+
+{% block main_class %}flex min-h-svh w-full items-center justify-center bg-muted p-4 sm:p-6 md:p-10{% endblock %}
 
 {% block content %}
-<div class="w-full max-w-md">
-  <c-card>
-    <c-card.header class="space-y-2 text-center">
-      <a href="{% url 'properties:list' %}" class="mx-auto flex size-10 items-center justify-center rounded-lg bg-primary text-primary-foreground" aria-label="Strata home">
-        <c-ui.icon name="home" variant="solid" classes="size-5" />
-      </a>
-      <c-card.title class="text-2xl">{% block auth_title %}Strata{% endblock %}</c-card.title>
-      <c-card.description>{% block auth_subtitle %}Welcome back{% endblock %}</c-card.description>
-    </c-card.header>
-    <c-card.content>
-      {% block auth_content %}{% endblock %}
-    </c-card.content>
+<div class="w-full max-w-3xl">
+  <a href="{% url 'properties:list' %}" class="mb-6 flex items-center justify-center gap-2 font-semibold tracking-tight focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring">
+    <span class="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+      <c-ui.icon name="home" variant="solid" classes="size-4" />
+    </span>
+    Strata
+  </a>
+
+  <c-card class="overflow-hidden p-0">
+    <div class="grid md:grid-cols-2">
+      <div class="p-6 sm:p-8">
+        <div class="mb-6 space-y-2 text-center">
+          <h1 class="text-2xl font-bold tracking-tight">{% block auth_title %}Welcome{% endblock %}</h1>
+          <p class="text-balance text-sm text-muted-foreground">{% block auth_subtitle %}{% endblock %}</p>
+        </div>
+        {% block auth_content %}{% endblock %}
+      </div>
+
+      <aside class="relative hidden min-h-full overflow-hidden bg-primary p-8 text-primary-foreground md:flex md:flex-col md:justify-end" aria-label="Strata introduction">
+        <div class="absolute -right-16 -top-16 size-64 rounded-full border border-primary-foreground/15"></div>
+        <div class="absolute -right-4 top-10 size-40 rounded-full border border-primary-foreground/15"></div>
+        <div class="relative space-y-3">
+          <p class="text-2xl font-semibold tracking-tight">Find your next place.</p>
+          <p class="text-sm leading-6 text-primary-foreground/70">Browse homes, save favorites, and talk directly with property owners.</p>
+        </div>
+      </aside>
+    </div>
   </c-card>
-  <div class="mt-6 text-center text-sm text-muted-foreground">
-    {% block auth_footer %}{% endblock %}
-  </div>
+
+  <p class="mt-6 text-center text-xs text-muted-foreground">
+    By continuing, you agree to Strata's Terms of Service and Privacy Policy.
+  </p>
 </div>
 {% endblock %}

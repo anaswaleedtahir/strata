@@ -29,12 +29,12 @@
   <a href="#main-content" class="sr-only z-[100] rounded-md bg-background px-4 py-2 focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:ring-2 focus:ring-ring">
     Skip to content
   </a>
-  <c-navigation.navbar />
+  {% block navigation %}<c-navigation.navbar />{% endblock %}
   {% if messages %}<c-ui.messages />{% endif %}
   <main id="main-content" class="{% block main_class %}mx-auto w-full max-w-7xl flex-1 px-4 py-8 sm:px-6 lg:px-8{% endblock %}">
     {% block content %}{% endblock %}
   </main>
-  <c-navigation.footer />
+  {% block footer %}<c-navigation.footer />{% endblock %}
   {% block extra_scripts %}{% endblock %}
 </body>
 </html>
