@@ -4,7 +4,7 @@ Improvements for modern Django and Python:
 - Use settings.AUTH_USER_MODEL instead of direct User import.
 - Safer upload paths that handle unsaved instances.
 - Published manager helper and small convenience methods.
-- DB indexes and conditional UniqueConstraint for primary images.
+- DB indexes for common lookups.
 """
 
 from __future__ import annotations
@@ -15,7 +15,7 @@ from django.conf import settings
 from django.core.files.storage import storages
 from django.core.validators import MinValueValidator
 from django.db import models
-from django.db.models import Index, Q, UniqueConstraint
+from django.db.models import Index, UniqueConstraint
 from django.urls import reverse
 
 from apps.shared.models import BaseModel
@@ -127,32 +127,23 @@ class Property(BaseModel):
     def get_absolute_url(self) -> str:
         return reverse("properties:detail", args=[self.pk])
 
-    def primary_image(self) -> "PropertyImage | None":
-        """Return the primary image for this property, or the first image if none marked primary."""
-        return self.images.filter(is_primary=True).first() or self.images.first()
-
 
 class PropertyImage(BaseModel):
-    """Model representing an image of a property."""
+    """Model representing a gallery image of a property.
+
+    The representative image shown on cards, the map, and as the lead photo is
+    Property.thumbnail; these are additional gallery photos.
+    """
 
     property = models.ForeignKey(
         Property, on_delete=models.CASCADE, related_name="images"
     )
     image = models.ImageField(upload_to=property_image_upload_path)
-    is_primary = models.BooleanField(default=False, help_text="Mark as primary image")
 
     class Meta:
-        ordering = ["-is_primary", "created_at"]
+        ordering = ["created_at"]
         verbose_name = "Property Image"
         verbose_name_plural = "Property Images"
-        constraints = [
-            # Ensure only one primary image per property at the DB level
-            UniqueConstraint(
-                fields=["property"],
-                condition=Q(is_primary=True),
-                name="one_primary_image_per_property",
-            )
-        ]
 
     def __str__(self) -> str:
         return f"Image for {self.property.name}"

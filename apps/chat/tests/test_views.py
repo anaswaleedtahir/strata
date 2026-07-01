@@ -190,12 +190,10 @@ class ConversationListViewTestCase(TransactionTestCase):
         primary_image = PropertyImage.objects.create(
             property=self.property1,
             image=self._png_upload("primary.png"),
-            is_primary=True,
         )
         fallback_image = PropertyImage.objects.create(
             property=self.property2,
             image=self._png_upload("fallback.png"),
-            is_primary=False,
         )
         self.addCleanup(primary_image.image.delete, save=False)
         self.addCleanup(fallback_image.image.delete, save=False)

@@ -130,7 +130,6 @@ class PropertyCreateTests(PropertyFileTestMixin, TestCase):
         self.addCleanup(prop.thumbnail.delete, save=False)
         self.assertTrue(bool(prop.thumbnail))
         self.assertEqual(prop.images.count(), 1)
-        self.assertFalse(prop.images.get().is_primary)
 
     def test_creates_property(self):
         prop = property_create(user=self.user, form_data=self.form_data, images=[])

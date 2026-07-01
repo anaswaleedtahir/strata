@@ -16,7 +16,7 @@ def conversation_list_for_user(*, user) -> list[Conversation]:
         .prefetch_related(
             Prefetch(
                 "property__images",
-                queryset=PropertyImage.objects.order_by("-is_primary", "created_at"),
+                queryset=PropertyImage.objects.order_by("created_at"),
                 to_attr="prefetched_images",
             )
         )

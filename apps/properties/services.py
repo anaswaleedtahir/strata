@@ -90,15 +90,10 @@ def property_image_add(
     *,
     property_obj: Property,
     image_file,
-    is_primary: bool,
     new_files: _NewFileTracker | None = None,
 ) -> PropertyImage:
     with transaction.atomic():
-        if is_primary:
-            property_obj.images.filter(is_primary=True).update(is_primary=False)
-        image = PropertyImage(
-            property=property_obj, image=image_file, is_primary=is_primary
-        )
+        image = PropertyImage(property=property_obj, image=image_file)
         image.full_clean()
         try:
             image.save()
@@ -150,7 +145,6 @@ def property_create(*, user, form_data: dict, images: list) -> Property:
                 property_image_add(
                     property_obj=prop,
                     image_file=image_file,
-                    is_primary=False,
                     new_files=new_files,
                 )
     except Exception:
@@ -244,7 +238,6 @@ def property_update(
                     property_image_add(
                         property_obj=property_obj,
                         image_file=image_file,
-                        is_primary=False,
                         new_files=new_files,
                     )
 
