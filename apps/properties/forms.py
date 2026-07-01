@@ -9,6 +9,13 @@ from apps.properties.models import Property
 class PropertyForm(forms.ModelForm):
     """Form for creating and editing properties."""
 
+    thumbnail = forms.ImageField(
+        required=False,
+        widget=forms.ClearableFileInput(attrs={"accept": "image/*"}),
+        label="Thumbnail image",
+        help_text="Shown on cards, the map, and as the lead photo. Required to publish.",
+    )
+
     documents = forms.FileField(
         required=False,
         validators=[FileExtensionValidator(allowed_extensions=["pdf"])],
@@ -23,6 +30,7 @@ class PropertyForm(forms.ModelForm):
             "name",
             "description",
             "full_address",
+            "thumbnail",
             "property_type",
             "price",
             "bedrooms",

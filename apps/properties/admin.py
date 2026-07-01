@@ -17,7 +17,7 @@ class PropertyImageInline(admin.TabularInline):
     extra = 1
     can_delete = False
     readonly_fields = ("preview_image",)
-    fields = ("image", "preview_image", "is_primary")
+    fields = ("image", "preview_image")
 
     def preview_image(self, obj):
         if obj.image:

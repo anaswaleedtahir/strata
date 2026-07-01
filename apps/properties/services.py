@@ -32,6 +32,21 @@ def _validate_images(images) -> list:
     return cleaned_images
 
 
+def _validate_optional_image(image):
+    """Validate a single, optional image upload. Returns the cleaned file or None."""
+    if not image:
+        return None
+    return _validate_images([image])[0]
+
+
+def _require_thumbnail_for_publish(*, is_published: bool, has_thumbnail: bool) -> None:
+    if is_published and not has_thumbnail:
+        raise ApplicationError(
+            "A thumbnail image is required to publish this property. "
+            "Add a thumbnail or save it as a draft."
+        )
+
+
 def _storage_ref(field_file) -> tuple | None:
     if not field_file or not field_file.name:
         return None
@@ -100,33 +115,42 @@ def property_image_add(
 
 def property_create(*, user, form_data: dict, images: list) -> Property:
     _validate_document_size(form_data.get("documents"))
+    cleaned_thumbnail = _validate_optional_image(form_data.get("thumbnail"))
     cleaned_images = _validate_images(images)
+
+    is_published = form_data.get("is_published", False)
+    _require_thumbnail_for_publish(
+        is_published=is_published, has_thumbnail=bool(cleaned_thumbnail)
+    )
 
     prop = Property(
         user=user,
         name=form_data["name"],
         description=form_data.get("description", ""),
         full_address=form_data["full_address"],
+        thumbnail=cleaned_thumbnail or None,
         property_type=form_data["property_type"],
         price=form_data["price"],
         bedrooms=form_data.get("bedrooms"),
         bathrooms=form_data.get("bathrooms"),
         area=form_data.get("area"),
         documents=form_data.get("documents") or None,
-        is_published=form_data.get("is_published", False),
+        is_published=is_published,
     )
     prop.full_clean()
     new_files = _NewFileTracker()
     try:
         with transaction.atomic():
             prop.save()
+            if prop.thumbnail:
+                new_files.track(prop.thumbnail)
             if prop.documents:
                 new_files.track(prop.documents)
-            for idx, image_file in enumerate(cleaned_images):
+            for image_file in cleaned_images:
                 property_image_add(
                     property_obj=prop,
                     image_file=image_file,
-                    is_primary=(idx == 0),
+                    is_primary=False,
                     new_files=new_files,
                 )
     except Exception:
@@ -145,6 +169,7 @@ def property_update(
     remove_document: bool,
 ) -> Property:
     _validate_document_size(form_data.get("documents"))
+    cleaned_thumbnail = _validate_optional_image(form_data.get("thumbnail"))
     cleaned_images = _validate_images(images)
 
     non_file_fields = [
@@ -161,6 +186,17 @@ def property_update(
     for field in non_file_fields:
         if field in form_data:
             setattr(property_obj, field, form_data[field])
+
+    old_thumbnail_ref = None
+    if cleaned_thumbnail:
+        if property_obj.thumbnail:
+            old_thumbnail_ref = _storage_ref(property_obj.thumbnail)
+        property_obj.thumbnail = cleaned_thumbnail
+
+    _require_thumbnail_for_publish(
+        is_published=property_obj.is_published,
+        has_thumbnail=bool(property_obj.thumbnail),
+    )
 
     old_document_ref = None
     new_doc = form_data.get("documents")
@@ -183,10 +219,14 @@ def property_update(
     try:
         with transaction.atomic():
             property_obj.save()
+            if cleaned_thumbnail and property_obj.thumbnail:
+                new_files.track(property_obj.thumbnail)
             if new_doc and new_doc is not False and property_obj.documents:
                 new_files.track(property_obj.documents)
 
             pending_deletes: list[tuple] = []
+            if old_thumbnail_ref is not None:
+                pending_deletes.append(old_thumbnail_ref)
             if remove_document and property_obj.documents:
                 ref = _storage_ref(property_obj.documents)
                 if ref is not None:
@@ -200,12 +240,11 @@ def property_update(
                 ).delete()
 
             if cleaned_images:
-                existing_count = property_obj.images.count()
-                for idx, image_file in enumerate(cleaned_images):
+                for image_file in cleaned_images:
                     property_image_add(
                         property_obj=property_obj,
                         image_file=image_file,
-                        is_primary=(idx == 0 and existing_count == 0),
+                        is_primary=False,
                         new_files=new_files,
                     )
 
@@ -226,6 +265,9 @@ def property_delete(*, property_obj: Property) -> None:
         ref = _storage_ref(img.image)
         if ref is not None:
             pending_deletes.append(ref)
+    thumbnail_ref = _storage_ref(property_obj.thumbnail)
+    if thumbnail_ref is not None:
+        pending_deletes.append(thumbnail_ref)
     doc_ref = _storage_ref(property_obj.documents)
     if doc_ref is not None:
         pending_deletes.append(doc_ref)
@@ -233,6 +275,21 @@ def property_delete(*, property_obj: Property) -> None:
     with transaction.atomic():
         property_obj.delete()
         _schedule_storage_deletes(pending_deletes)
+
+
+def property_set_published(*, property_obj: Property, publish: bool) -> Property:
+    """Publish or unpublish a property.
+
+    Publishing enforces the same thumbnail requirement as create/update.
+    """
+    if publish:
+        _require_thumbnail_for_publish(
+            is_published=True, has_thumbnail=bool(property_obj.thumbnail)
+        )
+    if property_obj.is_published != publish:
+        property_obj.is_published = publish
+        property_obj.save(update_fields=["is_published"])
+    return property_obj
 
 
 def favorite_toggle(*, user, property_obj: Property) -> bool:

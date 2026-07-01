@@ -49,6 +49,15 @@ def property_image_upload_path(instance: "PropertyImage", filename: str) -> str:
     return f"properties/images/{prop_id}/{filename}"
 
 
+def property_thumbnail_upload_path(instance: "Property", filename: str) -> str:
+    """Generate upload path for a property's thumbnail image.
+
+    Use instance.id when available; fall back to 'temp' for unsaved instances.
+    """
+    pid = getattr(instance, "id", None) or "temp"
+    return f"properties/thumbnails/{pid}/{filename}"
+
+
 def private_document_storage():
     return storages["private_documents"]
 
@@ -66,6 +75,12 @@ class Property(BaseModel):
     )
     name = models.CharField(max_length=255)
     full_address = models.CharField(max_length=255)
+    thumbnail = models.ImageField(
+        upload_to=property_thumbnail_upload_path,
+        blank=True,
+        null=True,
+        help_text="Primary image shown on cards, the map, and as the lead photo. Required to publish.",
+    )
     property_type = models.CharField(max_length=10, choices=PROPERTY_TYPE)
     description = models.TextField(blank=True)
     # Use 2 decimal places for currency precision. Note: changing this requires a migration.

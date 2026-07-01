@@ -102,9 +102,35 @@ class PropertyCreateTests(PropertyFileTestMixin, TestCase):
             "bedrooms": 3,
             "bathrooms": 2,
             "area": "1200.00",
+            "thumbnail": self._png_upload("thumb.png"),
             "documents": None,
             "is_published": True,
         }
+
+    def test_publishing_without_thumbnail_is_rejected(self):
+        form_data = {**self.form_data, "thumbnail": None}
+        with self.assertRaisesMessage(
+            ApplicationError, "A thumbnail image is required to publish"
+        ):
+            property_create(user=self.user, form_data=form_data, images=[])
+        self.assertEqual(Property.objects.count(), 0)
+
+    def test_draft_without_thumbnail_is_allowed(self):
+        form_data = {**self.form_data, "thumbnail": None, "is_published": False}
+        prop = property_create(user=self.user, form_data=form_data, images=[])
+        self.assertFalse(prop.is_published)
+        self.assertFalse(bool(prop.thumbnail))
+
+    def test_thumbnail_is_saved_separately_from_gallery(self):
+        prop = property_create(
+            user=self.user,
+            form_data=self.form_data,
+            images=[self._png_upload("gallery.png")],
+        )
+        self.addCleanup(prop.thumbnail.delete, save=False)
+        self.assertTrue(bool(prop.thumbnail))
+        self.assertEqual(prop.images.count(), 1)
+        self.assertFalse(prop.images.get().is_primary)
 
     def test_creates_property(self):
         prop = property_create(user=self.user, form_data=self.form_data, images=[])
@@ -209,6 +235,7 @@ class PropertyUpdateStorageTests(PropertyFileTestMixin, TestCase):
                 "full_address": "1 Old St",
                 "property_type": "House",
                 "price": "1000000.00",
+                "thumbnail": self._png_upload("old-thumb.png"),
                 "documents": self._document_upload("old.pdf"),
                 "is_published": True,
             },
@@ -303,6 +330,7 @@ class PropertyDeleteTests(PropertyFileTestMixin, TestCase):
                 "full_address": "9 Delete Ave",
                 "property_type": "House",
                 "price": "250000.00",
+                "thumbnail": self._png_upload("delete-thumb.png"),
                 "documents": self._document_upload(),
                 "is_published": True,
             },
@@ -336,6 +364,7 @@ class PropertyDeleteTests(PropertyFileTestMixin, TestCase):
                 "full_address": "10 Risk Rd",
                 "property_type": "House",
                 "price": "250000.00",
+                "thumbnail": self._png_upload("orphan-thumb.png"),
                 "documents": None,
                 "is_published": True,
             },

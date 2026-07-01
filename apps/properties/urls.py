@@ -10,6 +10,7 @@ from apps.properties.views import (
     PropertyEditView,
     PropertyFavoriteToggleView,
     PropertyListView,
+    PropertyPublishToggleView,
 )
 
 app_name = "properties"
@@ -28,6 +29,11 @@ urlpatterns = [
         "<int:pk>/favorite/",
         PropertyFavoriteToggleView.as_view(),
         name="favorite_toggle",
+    ),
+    path(
+        "<int:pk>/publish/",
+        PropertyPublishToggleView.as_view(),
+        name="publish_toggle",
     ),
     path("<int:pk>/delete/", PropertyDeleteView.as_view(), name="delete"),
     path("my-properties/", MyPropertiesListView.as_view(), name="my-properties"),

@@ -45,7 +45,22 @@
     </c-card.header>
     <c-card.content class="space-y-6">
       <div class="space-y-2">
-        <label for="id_images" class="text-sm font-medium">Property images</label>
+        <label for="id_thumbnail" class="text-sm font-medium">Thumbnail image</label>
+        <input id="id_thumbnail" type="file" name="thumbnail" accept="image/*" class="flex min-h-9 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs file:mr-3 file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring">
+        <p class="text-sm text-muted-foreground">Shown on cards, the map, and as the lead photo. Required to publish. JPG, PNG, or WebP, up to 5MB.</p>
+        {% for error in form.thumbnail.errors %}<p class="text-sm text-destructive">{{ error }}</p>{% endfor %}
+        {% if is_edit_mode and property.thumbnail %}
+          <div class="pt-2">
+            <p class="text-xs text-muted-foreground">Current thumbnail{% if property.is_published %} (upload a new file to replace it){% endif %}</p>
+            <img src="{{ property.thumbnail.url }}" alt="{{ property.name }} thumbnail" class="mt-2 aspect-[4/3] w-40 rounded-lg border object-cover">
+          </div>
+        {% endif %}
+      </div>
+
+      <c-separator />
+
+      <div class="space-y-2">
+        <label for="id_images" class="text-sm font-medium">Additional images</label>
         <input id="id_images" type="file" name="images" multiple accept="image/*" class="flex min-h-9 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs file:mr-3 file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring">
         <p class="text-sm text-muted-foreground">JPG, PNG, or WebP. Up to 5MB each.</p>
       </div>

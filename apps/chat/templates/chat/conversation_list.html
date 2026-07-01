@@ -21,15 +21,15 @@
       {% for conversation in conversations %}
         <a href="{% url 'chat:conversation_detail' conversation.id %}" class="flex gap-4 bg-card p-4 transition-colors hover:bg-accent/50 sm:p-5">
           <div class="size-14 shrink-0 overflow-hidden rounded-lg bg-muted">
-            {% with primary_image=conversation.primary_image %}
-              {% if primary_image %}
-                <img src="{{ primary_image.image.url }}" alt="{{ conversation.property.name }}" class="size-full object-cover">
-              {% else %}
-                <div class="surface-placeholder flex size-full items-center justify-center text-muted-foreground">
-                  <c-ui.icon name="home" classes="size-6" />
-                </div>
-              {% endif %}
-            {% endwith %}
+            {% if conversation.property.thumbnail %}
+              <img src="{{ conversation.property.thumbnail.url }}" alt="{{ conversation.property.name }}" class="size-full object-cover">
+            {% elif conversation.primary_image %}
+              <img src="{{ conversation.primary_image.image.url }}" alt="{{ conversation.property.name }}" class="size-full object-cover">
+            {% else %}
+              <div class="surface-placeholder flex size-full items-center justify-center text-muted-foreground">
+                <c-ui.icon name="home" classes="size-6" />
+              </div>
+            {% endif %}
           </div>
 
           <div class="min-w-0 flex-1">

@@ -32,6 +32,7 @@ from apps.properties.services import (
     favorite_toggle,
     property_create,
     property_delete,
+    property_set_published,
     property_update,
 )
 from apps.shared.exceptions import ApplicationError
@@ -139,6 +140,8 @@ class PropertyCreateView(LoginRequiredMixin, HTMXMixin, View):
             try:
                 form_data = {
                     **form.cleaned_data,
+                    "thumbnail": request.FILES.get("thumbnail"),
+                    "documents": request.FILES.get("documents"),
                     "is_published": request.POST.get("intent") == "publish",
                 }
                 property_obj = property_create(
@@ -201,6 +204,8 @@ class PropertyEditView(LoginRequiredMixin, OwnerRequiredMixin, HTMXMixin, View):
             try:
                 form_data = {
                     **form.cleaned_data,
+                    "thumbnail": request.FILES.get("thumbnail"),
+                    "documents": request.FILES.get("documents"),
                     "is_published": request.POST.get("intent") == "publish",
                 }
                 property_obj = property_update(
@@ -324,3 +329,28 @@ class PropertyDeleteView(LoginRequiredMixin, OwnerRequiredMixin, HTMXMixin, View
         if self.is_htmx:
             return HttpResponseClientRedirect(reverse("properties:list"))
         return redirect("properties:list")
+
+
+class PropertyPublishToggleView(
+    LoginRequiredMixin, OwnerRequiredMixin, HTMXMixin, View
+):
+    def post(self, request, pk):
+        property_obj = get_object_or_404(Property, pk=pk)
+        self.check_owner(property_obj)
+
+        publish = request.POST.get("intent") == "publish"
+        try:
+            property_set_published(property_obj=property_obj, publish=publish)
+        except ApplicationError as e:
+            messages.error(request, e.message)
+        else:
+            messages.success(
+                request,
+                "Property published." if publish else "Property moved to draft.",
+            )
+
+        if self.is_htmx:
+            return HttpResponseClientRedirect(
+                reverse("properties:detail", args=[property_obj.pk])
+            )
+        return redirect("properties:detail", pk=property_obj.pk)

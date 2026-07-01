@@ -5,13 +5,68 @@
     <c-button href="{% url 'properties:list' %}" variant="ghost" size="sm" class="-ml-3">
       <c-ui.icon name="arrow-left" classes="size-4" /> Back to Properties
     </c-button>
-    {% if user.is_authenticated and user != property.user %}
+
+    {% if is_owner %}
+      <div class="flex flex-wrap items-center gap-2">
+        <form method="post" action="{% url 'properties:publish_toggle' property.pk %}" hx-post="{% url 'properties:publish_toggle' property.pk %}" hx-swap="none">
+          {% csrf_token %}
+          {% if property.is_published %}
+            <input type="hidden" name="intent" value="draft">
+            <c-button type="submit" variant="outline" size="sm">
+              <c-ui.icon name="eye-off" classes="size-4" /> Move to draft
+            </c-button>
+          {% else %}
+            <input type="hidden" name="intent" value="publish">
+            {% if property.thumbnail %}
+              <c-button type="submit" size="sm">
+                <c-ui.icon name="check-circle" classes="size-4" /> Publish
+              </c-button>
+            {% else %}
+              <c-button type="submit" size="sm" disabled title="Add a thumbnail image via Edit before you can publish.">
+                <c-ui.icon name="check-circle" classes="size-4" /> Publish
+              </c-button>
+            {% endif %}
+          {% endif %}
+        </form>
+        <c-button href="{% url 'properties:edit' property.pk %}" variant="outline" size="sm">
+          <c-ui.icon name="pencil" classes="size-4" /> Edit
+        </c-button>
+        <c-alert_dialog>
+          <c-alert_dialog.trigger>
+            <c-button type="button" variant="outline" size="sm" class="text-destructive hover:text-destructive">
+              <c-ui.icon name="trash" classes="size-4" /> Delete
+            </c-button>
+          </c-alert_dialog.trigger>
+          <c-alert_dialog.content>
+            <c-alert_dialog.header>
+              <c-alert_dialog.title>Delete this Property?</c-alert_dialog.title>
+              <c-alert_dialog.description>This permanently removes the Property, its images, Favorites, and Conversations.</c-alert_dialog.description>
+            </c-alert_dialog.header>
+            <c-alert_dialog.footer>
+              <c-alert_dialog.cancel>Cancel</c-alert_dialog.cancel>
+              <form method="post" action="{% url 'properties:delete' property.pk %}">
+                {% csrf_token %}
+                <c-button type="submit" variant="destructive">Delete Property</c-button>
+              </form>
+            </c-alert_dialog.footer>
+          </c-alert_dialog.content>
+        </c-alert_dialog>
+      </div>
+    {% elif user.is_authenticated %}
       <c-properties.favorite-button :property="property" />
     {% endif %}
   </div>
 
-  <header class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
-    <div class="space-y-3">
+  <header class="space-y-3">
+    <div class="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
+      <h1 class="text-3xl font-bold tracking-tight sm:text-4xl">{{ property.name }}</h1>
+      <p class="price-tag whitespace-nowrap text-2xl font-bold">{{ property.price|pkr }}</p>
+    </div>
+    <div class="flex flex-wrap items-center justify-between gap-x-6 gap-y-2">
+      <p class="flex items-start gap-2 text-muted-foreground">
+        <c-ui.icon name="location-marker" classes="mt-0.5 size-5 shrink-0" />
+        {{ property.full_address }}
+      </p>
       <div class="flex flex-wrap gap-2">
         <c-badge variant="secondary">{{ property.get_property_type_display }}</c-badge>
         {% if is_owner %}
@@ -20,17 +75,20 @@
           </c-badge>
         {% endif %}
       </div>
-      <h1 class="text-3xl font-bold tracking-tight sm:text-4xl">{{ property.name }}</h1>
-      <p class="flex items-start gap-2 text-muted-foreground">
-        <c-ui.icon name="location-marker" classes="mt-0.5 size-5 shrink-0" />
-        {{ property.full_address }}
-      </p>
     </div>
-    <p class="price-tag text-2xl font-bold">{{ property.price|pkr }}</p>
   </header>
 
   <section class="grid gap-4 lg:grid-cols-3" aria-label="Property photos">
-    {% if property.images.first %}
+    {% if property.thumbnail %}
+      <img src="{{ property.thumbnail.url }}" alt="{{ property.name }}" class="h-80 w-full rounded-xl object-cover lg:col-span-2 lg:h-[30rem]">
+      <div class="grid grid-cols-2 gap-4 lg:grid-cols-1">
+        {% for image in property.images.all|slice:":2" %}
+          <img src="{{ image.image.url }}" alt="{{ property.name }} photo {{ forloop.counter|add:1 }}" class="h-36 w-full rounded-xl object-cover lg:h-[14.5rem]">
+        {% empty %}
+          <div class="surface-placeholder hidden rounded-xl lg:block"></div>
+        {% endfor %}
+      </div>
+    {% elif property.images.first %}
       <img src="{{ property.images.first.image.url }}" alt="{{ property.name }}" class="h-80 w-full rounded-xl object-cover lg:col-span-2 lg:h-[30rem]">
       <div class="grid grid-cols-2 gap-4 lg:grid-cols-1">
         {% for image in property.images.all|slice:"1:3" %}
@@ -46,133 +104,121 @@
     {% endif %}
   </section>
 
-  <div class="grid gap-8 lg:grid-cols-[minmax(0,1fr)_22rem]">
-    <div class="space-y-6">
-      <c-card>
-        <c-card.header>
-          <c-card.title>Property details</c-card.title>
-          <c-card.description>The essentials at a glance.</c-card.description>
-        </c-card.header>
-        <c-card.content>
-          <dl class="grid grid-cols-2 gap-6 sm:grid-cols-3">
-            <div>
-              <dt class="text-sm text-muted-foreground">Type</dt>
-              <dd class="mt-1 font-medium">{{ property.get_property_type_display }}</dd>
+  <div class="space-y-6">
+    <c-card>
+      <c-card.header>
+        <c-card.title>Property Details</c-card.title>
+        <c-card.description>The essentials at a glance.</c-card.description>
+      </c-card.header>
+      <c-card.content class="space-y-6">
+        <dl class="flex flex-wrap items-center justify-between gap-x-8 gap-y-5">
+            <div class="flex items-center gap-3">
+              <div class="flex size-9 shrink-0 items-center justify-center rounded-full bg-secondary text-sm font-semibold">
+                {{ property.user.first_name|slice:":1"|default:"O"|upper }}
+              </div>
+              <div>
+                <dt class="text-sm text-muted-foreground">Owner</dt>
+                <dd class="font-medium">{{ property.user.first_name|default:"Property Owner" }}{% if is_owner %} <span class="text-muted-foreground">(You)</span>{% endif %}</dd>
+              </div>
+            </div>
+            <div class="flex items-center gap-3">
+              <span class="flex size-9 shrink-0 items-center justify-center rounded-lg bg-secondary text-muted-foreground">
+                <c-ui.icon name="tag" classes="size-4" />
+              </span>
+              <div>
+                <dt class="text-sm text-muted-foreground">Type</dt>
+                <dd class="font-medium">{{ property.get_property_type_display }}</dd>
+              </div>
             </div>
             {% if property.bedrooms is not None %}
-              <div>
-                <dt class="text-sm text-muted-foreground">Bedrooms</dt>
-                <dd class="mt-1 font-medium">{{ property.bedrooms }}</dd>
+              <div class="flex items-center gap-3">
+                <span class="flex size-9 shrink-0 items-center justify-center rounded-lg bg-secondary text-muted-foreground">
+                  <c-ui.icon name="home" classes="size-4" />
+                </span>
+                <div>
+                  <dt class="text-sm text-muted-foreground">Bedrooms</dt>
+                  <dd class="font-medium">{{ property.bedrooms }}</dd>
+                </div>
               </div>
             {% endif %}
             {% if property.bathrooms is not None %}
-              <div>
-                <dt class="text-sm text-muted-foreground">Bathrooms</dt>
-                <dd class="mt-1 font-medium">{{ property.bathrooms }}</dd>
+              <div class="flex items-center gap-3">
+                <span class="flex size-9 shrink-0 items-center justify-center rounded-lg bg-secondary text-muted-foreground">
+                  <c-ui.icon name="sparkles" classes="size-4" />
+                </span>
+                <div>
+                  <dt class="text-sm text-muted-foreground">Bathrooms</dt>
+                  <dd class="font-medium">{{ property.bathrooms }}</dd>
+                </div>
               </div>
             {% endif %}
             {% if property.area %}
-              <div>
-                <dt class="text-sm text-muted-foreground">Area</dt>
-                <dd class="mt-1 font-medium">{{ property.area|floatformat:0 }} sq ft</dd>
+              <div class="flex items-center gap-3">
+                <span class="flex size-9 shrink-0 items-center justify-center rounded-lg bg-secondary text-muted-foreground">
+                  <c-ui.icon name="arrows-expand" classes="size-4" />
+                </span>
+                <div>
+                  <dt class="text-sm text-muted-foreground">Area</dt>
+                  <dd class="font-medium">{{ property.area|floatformat:0 }} sq ft</dd>
+                </div>
               </div>
             {% endif %}
-            <div>
-              <dt class="text-sm text-muted-foreground">Listed</dt>
-              <dd class="mt-1 font-medium">{{ property.created_at|date:"M j, Y" }}</dd>
+            <div class="flex items-center gap-3">
+              <span class="flex size-9 shrink-0 items-center justify-center rounded-lg bg-secondary text-muted-foreground">
+                <c-ui.icon name="calendar" classes="size-4" />
+              </span>
+              <div>
+                <dt class="text-sm text-muted-foreground">Listed</dt>
+                <dd class="font-medium">{{ property.created_at|date:"M j, Y" }}</dd>
+              </div>
             </div>
-          </dl>
-        </c-card.content>
-      </c-card>
+        </dl>
 
+        {% if not is_owner %}
+          <div class="space-y-2">
+            {% if user.is_authenticated %}
+              <form method="post" action="{% url 'chat:start_conversation' property.pk %}">
+                {% csrf_token %}
+                <c-button type="submit">
+                  <c-ui.icon name="chat" classes="size-4" /> Message owner
+                </c-button>
+              </form>
+              <p class="text-xs leading-5 text-muted-foreground">Your conversation is private and always tied to this Property.</p>
+            {% else %}
+              <c-button href="{% url 'account_login' %}?next={{ request.path|urlencode }}">Sign in to message</c-button>
+            {% endif %}
+          </div>
+        {% endif %}
+      </c-card.content>
+    </c-card>
+
+    <c-card>
+      <c-card.header>
+        <c-card.title>Description</c-card.title>
+      </c-card.header>
+      <c-card.content>
+        {% if property.description %}
+          <div class="prose prose-neutral max-w-none text-sm leading-7 text-muted-foreground">
+            {{ property.description|linebreaks }}
+          </div>
+        {% else %}
+          <p class="text-sm text-muted-foreground">The Owner has not added a description yet.</p>
+        {% endif %}
+      </c-card.content>
+    </c-card>
+
+    {% if is_owner and property.documents %}
       <c-card>
         <c-card.header>
-          <c-card.title>Description</c-card.title>
+          <c-card.title>Private documents</c-card.title>
+          <c-card.description>Only you and administrators can download this file.</c-card.description>
         </c-card.header>
         <c-card.content>
-          {% if property.description %}
-            <div class="prose prose-neutral max-w-none text-sm leading-7 text-muted-foreground">
-              {{ property.description|linebreaks }}
-            </div>
-          {% else %}
-            <p class="text-sm text-muted-foreground">The Owner has not added a description yet.</p>
-          {% endif %}
+          <c-button href="{% url 'properties:download_document' property.pk %}" variant="outline">
+            <c-ui.icon name="download" classes="size-4" /> Download document
+          </c-button>
         </c-card.content>
       </c-card>
-
-      {% if is_owner and property.documents %}
-        <c-card>
-          <c-card.header>
-            <c-card.title>Private documents</c-card.title>
-            <c-card.description>Only you and administrators can download this file.</c-card.description>
-          </c-card.header>
-          <c-card.content>
-            <c-button href="{% url 'properties:download_document' property.pk %}" variant="outline">
-              <c-ui.icon name="download" classes="size-4" /> Download document
-            </c-button>
-          </c-card.content>
-        </c-card>
-      {% endif %}
-    </div>
-
-    <aside class="space-y-4">
-      <c-card class="lg:sticky lg:top-20">
-        <c-card.header>
-          <c-card.title>{% if is_owner %}Manage Property{% else %}Contact Owner{% endif %}</c-card.title>
-          <c-card.description>
-            {% if is_owner %}Update its details or publication status.{% else %}Direct contact details stay private.{% endif %}
-          </c-card.description>
-        </c-card.header>
-        <c-card.content class="space-y-4">
-          <div class="flex items-center gap-3">
-            <div class="flex size-10 items-center justify-center rounded-full bg-secondary text-sm font-semibold">
-              {{ property.user.first_name|slice:":1"|default:"O"|upper }}
-            </div>
-            <div>
-              <p class="font-medium">{{ property.user.first_name|default:"Property Owner" }}</p>
-              <p class="text-sm text-muted-foreground">Owner</p>
-            </div>
-          </div>
-
-          {% if is_owner %}
-            <div class="grid gap-2">
-              <c-button href="{% url 'properties:edit' property.pk %}">
-                <c-ui.icon name="pencil" classes="size-4" /> Edit Property
-              </c-button>
-              <c-alert_dialog>
-                <c-alert_dialog.trigger>
-                  <c-button type="button" variant="outline" class="w-full text-destructive hover:text-destructive">
-                    <c-ui.icon name="trash" classes="size-4" /> Delete Property
-                  </c-button>
-                </c-alert_dialog.trigger>
-                <c-alert_dialog.content>
-                  <c-alert_dialog.header>
-                    <c-alert_dialog.title>Delete this Property?</c-alert_dialog.title>
-                    <c-alert_dialog.description>This permanently removes the Property, its images, Favorites, and Conversations.</c-alert_dialog.description>
-                  </c-alert_dialog.header>
-                  <c-alert_dialog.footer>
-                    <c-alert_dialog.cancel>Cancel</c-alert_dialog.cancel>
-                    <form method="post" action="{% url 'properties:delete' property.pk %}">
-                      {% csrf_token %}
-                      <c-button type="submit" variant="destructive">Delete Property</c-button>
-                    </form>
-                  </c-alert_dialog.footer>
-                </c-alert_dialog.content>
-              </c-alert_dialog>
-            </div>
-          {% elif user.is_authenticated %}
-            <form method="post" action="{% url 'chat:start_conversation' property.pk %}">
-              {% csrf_token %}
-              <c-button type="submit" class="w-full">
-                <c-ui.icon name="chat" classes="size-4" /> Message Owner
-              </c-button>
-            </form>
-            <p class="text-xs leading-5 text-muted-foreground">Your Conversation is private and always tied to this Property.</p>
-          {% else %}
-            <c-button href="{% url 'account_login' %}?next={{ request.path|urlencode }}" class="w-full">Sign in to message</c-button>
-          {% endif %}
-        </c-card.content>
-      </c-card>
-    </aside>
+    {% endif %}
   </div>
 </article>
